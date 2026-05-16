@@ -17,7 +17,6 @@
 html{font-size:15px;}
 body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;-webkit-text-size-adjust:100%;}
 
-/* AUTH */
 .auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px;}
 .auth-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px 24px;width:100%;max-width:360px;}
 .auth-box h1{font-family:var(--display);font-size:22px;font-weight:800;color:var(--accent);margin-bottom:4px;}
@@ -32,16 +31,14 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .btn-primary{width:100%;padding:12px;border:none;border-radius:8px;font-family:var(--mono);font-size:13px;cursor:pointer;background:var(--accent2);color:#fff;}
 .auth-err{font-size:11px;font-family:var(--mono);margin-top:10px;text-align:center;min-height:16px;color:var(--danger);}
 
-/* HEADER */
-.header{padding:11px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;position:sticky;top:0;background:var(--bg);z-index:100;}
+.header{padding:11px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;position:sticky;top:0;background:var(--bg);z-index:100;flex-wrap:wrap;}
 .header h1{font-family:var(--display);font-size:16px;font-weight:800;color:var(--accent);flex:1;}
 .rate-badge{font-family:var(--mono);font-size:10px;color:var(--muted);white-space:nowrap;}
-.rate-badge span{color:var(--ok);}
+.rate-badge b{color:var(--ok);}
 .logout-btn{background:none;border:1px solid var(--border);color:var(--muted);font-family:var(--mono);font-size:11px;padding:5px 10px;border-radius:5px;cursor:pointer;white-space:nowrap;}
 .back-btn{background:none;border:none;color:var(--accent2);font-family:var(--mono);font-size:12px;cursor:pointer;padding:4px 6px;white-space:nowrap;}
 .header-total{font-family:var(--mono);font-size:12px;color:var(--ok);white-space:nowrap;}
 
-/* HOME */
 .home{padding:16px;}
 .home-title{font-family:var(--display);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:12px;}
 .trips-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:10px;margin-bottom:12px;}
@@ -57,14 +54,12 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .add-trip-box input:focus{border-color:var(--accent2);}
 .btn-add{background:var(--accent2);color:#fff;border:none;border-radius:8px;padding:11px;font-family:var(--mono);font-size:12px;cursor:pointer;width:100%;}
 
-/* TRIP DETAIL */
 .trip-detail{display:grid;grid-template-columns:1fr 270px;min-height:calc(100vh - 53px);}
 @media(max-width:680px){.trip-detail{grid-template-columns:1fr;}.sidebar{border-left:none;border-top:1px solid var(--border);}}
 .segments{padding:14px 16px;border-right:1px solid var(--border);}
 .seg-list{display:flex;flex-direction:column;gap:8px;}
 .stitle{font-family:var(--display);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:8px;}
 
-/* SEGMENT */
 .seg{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;transition:.2s;}
 .seg.draft{border-color:var(--accent);}
 .seg-hdr{display:flex;align-items:center;gap:8px;padding:10px 12px;cursor:pointer;user-select:none;-webkit-user-select:none;}
@@ -86,16 +81,14 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .tp-bus{background:rgba(61,214,140,.15);color:#5dd6a0;}
 .tp-flight{background:rgba(240,192,64,.2);color:var(--accent);}
 
-/* SEG EDIT */
 .seg-edit{display:none;border-top:1px solid var(--border);padding:12px;background:var(--surface2);flex-direction:column;gap:9px;}
 .seg-edit.open{display:flex;}
 .frow{display:flex;gap:7px;flex-wrap:wrap;}
 .efield{display:flex;flex-direction:column;gap:3px;flex:1;min-width:85px;}
 .efield label{font-size:9px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
 .efield input,.efield select{background:var(--surface);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:var(--mono);font-size:13px;padding:8px;outline:none;width:100%;}
-.efield input:focus,.efield select:focus{border-color:var(--accent2);}
+.efield input:focus{border-color:var(--accent2);}
 
-/* PRICE */
 .price-block{display:flex;flex-direction:column;gap:5px;}
 .price-block label{font-size:9px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
 .price-inner{display:flex;gap:6px;align-items:center;}
@@ -106,7 +99,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .cur-btn.active{border-color:var(--accent2);color:var(--accent2);background:rgba(124,111,240,.1);}
 .price-hint{font-size:10px;color:var(--ok);font-family:var(--mono);padding:5px 8px;background:rgba(61,214,140,.06);border-radius:5px;border:1px solid rgba(61,214,140,.15);}
 
-/* SEARCH */
 .search-btns{display:flex;flex-direction:column;gap:5px;}
 .search-title{font-size:9px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;}
 .search-btn{display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:7px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:var(--mono);font-size:11px;cursor:pointer;text-decoration:none;width:100%;transition:.2s;}
@@ -118,20 +110,16 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .sbtn{background:var(--accent2);color:#fff;border:none;border-radius:5px;padding:8px 14px;font-family:var(--mono);font-size:11px;cursor:pointer;}
 .delbtn{background:rgba(240,80,96,.12);color:var(--danger);border:1px solid rgba(240,80,96,.3);border-radius:5px;padding:8px 14px;font-family:var(--mono);font-size:11px;cursor:pointer;}
 
-/* ADD SEG */
 .add-seg-box{background:var(--surface2);border:1px dashed var(--border);border-radius:10px;padding:12px;margin-top:8px;}
 .seg-type-row{display:flex;gap:5px;margin-bottom:9px;}
 .type-btn{flex:1;padding:8px 4px;border:1px solid var(--border);background:var(--surface);color:var(--muted);border-radius:6px;font-family:var(--mono);font-size:10px;cursor:pointer;text-align:center;transition:.2s;}
 .type-btn.active{border-color:var(--accent2);color:var(--accent2);background:rgba(124,111,240,.1);}
 
-/* ALERTS */
 .alerts{padding:8px 16px 4px;}
 .alert{display:flex;align-items:flex-start;gap:6px;padding:7px 10px;border-radius:7px;margin-bottom:5px;font-size:11px;font-family:var(--mono);line-height:1.5;}
 .alert.info{background:rgba(124,111,240,.08);border:1px solid rgba(124,111,240,.25);color:#a09af0;}
 .alert.ok{background:rgba(61,214,140,.08);border:1px solid rgba(61,214,140,.2);color:var(--ok);}
-.alert.warn{background:rgba(240,120,80,.1);border:1px solid rgba(240,120,80,.25);color:var(--warn);}
 
-/* SIDEBAR */
 .sidebar{padding:14px;display:flex;flex-direction:column;gap:11px;overflow-y:auto;}
 .sc{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
 .sc h3{padding:8px 11px;font-family:var(--display);font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);}
@@ -153,11 +141,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .tdate{font-family:var(--mono);font-size:9px;color:var(--muted);}
 .tlbl{font-size:11px;font-weight:500;margin-top:1px;}
 .tsub{font-size:9px;color:var(--muted);font-family:var(--mono);margin-top:1px;}
-
 .rates-card{padding:9px 11px;font-family:var(--mono);font-size:10px;line-height:1.9;}
 .rate-row{display:flex;justify-content:space-between;}
 .rate-row .rv{color:var(--ok);}
-.rate-updated{color:var(--muted);font-size:9px;margin-top:4px;}
+.rate-upd{color:var(--muted);font-size:9px;margin-top:4px;}
 
 .loading{display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:var(--mono);color:var(--muted);}
 .spinner{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--accent2);border-radius:50%;animation:spin .7s linear infinite;margin-right:10px;}
@@ -171,9 +158,30 @@ const SUPA_URL='https://fbcdmhvjfnjioecqlnpf.supabase.co';
 const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZiY2RtaHZqZm5qaW9lY3FsbnBmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NDYzNTYsImV4cCI6MjA5NDUyMjM1Nn0.XnvAFJSVjP2vC0rL4guedpievJqm6Jp3sIxiSLwueRQ';
 const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
 
-// Курсы — дефолт, обновляются при загрузке
 let RATES={USD:44,EUR:51,UAH:1};
 let ratesUpdated='загрузка...';
+let currentUser=null,currentTrip=null,currentSegs=[],newSegType='flight';
+let drafts={};
+let openSegIdx=null; // какой сегмент открыт
+
+const app=document.getElementById('app');
+
+// ── СОСТОЯНИЕ НАВИГАЦИИ ──
+// Сохраняем в sessionStorage (переживает переход на другую вкладку и возврат)
+function saveNav(){
+  try{
+    sessionStorage.setItem('nav',JSON.stringify({
+      tripId:currentTrip?.id,
+      tripName:currentTrip?.name,
+      openSegIdx
+    }));
+  }catch(e){}
+}
+function loadNav(){
+  try{const d=sessionStorage.getItem('nav');return d?JSON.parse(d):null;}
+  catch(e){return null;}
+}
+function clearNav(){try{sessionStorage.removeItem('nav');}catch(e){}}
 
 async function fetchRates(){
   try{
@@ -182,69 +190,89 @@ async function fetchRates(){
     if(d.rates){
       RATES.USD=+(1/d.rates.USD).toFixed(2);
       RATES.EUR=+(1/d.rates.EUR).toFixed(2);
-      ratesUpdated='обновлено сейчас';
-      // Обновить отображение курса в хедере если он есть
+      ratesUpdated='только что';
       const rb=document.getElementById('rate-badge-val');
-      if(rb)rb.textContent=`$ ${RATES.USD} ₴ · € ${RATES.EUR} ₴`;
-      const rc=document.getElementById('rates-card');
-      if(rc)renderRatesCard();
+      if(rb)rb.innerHTML=`<b>$${RATES.USD}₴</b> · <b>€${RATES.EUR}₴</b>`;
+      renderRatesCard();
     }
-  }catch(e){
-    ratesUpdated='офлайн, курс примерный';
-  }
+  }catch(e){ratesUpdated='офлайн, курс примерный';}
 }
 
-let currentUser=null,currentTrip=null,currentSegs=[],newSegType='flight';
-let drafts={};
-const app=document.getElementById('app');
-
-function toUAH(amount,cur){return+(amount*(RATES[cur]||RATES.USD)).toFixed(2);}
-function fmt(uah){return Math.round(uah).toLocaleString('ru-RU')+' ₴';}
+function toUAH(a,c){return+(a*(RATES[c]||RATES.USD)).toFixed(2);}
+function fmt(u){return Math.round(u).toLocaleString('ru-RU')+' ₴';}
 function fmtD(d){if(!d)return'?';const[,m,day]=d.split('-');const mn=['','янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];return`${+day} ${mn[+m]}`;}
-const tlabel={train:'ПОЕЗД',bus:'АВТОБУС',flight:'РЕЙС'};
-const icons={train:'🚂',bus:'🚌',flight:'✈️'};
-const curSym={USD:'$',EUR:'€',UAH:'₴'};
+const TL={train:'ПОЕЗД',bus:'АВТОБУС',flight:'РЕЙС'};
+const IC={train:'🚂',bus:'🚌',flight:'✈️'};
+const CS={USD:'$',EUR:'€',UAH:'₴'};
 
-function saveDraft(id,data){drafts[id]=data;try{localStorage.setItem('drafts_'+currentTrip?.id,JSON.stringify(drafts));}catch(e){}}
-function loadDrafts(tid){try{const d=localStorage.getItem('drafts_'+tid);drafts=d?JSON.parse(d):{};}catch(e){drafts={};}}
-function clearDraft(id){delete drafts[id];try{localStorage.setItem('drafts_'+currentTrip?.id,JSON.stringify(drafts));}catch(e){}}
+function saveDraft(id,data){drafts[id]=data;try{localStorage.setItem('d_'+currentTrip?.id,JSON.stringify(drafts));}catch(e){}}
+function loadDrafts(tid){try{const d=localStorage.getItem('d_'+tid);drafts=d?JSON.parse(d):{};}catch(e){drafts={};}}
+function clearDraft(id){delete drafts[id];try{localStorage.setItem('d_'+currentTrip?.id,JSON.stringify(drafts));}catch(e){}}
 function getSeg(i){const s=currentSegs[i];return drafts[s.id]?{...s,...drafts[s.id]}:s;}
 function hasDraft(i){return!!drafts[currentSegs[i]?.id];}
 
-function searchLinks(s){
+function links(s){
   const f=s.from_city||'',t=s.to_city||'',d=s.date_from||'';
   if(s.type==='flight')return[
-    {icon:'🔍',label:'Google Flights',url:`https://www.google.com/travel/flights?hl=ru`},
+    {icon:'🔍',label:'Google Flights',url:'https://www.google.com/travel/flights?hl=ru'},
     {icon:'✈',label:'Skyscanner',url:`https://www.skyscanner.com/transport/flights/${encodeURIComponent(f)}/${encodeURIComponent(t)}/`},
     {icon:'💰',label:'Kiwi.com',url:`https://www.kiwi.com/en/search/results/${encodeURIComponent(f)}/${encodeURIComponent(t)}/${d}/no-return`},
   ];
   if(s.type==='bus')return[
     {icon:'🚌',label:'FlixBus',url:`https://shop.flixbus.com/search?departureCity=${encodeURIComponent(f)}&arrivalCity=${encodeURIComponent(t)}&rideDate=${d}&adult=1`},
-    {icon:'🔍',label:'Busbud',url:`https://www.busbud.com/`},
-    {icon:'🚌',label:'Ecolines',url:`https://ecolines.net/`},
+    {icon:'🔍',label:'Busbud',url:'https://www.busbud.com/'},
+    {icon:'🚌',label:'Ecolines',url:'https://ecolines.net/'},
   ];
   return[
-    {icon:'🚂',label:'Укрзалізниця',url:`https://booking.uz.gov.ua/`},
-    {icon:'🚆',label:'PKP (Польша)',url:`https://www.pkp.pl/en/timetable`},
+    {icon:'🚂',label:'Укрзалізниця',url:'https://booking.uz.gov.ua/'},
+    {icon:'🚆',label:'PKP (Польша)',url:'https://www.pkp.pl/en/timetable'},
     {icon:'🔍',label:'Rail.cc',url:`https://rail.cc/ru/train/${encodeURIComponent(f)}-to-${encodeURIComponent(t)}`},
   ];
 }
 
+// ── INIT ──
 async function init(){
   showLoading();
-  fetchRates(); // запускаем в фоне
+  fetchRates();
   const {data:{session}}=await sb.auth.getSession();
-  if(session){currentUser=session.user;showHome();}
-  else showAuth();
+  if(session){
+    currentUser=session.user;
+    // Восстановить навигацию если была открыта поездка
+    const nav=loadNav();
+    if(nav?.tripId){
+      await restoreTrip(nav.tripId,nav.tripName,nav.openSegIdx);
+    } else {
+      showHome();
+    }
+  } else {
+    showAuth();
+  }
   sb.auth.onAuthStateChange((_,s)=>{
-    if(s){currentUser=s.user;showHome();}
-    else{currentUser=null;showAuth();}
+    if(s){currentUser=s.user;const nav=loadNav();if(nav?.tripId){restoreTrip(nav.tripId,nav.tripName,nav.openSegIdx);}else showHome();}
+    else{currentUser=null;clearNav();showAuth();}
   });
+}
+
+async function restoreTrip(id,name,segIdx){
+  currentTrip={id,name};
+  loadDrafts(id);
+  const {data}=await sb.from('segments').select('*').eq('trip_id',id).order('position');
+  currentSegs=data||[];
+  openSegIdx=segIdx;
+  renderTrip();
+  // Открыть нужный сегмент
+  if(segIdx!==null&&segIdx!==undefined){
+    setTimeout(()=>{
+      const e=document.getElementById(`ed${segIdx}`),c=document.getElementById(`ch${segIdx}`);
+      if(e){e.classList.add('open');c&&c.classList.add('open');}
+    },100);
+  }
 }
 
 function showLoading(){app.innerHTML=`<div class="loading"><div class="spinner"></div>Загрузка...</div>`;}
 
 function showAuth(tab='login'){
+  clearNav();
   app.innerHTML=`
   <div class="auth-wrap"><div class="auth-box">
     <h1>✈ Мои Поездки</h1>
@@ -271,14 +299,15 @@ async function doReg(){
   if(error){el.style.color='var(--danger)';el.textContent=error.message;}
   else{el.style.color='var(--ok)';el.textContent='Проверьте почту!';}
 }
-async function doLogout(){await sb.auth.signOut();}
+async function doLogout(){clearNav();await sb.auth.signOut();}
 
 async function showHome(){
+  clearNav();
   showLoading();
   const {data:trips}=await sb.from('trips').select('*').order('created_at');
-  const segsAll=trips?.length?(await sb.from('segments').select('*').in('trip_id',trips.map(t=>t.id))).data||[]:[];
+  const sa=trips?.length?(await sb.from('segments').select('*').in('trip_id',trips.map(t=>t.id))).data||[]:[];
   const cards=(trips||[]).map(t=>{
-    const segs=segsAll.filter(s=>s.trip_id===t.id).sort((a,b)=>a.position-b.position);
+    const segs=sa.filter(s=>s.trip_id===t.id).sort((a,b)=>a.position-b.position);
     const total=segs.reduce((a,s)=>a+toUAH(+s.price_amount||0,s.price_currency||'USD'),0);
     const dates=segs.length?`${fmtD(segs[0].date_from)} – ${fmtD(segs[segs.length-1].date_from)}`:'—';
     const route=segs.length?`${segs[0].from_city||'?'} → ${segs[segs.length-1].to_city||'?'}`:'—';
@@ -292,7 +321,7 @@ async function showHome(){
   app.innerHTML=`
   <div class="header">
     <h1>✈ Мои Поездки</h1>
-    <span class="rate-badge">$ <span id="rate-badge-val">${RATES.USD} ₴ · € ${RATES.EUR} ₴</span></span>
+    <span class="rate-badge" id="rate-badge-val"><b>$${RATES.USD}₴</b> · <b>€${RATES.EUR}₴</b></span>
     <button class="logout-btn" onclick="doLogout()">Выйти</button>
   </div>
   <div class="home">
@@ -319,10 +348,13 @@ async function delTrip(id){
 }
 
 async function openTrip(id,name){
-  currentTrip={id,name};showLoading();
+  currentTrip={id,name};
+  openSegIdx=null;
   loadDrafts(id);
+  showLoading();
   const {data}=await sb.from('segments').select('*').eq('trip_id',id).order('position');
   currentSegs=data||[];
+  saveNav();
   renderTrip();
 }
 
@@ -336,7 +368,6 @@ function renderTrip(){
   <div class="header">
     <button class="back-btn" onclick="showHome()">← Назад</button>
     <h1>${currentTrip.name}</h1>
-    <span class="rate-badge" style="display:none" id="rate-badge-val2"></span>
     <span class="header-total" id="trip-total">${fmt(total)}</span>
     <button class="logout-btn" onclick="doLogout()">Выйти</button>
   </div>
@@ -375,7 +406,7 @@ function renderRatesCard(){
     <div class="rate-row"><span>1 USD</span><span class="rv">= ${RATES.USD} ₴</span></div>
     <div class="rate-row"><span>1 EUR</span><span class="rv">= ${RATES.EUR} ₴</span></div>
     <div class="rate-row"><span>1 UAH</span><span class="rv">= 1 ₴</span></div>
-    <div class="rate-updated">🔄 ${ratesUpdated}</div>`;
+    <div class="rate-upd">🔄 ${ratesUpdated}</div>`;
 }
 
 function renderSegList(){
@@ -384,17 +415,18 @@ function renderSegList(){
     const isDraft=hasDraft(i);
     const uah=toUAH(+s.price_amount||0,s.price_currency||'USD');
     const cur=s.price_currency||'USD';
-    const sym=curSym[cur]||'$';
-    const links=searchLinks(s);
-    const linksHTML=links.map(l=>`<a class="search-btn" href="${l.url}" target="_blank" rel="noopener">
+    const sym=CS[cur]||'$';
+    const lnks=links(s);
+    const lhtml=lnks.map(l=>`<a class="search-btn" href="${l.url}" target="_blank" rel="noopener">
       <span>${l.icon}</span><span class="sb-label">${l.label}</span><span class="sb-arrow">↗</span>
     </a>`).join('');
+    const phint=cur==='UAH'?`${s.price_amount||0} ₴`:cur==='USD'?`${s.price_amount||0} × ${RATES.USD} = ${fmt(uah)}`:`${s.price_amount||0} × ${RATES.EUR} = ${fmt(uah)}`;
     return`<div class="seg ${isDraft?'draft':''}">
     <div class="seg-hdr" onclick="togSeg(${i})">
-      <div class="sicon icon-${s.type}">${icons[s.type]||'📍'}</div>
+      <div class="sicon icon-${s.type}">${IC[s.type]||'📍'}</div>
       <div class="sinfo">
         <div class="sroute">
-          <span class="tpill tp-${s.type}">${tlabel[s.type]||s.type}</span>
+          <span class="tpill tp-${s.type}">${TL[s.type]||s.type}</span>
           ${s.from_city||'?'}<span class="arr">→</span>${s.to_city||'?'}
           ${isDraft?'<span class="draftbadge">● черновик</span>':''}
         </div>
@@ -404,7 +436,7 @@ function renderSegList(){
           <span>⏱ ${s.duration||'—'}</span>
         </div>
       </div>
-      <div class="sprice">${fmt(uah)}<div class="orig">${s.price_amount||0} ${sym}</div></div>
+      <div class="sprice">${fmt(uah)}<div class="orig">${s.price_amount||0}${sym}</div></div>
       <span class="chev" id="ch${i}">▼</span>
     </div>
     <div class="seg-edit" id="ed${i}">
@@ -417,22 +449,18 @@ function renderSegList(){
         <div class="efield"><label>Выезд</label><input type="time" value="${s.time_dep&&s.time_dep!=='—'?s.time_dep:''}" onchange="ds(${i},'time_dep',this.value||'—')"></div>
         <div class="efield"><label>Прибытие</label><input type="time" value="${s.time_arr&&s.time_arr!=='—'?s.time_arr:''}" onchange="ds(${i},'time_arr',this.value||'—')"></div>
       </div>
-
       <div class="price-block">
         <label>Стоимость</label>
         <div class="price-inner">
-          <input type="number" value="${s.price_amount||0}" min="0" id="pi${i}" onchange="ds(${i},'price_amount',+this.value)">
+          <input type="number" value="${s.price_amount||0}" min="0" onchange="ds(${i},'price_amount',+this.value)">
           <div class="cur-row">
             <button class="cur-btn ${cur==='UAH'?'active':''}" onclick="setCur(${i},'UAH')">₴</button>
             <button class="cur-btn ${cur==='USD'?'active':''}" onclick="setCur(${i},'USD')">$</button>
             <button class="cur-btn ${cur==='EUR'?'active':''}" onclick="setCur(${i},'EUR')">€</button>
           </div>
         </div>
-        <div class="price-hint" id="ph${i}">
-          ${cur==='UAH'?`${s.price_amount||0} ₴`:cur==='USD'?`${s.price_amount||0} × ${RATES.USD} = ${fmt(uah)}`:`${s.price_amount||0} × ${RATES.EUR} = ${fmt(uah)}`}
-        </div>
+        <div class="price-hint" id="ph${i}">${phint}</div>
       </div>
-
       <div class="frow">
         <div class="efield" style="flex:2"><label>Перевозчик</label><input value="${s.carrier||''}" placeholder="Lufthansa, FlixBus..." onchange="ds(${i},'carrier',this.value)"></div>
         <div class="efield"><label>Длит.</label><input value="${s.duration||''}" placeholder="~4 ч" onchange="ds(${i},'duration',this.value)"></div>
@@ -442,10 +470,9 @@ function renderSegList(){
         <div class="efield"><label>Адрес прибыт.</label><input value="${s.arr_address||''}" placeholder="TLV, Терминал 3" onchange="ds(${i},'arr_address',this.value)"></div>
       </div>
       <div class="efield"><label>Заметка</label><input value="${s.notes||''}" placeholder="доп. информация" onchange="ds(${i},'notes',this.value)"></div>
-
       <div class="search-btns">
-        <div class="search-title">🔎 Найти билеты (откроется в браузере)</div>
-        ${linksHTML}
+        <div class="search-title">🔎 Найти билеты</div>
+        ${lhtml}
       </div>
       <div class="row-btns">
         <button class="delbtn" onclick="delSeg(${i})">🗑 Удалить</button>
@@ -456,35 +483,41 @@ function renderSegList(){
   }).join('');
 }
 
+function togSeg(i){
+  const e=document.getElementById(`ed${i}`),c=document.getElementById(`ch${i}`);
+  const was=e.classList.contains('open');
+  document.querySelectorAll('.seg-edit').forEach(x=>x.classList.remove('open'));
+  document.querySelectorAll('.chev').forEach(x=>x.classList.remove('open'));
+  if(!was){
+    e.classList.add('open');c.classList.add('open');
+    openSegIdx=i;
+  } else {
+    openSegIdx=null;
+  }
+  saveNav(); // сохраняем какой сегмент открыт
+}
+
 function setCur(i,cur){
   ds(i,'price_currency',cur);
-  // обновить кнопки валюты без перерисовки
   document.querySelectorAll(`#ed${i} .cur-btn`).forEach(b=>{
-    b.classList.toggle('active',
-      (cur==='UAH'&&b.textContent==='₴')||(cur==='USD'&&b.textContent==='$')||(cur==='EUR'&&b.textContent==='€'));
+    b.classList.toggle('active',(cur==='UAH'&&b.textContent==='₴')||(cur==='USD'&&b.textContent==='$')||(cur==='EUR'&&b.textContent==='€'));
   });
 }
 
-// Черновик — сохраняет без закрытия панели
 function ds(i,k,v){
   const seg=currentSegs[i];
   const upd={...(drafts[seg.id]||{}),[k]:v};
   saveDraft(seg.id,upd);
-  // Обновляем только итоги и карточку сегмента
+  // Обновляем только нужное без перерисовки всего
   const s=getSeg(i);
   const uah=toUAH(+s.price_amount||0,s.price_currency||'USD');
   const cur=s.price_currency||'USD';
-  // price hint
   const ph=document.getElementById(`ph${i}`);
   if(ph)ph.textContent=cur==='UAH'?`${s.price_amount||0} ₴`:cur==='USD'?`${s.price_amount||0} × ${RATES.USD} = ${fmt(uah)}`:`${s.price_amount||0} × ${RATES.EUR} = ${fmt(uah)}`;
-  // заголовок сегмента
-  const priceEl=document.querySelector(`#seg-list > div:nth-child(${i+1}) .sprice`);
-  if(priceEl)priceEl.innerHTML=`${fmt(uah)}<div class="orig">${s.price_amount||0} ${curSym[cur]||'$'}</div>`;
-  const routeEl=document.querySelector(`#seg-list > div:nth-child(${i+1}) .sroute`);
-  if(routeEl){
-    const pill=routeEl.querySelector('.tpill')?.outerHTML||'';
-    routeEl.innerHTML=`${pill}${s.from_city||'?'}<span class="arr">→</span>${s.to_city||'?'}<span class="draftbadge">● черновик</span>`;
-  }
+  const pe=document.querySelector(`#seg-list > div:nth-child(${i+1}) .sprice`);
+  if(pe)pe.innerHTML=`${fmt(uah)}<div class="orig">${s.price_amount||0}${CS[cur]||'$'}</div>`;
+  const re=document.querySelector(`#seg-list > div:nth-child(${i+1}) .sroute`);
+  if(re){const pill=re.querySelector('.tpill')?.outerHTML||'';re.innerHTML=`${pill}${s.from_city||'?'}<span class="arr">→</span>${s.to_city||'?'}<span class="draftbadge">● черновик</span>`;}
   renderBgt();renderTL();renderAlerts();
 }
 
@@ -508,14 +541,6 @@ async function addSeg(){
   if(!error){currentSegs.push(data);renderTrip();}
 }
 
-function togSeg(i){
-  const e=document.getElementById(`ed${i}`),c=document.getElementById(`ch${i}`);
-  const was=e.classList.contains('open');
-  document.querySelectorAll('.seg-edit').forEach(x=>x.classList.remove('open'));
-  document.querySelectorAll('.chev').forEach(x=>x.classList.remove('open'));
-  if(!was){e.classList.add('open');c.classList.add('open');}
-}
-
 async function saveSeg(i){
   const seg=currentSegs[i];
   const d=getSeg(i);
@@ -526,22 +551,30 @@ async function saveSeg(i){
     carrier:d.carrier,duration:d.duration,
     notes:d.notes,dep_address:d.dep_address,arr_address:d.arr_address,
   }).eq('id',seg.id);
-  if(!error){Object.assign(currentSegs[i],d);clearDraft(seg.id);renderTrip();}
+  if(!error){
+    Object.assign(currentSegs[i],d);
+    clearDraft(seg.id);
+    openSegIdx=null;
+    saveNav();
+    renderTrip();
+  }
 }
 
 async function delSeg(i){
   if(!confirm('Удалить сегмент?'))return;
   clearDraft(currentSegs[i].id);
   await sb.from('segments').delete().eq('id',currentSegs[i].id);
-  currentSegs.splice(i,1);renderTrip();
+  currentSegs.splice(i,1);
+  openSegIdx=null;saveNav();
+  renderTrip();
 }
 
 function renderAlerts(){
   const a=[];
   if(currentSegs.some((_,i)=>hasDraft(i)))
-    a.push({t:'info',txt:'💾 Есть несохранённые изменения. Нажмите «Сохранить» в сегменте когда закончите заполнение.'});
+    a.push({t:'info',txt:'💾 Есть несохранённые изменения. Нажмите «Сохранить» когда закончите.'});
   else if(currentSegs.length>0)
-    a.push({t:'ok',txt:'✓ Все сегменты сохранены. Черновики автоматически сохраняются при переходе на другие сайты.'});
+    a.push({t:'ok',txt:'✓ Все сохранено. При переходе на другой сайт страница восстановится автоматически.'});
   const box=document.getElementById('alerts-box');
   if(box)box.innerHTML=a.map(x=>`<div class="alert ${x.t}">${x.txt}</div>`).join('');
 }
@@ -558,7 +591,7 @@ function renderTL(){
     </div>
     <div class="tco">
       <div class="tdate">${fmtD(s.date_from)}${s.time_dep&&s.time_dep!=='—'?' · '+s.time_dep:''}</div>
-      <div class="tlbl">${icons[s.type]} ${s.from_city||'?'} → ${s.to_city||'?'}</div>
+      <div class="tlbl">${IC[s.type]} ${s.from_city||'?'} → ${s.to_city||'?'}</div>
       ${s.dep_address?`<div class="tsub">📍 ${s.dep_address}</div>`:''}
       ${s.arr_address?`<div class="tsub">🏁 ${s.arr_address}</div>`:''}
       ${s.carrier?`<div class="tsub">${s.carrier}</div>`:''}
@@ -572,14 +605,11 @@ function renderBgt(){
   if(!bgt)return;
   let tot=0;
   bgt.innerHTML=currentSegs.map((seg,i)=>{
-    const s=getSeg(i);
-    const uah=toUAH(+s.price_amount||0,s.price_currency||'USD');
-    tot+=uah;
+    const s=getSeg(i);const uah=toUAH(+s.price_amount||0,s.price_currency||'USD');tot+=uah;
     return`<div class="brow"><span class="lb">${s.from_city||'?'}→${s.to_city||'?'}</span><span class="am">${fmt(uah)}</span></div>`;
   }).join('');
   const ts=fmt(tot);
-  if(btv)btv.textContent=ts;
-  if(th)th.textContent=ts;
+  if(btv)btv.textContent=ts;if(th)th.textContent=ts;
 }
 
 init();
