@@ -3,284 +3,506 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Планировщик поездки</title>
+<title>Мои Поездки</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
-  :root {
-    --bg:#0e0e12;--surface:#16161c;--surface2:#1e1e28;--border:#2a2a38;
-    --accent:#f0c040;--accent2:#7c6ff0;--ok:#3dd68c;--warn:#f07850;--danger:#f05060;
-    --text:#e8e8f0;--muted:#8888a8;
-    --mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif;--display:'Syne',sans-serif;
-  }
-  *{box-sizing:border-box;margin:0;padding:0;}
-  body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh;}
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+:root {
+  --bg:#0e0e12;--surface:#16161c;--surface2:#1e1e28;--border:#2a2a38;
+  --accent:#f0c040;--accent2:#7c6ff0;--ok:#3dd68c;--warn:#f07850;--danger:#f05060;
+  --text:#e8e8f0;--muted:#8888a8;
+  --mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif;--display:'Syne',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh;}
 
-  .header{padding:18px 24px 14px;border-bottom:1px solid var(--border);display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;position:sticky;top:0;background:var(--bg);z-index:100;}
-  .header h1{font-family:var(--display);font-size:19px;font-weight:800;letter-spacing:-0.5px;color:var(--accent);}
-  .header .sub{color:var(--muted);font-size:11px;font-family:var(--mono);}
-  .total-badge{margin-left:auto;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:5px 12px;font-family:var(--mono);font-size:13px;}
-  .total-badge span{color:var(--accent);font-weight:500;}
+/* AUTH */
+.auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+.auth-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:36px;width:100%;max-width:380px;}
+.auth-box h1{font-family:var(--display);font-size:24px;font-weight:800;color:var(--accent);margin-bottom:6px;}
+.auth-box .sub{color:var(--muted);font-size:12px;font-family:var(--mono);margin-bottom:28px;}
+.auth-tabs{display:flex;gap:4px;margin-bottom:24px;background:var(--surface2);border-radius:8px;padding:4px;}
+.auth-tab{flex:1;padding:8px;border:none;background:none;color:var(--muted);font-family:var(--mono);font-size:12px;border-radius:6px;cursor:pointer;transition:.2s;}
+.auth-tab.active{background:var(--accent2);color:#fff;}
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;}
+.field label{font-size:10px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+.field input{background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--mono);font-size:13px;padding:10px 12px;outline:none;transition:.2s;}
+.field input:focus{border-color:var(--accent2);}
+.btn{width:100%;padding:11px;border:none;border-radius:8px;font-family:var(--mono);font-size:13px;cursor:pointer;transition:.2s;}
+.btn-primary{background:var(--accent2);color:#fff;}
+.btn-primary:hover{opacity:.88;}
+.btn-danger{background:rgba(240,80,96,.15);color:var(--danger);border:1px solid rgba(240,80,96,.3);}
+.btn-ok{background:rgba(61,214,140,.12);color:var(--ok);border:1px solid rgba(61,214,140,.25);}
+.auth-err{color:var(--danger);font-size:11px;font-family:var(--mono);margin-top:10px;text-align:center;}
 
-  .layout{display:grid;grid-template-columns:1fr 310px;min-height:calc(100vh - 65px);}
-  @media(max-width:720px){.layout{grid-template-columns:1fr;}.sidebar{border-left:none;border-top:1px solid var(--border);}}
+/* HEADER */
+.header{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;position:sticky;top:0;background:var(--bg);z-index:100;}
+.header h1{font-family:var(--display);font-size:17px;font-weight:800;color:var(--accent);flex:1;}
+.user-email{font-family:var(--mono);font-size:10px;color:var(--muted);}
+.logout-btn{background:none;border:1px solid var(--border);color:var(--muted);font-family:var(--mono);font-size:10px;padding:4px 10px;border-radius:5px;cursor:pointer;}
+.back-btn{background:none;border:none;color:var(--accent2);font-family:var(--mono);font-size:12px;cursor:pointer;padding:4px 8px;}
 
-  .segments{padding:18px 24px;border-right:1px solid var(--border);}
-  .seg-list{display:flex;flex-direction:column;gap:9px;}
+/* HOME - TRIPS LIST */
+.home{padding:20px;}
+.home-title{font-family:var(--display);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:14px;}
+.trips-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-bottom:16px;}
+.trip-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;cursor:pointer;transition:.2s;position:relative;}
+.trip-card:hover{border-color:var(--accent2);}
+.trip-card h3{font-family:var(--display);font-size:15px;font-weight:700;margin-bottom:6px;}
+.trip-meta{font-family:var(--mono);font-size:10px;color:var(--muted);display:flex;flex-direction:column;gap:3px;}
+.trip-price{font-family:var(--mono);font-size:16px;font-weight:500;color:var(--ok);margin-top:10px;}
+.trip-del{position:absolute;top:10px;right:10px;background:none;border:none;color:var(--muted);font-size:14px;cursor:pointer;padding:4px;border-radius:4px;}
+.trip-del:hover{color:var(--danger);}
+.add-trip-box{background:var(--surface2);border:2px dashed var(--border);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:10px;align-items:center;}
+.add-trip-box input{background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--sans);font-size:14px;padding:10px 14px;outline:none;width:100%;}
+.add-trip-box input:focus{border-color:var(--accent2);}
+.btn-add{background:var(--accent2);color:#fff;border:none;border-radius:8px;padding:10px 20px;font-family:var(--mono);font-size:12px;cursor:pointer;width:100%;}
 
-  .seg{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:border-color .2s;}
-  .seg:hover{border-color:#3a3a50;}
-  .seg.haswarn{border-color:var(--warn);}
+/* TRIP DETAIL */
+.trip-detail{display:grid;grid-template-columns:1fr 290px;min-height:calc(100vh - 57px);}
+@media(max-width:700px){.trip-detail{grid-template-columns:1fr;}}
+.segments{padding:16px 20px;border-right:1px solid var(--border);}
+.seg-list{display:flex;flex-direction:column;gap:8px;}
+.stitle{font-family:var(--display);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:8px;}
 
-  .seg-header{display:flex;align-items:center;gap:10px;padding:11px 15px;cursor:pointer;user-select:none;}
-  .seg-icon{width:32px;height:32px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
-  .icon-train{background:rgba(124,111,240,.15);}
-  .icon-bus{background:rgba(61,214,140,.12);}
-  .icon-flight{background:rgba(240,192,64,.15);}
+.seg{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;transition:.2s;}
+.seg.haswarn{border-color:var(--warn);}
+.seg-hdr{display:flex;align-items:center;gap:8px;padding:10px 13px;cursor:pointer;user-select:none;-webkit-user-select:none;}
+.sicon{width:30px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;}
+.icon-train{background:rgba(124,111,240,.15);}
+.icon-bus{background:rgba(61,214,140,.12);}
+.icon-flight{background:rgba(240,192,64,.15);}
+.sinfo{flex:1;min-width:0;}
+.sroute{font-family:var(--display);font-weight:700;font-size:12px;display:flex;align-items:center;gap:4px;flex-wrap:wrap;}
+.arr{color:var(--muted);}
+.smeta{margin-top:2px;color:var(--muted);font-size:10px;font-family:var(--mono);display:flex;gap:6px;flex-wrap:wrap;}
+.sprice{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--ok);text-align:right;flex-shrink:0;}
+.sprice .usd{font-size:9px;color:var(--muted);}
+.wbadge{background:rgba(240,120,80,.15);color:var(--warn);border:1px solid rgba(240,120,80,.3);border-radius:3px;padding:1px 4px;font-size:8px;font-family:var(--mono);}
+.chev{color:var(--muted);transition:transform .2s;font-size:9px;margin-left:2px;flex-shrink:0;}
+.chev.open{transform:rotate(180deg);}
+.tpill{font-family:var(--mono);font-size:8px;padding:1px 4px;border-radius:3px;font-weight:500;}
+.tp-train{background:rgba(124,111,240,.2);color:#a09af0;}
+.tp-bus{background:rgba(61,214,140,.15);color:#5dd6a0;}
+.tp-flight{background:rgba(240,192,64,.2);color:var(--accent);}
 
-  .seg-info{flex:1;min-width:0;}
-  .seg-route{font-family:var(--display);font-weight:700;font-size:13px;display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
-  .seg-route .arr{color:var(--muted);font-weight:400;}
-  .seg-meta{margin-top:2px;color:var(--muted);font-size:10px;font-family:var(--mono);display:flex;gap:8px;flex-wrap:wrap;}
+.seg-edit{display:none;border-top:1px solid var(--border);padding:12px;background:var(--surface2);flex-direction:column;gap:10px;}
+.seg-edit.open{display:flex;}
+.frow{display:flex;gap:8px;flex-wrap:wrap;}
+.efield{display:flex;flex-direction:column;gap:3px;flex:1;min-width:90px;}
+.efield label{font-size:9px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+.efield input,.efield select{background:var(--surface);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:var(--mono);font-size:11px;padding:6px 7px;outline:none;width:100%;}
+.efield input:focus,.efield select:focus{border-color:var(--accent2);}
+.nbox{background:rgba(240,120,80,.08);border:1px solid rgba(240,120,80,.25);border-radius:6px;padding:7px 10px;font-size:10px;color:var(--warn);font-family:var(--mono);line-height:1.6;}
+.nbox.info{background:rgba(124,111,240,.08);border-color:rgba(124,111,240,.25);color:#a09af0;}
+.row-btns{display:flex;gap:8px;justify-content:space-between;}
+.sbtn{background:var(--accent2);color:#fff;border:none;border-radius:5px;padding:6px 12px;font-family:var(--mono);font-size:10px;cursor:pointer;}
+.delbtn{background:rgba(240,80,96,.12);color:var(--danger);border:1px solid rgba(240,80,96,.3);border-radius:5px;padding:6px 12px;font-family:var(--mono);font-size:10px;cursor:pointer;}
 
-  .seg-price{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--ok);text-align:right;flex-shrink:0;}
-  .seg-price .usd{font-size:10px;color:var(--muted);}
+.add-seg-box{background:var(--surface2);border:1px dashed var(--border);border-radius:10px;padding:12px;margin-top:8px;}
+.add-seg-box .stitle{margin-bottom:10px;}
+.seg-type-row{display:flex;gap:6px;margin-bottom:10px;}
+.type-btn{flex:1;padding:8px;border:1px solid var(--border);background:var(--surface);color:var(--muted);border-radius:6px;font-family:var(--mono);font-size:10px;cursor:pointer;text-align:center;}
+.type-btn.active{border-color:var(--accent2);color:var(--accent2);background:rgba(124,111,240,.1);}
 
-  .wbadge{background:rgba(240,120,80,.15);color:var(--warn);border:1px solid rgba(240,120,80,.3);border-radius:4px;padding:1px 5px;font-size:9px;font-family:var(--mono);}
+/* ALERTS */
+.alerts{padding:10px 20px 6px;}
+.alert{display:flex;align-items:flex-start;gap:6px;padding:7px 10px;border-radius:7px;margin-bottom:5px;font-size:11px;font-family:var(--mono);line-height:1.5;}
+.alert.danger{background:rgba(240,80,96,.1);border:1px solid rgba(240,80,96,.25);color:#f08090;}
+.alert.warn{background:rgba(240,120,80,.1);border:1px solid rgba(240,120,80,.25);color:var(--warn);}
+.alert.ok{background:rgba(61,214,140,.08);border:1px solid rgba(61,214,140,.2);color:var(--ok);}
 
-  .seg-edit{display:none;border-top:1px solid var(--border);padding:14px;background:var(--surface2);flex-direction:column;gap:11px;}
-  .seg-edit.open{display:flex;}
+/* SIDEBAR */
+.sidebar{padding:16px;display:flex;flex-direction:column;gap:12px;overflow-y:auto;}
+.sc{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+.sc h3{padding:8px 12px;font-family:var(--display);font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);}
+.bgt{padding:8px 12px;}
+.brow{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--border);font-size:10px;}
+.brow:last-child{border-bottom:none;}
+.brow .lb{color:var(--muted);font-family:var(--mono);font-size:9px;}
+.brow .am{font-family:var(--mono);color:var(--text);}
+.btotal{display:flex;justify-content:space-between;align-items:baseline;padding:8px 12px;border-top:2px solid var(--border);font-family:var(--display);font-weight:700;font-size:11px;}
+.btotal .am{color:var(--accent);font-size:15px;}
+.tl{padding:8px 12px;display:flex;flex-direction:column;}
+.tli{display:flex;gap:8px;padding-bottom:8px;}
+.tli:last-child{padding-bottom:0;}
+.tdc{display:flex;flex-direction:column;align-items:center;width:12px;flex-shrink:0;}
+.td{width:8px;height:8px;border-radius:50%;background:var(--accent2);border:2px solid var(--bg);margin-top:2px;flex-shrink:0;}
+.td.flight{background:var(--accent);}
+.td.arrive{background:var(--ok);}
+.tline{flex:1;width:1px;background:var(--border);margin-top:2px;}
+.tco{flex:1;}
+.tdate{font-family:var(--mono);font-size:9px;color:var(--muted);}
+.tlbl{font-size:10px;font-weight:500;margin-top:1px;}
+.tsub{font-size:9px;color:var(--muted);font-family:var(--mono);}
+.lug{padding:8px 12px;font-size:10px;font-family:var(--mono);line-height:1.8;}
+.lok{color:var(--ok);}
+.lwrn{color:var(--warn);}
 
-  .frow{display:flex;gap:9px;flex-wrap:wrap;}
-  .field{display:flex;flex-direction:column;gap:3px;flex:1;min-width:110px;}
-  .field label{font-size:9px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
-  .field input,.field select{background:var(--surface);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:var(--mono);font-size:12px;padding:6px 8px;outline:none;width:100%;transition:border-color .2s;}
-  .field input:focus,.field select:focus{border-color:var(--accent2);}
-
-  .nbox{background:rgba(240,120,80,.08);border:1px solid rgba(240,120,80,.25);border-radius:7px;padding:8px 11px;font-size:11px;color:var(--warn);font-family:var(--mono);line-height:1.6;}
-  .nbox.info{background:rgba(124,111,240,.08);border-color:rgba(124,111,240,.25);color:#a09af0;}
-
-  .alerts{padding:0 24px 12px;}
-  .alert{display:flex;align-items:flex-start;gap:7px;padding:8px 11px;border-radius:7px;margin-bottom:6px;font-size:11px;font-family:var(--mono);line-height:1.5;}
-  .alert.danger{background:rgba(240,80,96,.1);border:1px solid rgba(240,80,96,.25);color:#f08090;}
-  .alert.warn{background:rgba(240,120,80,.1);border:1px solid rgba(240,120,80,.25);color:var(--warn);}
-  .alert.ok{background:rgba(61,214,140,.08);border:1px solid rgba(61,214,140,.2);color:var(--ok);}
-  .ai{font-size:12px;flex-shrink:0;margin-top:1px;}
-
-  .sidebar{padding:18px;display:flex;flex-direction:column;gap:14px;}
-  .sc{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
-  .sc h3{padding:10px 13px 9px;font-family:var(--display);font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);}
-
-  .bgt{padding:9px 13px;}
-  .brow{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:11px;}
-  .brow:last-child{border-bottom:none;}
-  .brow .lb{color:var(--muted);font-family:var(--mono);font-size:10px;}
-  .brow .am{font-family:var(--mono);color:var(--text);}
-  .btotal{display:flex;justify-content:space-between;align-items:baseline;padding:9px 13px;border-top:2px solid var(--border);font-family:var(--display);font-weight:700;font-size:12px;}
-  .btotal .am{color:var(--accent);font-size:16px;}
-
-  .tl{padding:9px 13px;display:flex;flex-direction:column;}
-  .tli{display:flex;gap:9px;padding-bottom:10px;}
-  .tli:last-child{padding-bottom:0;}
-  .tdc{display:flex;flex-direction:column;align-items:center;width:13px;flex-shrink:0;}
-  .td{width:8px;height:8px;border-radius:50%;background:var(--accent2);border:2px solid var(--bg);margin-top:3px;flex-shrink:0;}
-  .td.flight{background:var(--accent);}
-  .td.arrive{background:var(--ok);}
-  .tline{flex:1;width:1px;background:var(--border);margin-top:2px;}
-  .tco{flex:1;}
-  .tdate{font-family:var(--mono);font-size:9px;color:var(--muted);}
-  .tlbl{font-size:11px;font-weight:500;margin-top:1px;}
-
-  .lug{padding:9px 13px;font-size:10px;font-family:var(--mono);line-height:1.9;}
-  .lok{color:var(--ok);}
-  .lwrn{color:var(--warn);}
-
-  .stitle{font-family:var(--display);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:9px;}
-  .chev{color:var(--muted);transition:transform .2s;font-size:10px;margin-left:2px;flex-shrink:0;}
-  .chev.open{transform:rotate(180deg);}
-
-  .tpill{font-family:var(--mono);font-size:8px;padding:2px 5px;border-radius:3px;font-weight:500;}
-  .tp-train{background:rgba(124,111,240,.2);color:#a09af0;}
-  .tp-bus{background:rgba(61,214,140,.15);color:#5dd6a0;}
-  .tp-flight{background:rgba(240,192,64,.2);color:var(--accent);}
-
-  .sbtn{background:var(--accent2);color:#fff;border:none;border-radius:5px;padding:6px 13px;font-family:var(--mono);font-size:11px;cursor:pointer;align-self:flex-end;transition:opacity .2s;}
-  .sbtn:hover{opacity:.85;}
+.loading{display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:var(--mono);color:var(--muted);}
+.spinner{width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--accent2);border-radius:50%;animation:spin .7s linear infinite;margin-right:10px;}
+@keyframes spin{to{transform:rotate(360deg);}}
 </style>
 </head>
 <body>
 
-<div class="header">
-  <h1>✈ МОЯ ПОЕЗДКА</h1>
-  <div class="sub">Киев → Тель-Авив → Кишинёв → Киев &nbsp;·&nbsp; июнь–июль 2026</div>
-  <div class="total-badge">Итого: <span id="total-uah">—</span></div>
-</div>
-
-<div id="alerts" class="alerts"></div>
-
-<div class="layout">
-  <div class="segments">
-    <div class="stitle">Сегменты маршрута</div>
-    <div class="seg-list" id="seg-list"></div>
-  </div>
-  <div class="sidebar">
-    <div class="sc"><h3>📅 Хронология</h3><div class="tl" id="tl"></div></div>
-    <div class="sc"><h3>💰 Бюджет (грн)</h3><div class="bgt" id="bgt"></div><div class="btotal"><span>ИТОГО</span><span class="am" id="btotal">—</span></div></div>
-    <div class="sc"><h3>🧳 Багаж</h3><div class="lug" id="lug"></div></div>
-  </div>
-</div>
+<div id="app"></div>
 
 <script>
+const SUPA_URL = 'https://fbcdmhvjfnjioecqlnpf.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZiY2RtaHZqZm5qaW9lY3FsbnBmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NDYzNTYsImV4cCI6MjA5NDUyMjM1Nn0.XnvAFJSVjP2vC0rL4guedpievJqm6Jp3sIxiSLwueRQ';
+const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
+
 const UAH = 41;
-const segs = [
-  {id:1,type:'train',icon:'🚂',from:'Киев',to:'Хелм (Польша)',
-   dateFrom:'2026-06-20',timeDep:'06:28',timeArr:'17:27',dateTo:'2026-06-20',
-   priceUSD:28,carrier:'УЗ / PKP (поезд 023К)',duration:'~11 ч',
-   notes:'Прямой поезд. Купе ~1174 грн, люкс ~1548 грн. Отправление утром, прибытие в Хелм в 17:27 — стыкуется с варшавским поездом.',
-   noteType:'info',booking:'tickets.ua или кассы УЗ',luggageOk:true},
-  {id:2,type:'train',icon:'🚆',from:'Хелм',to:'Варшава',
-   dateFrom:'2026-06-20',timeDep:'18:10',timeArr:'21:00',dateTo:'2026-06-20',
-   priceUSD:12,carrier:'PKP Intercity',duration:'~2 ч 50 мин',
-   notes:'Региональный поезд PKP. Пересадка в Хелме ~45 мин. Проверьте расписание на pkp.pl на день поездки.',
-   noteType:'warn',booking:'pkp.pl или koleo.pl',luggageOk:true},
-  {id:3,type:'bus',icon:'🚌',from:'Варшава',to:'Франкфурт-на-Майне',
-   dateFrom:'2026-06-21',timeDep:'22:00',timeArr:'13:00',dateTo:'2026-06-22',
-   priceUSD:55,carrier:'FlixBus',duration:'~15 ч',
-   notes:'Рекомендуем ночной FlixBus (~22:00) — прибывает утром во Франкфурт, не нужно ночевать. Отправление со ст. Варшава Западная.',
-   noteType:'info',booking:'flixbus.com',luggageOk:true},
-  {id:4,type:'flight',icon:'✈️',from:'Франкфурт (FRA)',to:'Тель-Авив (TLV)',
-   dateFrom:'2026-06-28',timeDep:'—',timeArr:'—',dateTo:'2026-06-28',
-   priceUSD:175,carrier:'SKY express / El Al / Aegean',duration:'~4 ч',
-   notes:'Проверьте Google Flights / Skyscanner на 28 июня. Дешевле всего SKY express от ~$160. El Al — прямой рейс ~$200+. Ryanair берёт доплату за второй предмет багажа!',
-   noteType:'warn',booking:'google.com/travel/flights',luggageOk:false,
-   luggageNote:'⚠️ Ryanair: рюкзак 40×30×20 = 2-й предмет, доплата при регистрации. Выбирайте El Al или Aegean.'},
-  {id:5,type:'flight',icon:'✈️',from:'Тель-Авив (TLV)',to:'Кишинёв (RMO)',
-   dateFrom:'2026-07-03',timeDep:'—',timeArr:'—',dateTo:'2026-07-03',
-   priceUSD:110,carrier:'FlyOne / HiSky / Wizz Air',duration:'~2 ч 55 мин',
-   notes:'FlyOne — самый популярный (42% бронирований). Прямой рейс. Цены от $94. Уточните наличие на конкретную дату.',
-   noteType:'info',booking:'flyone.eu или kiwi.com',luggageOk:true},
-  {id:6,type:'bus',icon:'🚌',from:'Кишинёв',to:'Киев',
-   dateFrom:'2026-07-04',timeDep:'06:00',timeArr:'18:00',dateTo:'2026-07-04',
-   priceUSD:25,carrier:'FlixBus / GAL Trans / Transmarine',duration:'~11–12 ч',
-   notes:'Автобус от Северного автовокзала Кишинёва. FlixBus от ~$26, GAL Trans / Transmarine от ~$20. Самый быстрый рейс ~10 ч.',
-   noteType:'info',booking:'flixbus.com или busbud.com',luggageOk:true},
-];
+let currentUser = null;
+let currentTrip = null;
+let currentSegs = [];
+let newSegType = 'flight';
 
-let state = segs.map(s=>({...s}));
+const app = document.getElementById('app');
 
-function fmt(usd){return Math.round(usd*UAH).toLocaleString('ru-RU')+' ₴';}
-function fmtD(d){const[,m,day]=d.split('-');const mn=['','янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];return `${+day} ${mn[+m]}`;}
+function fmt(u){return Math.round(u*UAH).toLocaleString('ru-RU')+' ₴';}
+function fmtD(d){if(!d)return'?';const[,m,day]=d.split('-');const mn=['','янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];return`${+day} ${mn[+m]}`;}
 const tlabel={train:'ПОЕЗД',bus:'АВТОБУС',flight:'РЕЙС'};
+const icons={train:'🚂',bus:'🚌',flight:'✈️'};
 
-function renderAll(){renderAlerts();renderSegs();renderTL();renderBgt();renderLug();}
-
-function renderAlerts(){
-  const a=[];
-  // timing gap check
-  const s1=state[1],s2=state[2];
-  if(s2.dateFrom===s1.dateTo){
-    const gap=(+s2.timeDep.replace(':',''))-(+s1.timeArr.replace(':',''));
-    if(gap<200) a.push({t:'danger',i:'⏱',txt:`Мало времени между прибытием в Варшаву (${s1.timeArr}) и отправлением автобуса (${s2.timeDep}). Рекомендуем ночной FlixBus (~22:00).`});
-  }
-  if(state.some(s=>!s.luggageOk)) a.push({t:'warn',i:'🧳',txt:'На рейсе FRA→TLV возможны ограничения по багажу в зависимости от перевозчика. Уточните правила до покупки.'});
-  a.push({t:'warn',i:'💡',txt:'Билет FRA→TLV на 28 июня — бронируйте сейчас. Июнь — пик сезона, цены растут.'});
-  a.push({t:'ok',i:'✓',txt:'Маршрут логичный. Все основные стыковки имеют достаточный запас времени.'});
-  document.getElementById('alerts').innerHTML=a.map(x=>`<div class="alert ${x.t}"><span class="ai">${x.i}</span><span>${x.txt}</span></div>`).join('');
+// ── INIT ──
+async function init(){
+  showLoading();
+  const {data:{session}} = await sb.auth.getSession();
+  if(session){currentUser=session.user;showHome();}
+  else showAuth();
+  sb.auth.onAuthStateChange((_,s)=>{
+    if(s){currentUser=s.user;showHome();}
+    else{currentUser=null;showAuth();}
+  });
 }
 
-function renderSegs(){
-  document.getElementById('seg-list').innerHTML=state.map((s,i)=>`
-  <div class="seg ${s.luggageOk?'':'haswarn'}" id="sg${s.id}">
-    <div class="seg-header" onclick="tog(${i})">
-      <div class="seg-icon icon-${s.type}">${s.icon}</div>
-      <div class="seg-info">
-        <div class="seg-route">
-          <span class="tpill tp-${s.type}">${tlabel[s.type]}</span>
-          ${s.from}<span class="arr">→</span>${s.to}
-          ${s.luggageOk?'':'<span class="wbadge">⚠ багаж</span>'}
+function showLoading(){
+  app.innerHTML=`<div class="loading"><div class="spinner"></div>Загрузка...</div>`;
+}
+
+// ── AUTH ──
+function showAuth(tab='login'){
+  app.innerHTML=`
+  <div class="auth-wrap">
+    <div class="auth-box">
+      <h1>✈ Мои Поездки</h1>
+      <div class="sub">Планировщик маршрутов</div>
+      <div class="auth-tabs">
+        <button class="auth-tab ${tab==='login'?'active':''}" onclick="showAuth('login')">Войти</button>
+        <button class="auth-tab ${tab==='reg'?'active':''}" onclick="showAuth('reg')">Регистрация</button>
+      </div>
+      <div class="field"><label>Email</label><input type="email" id="email" placeholder="you@example.com"></div>
+      <div class="field"><label>Пароль</label><input type="password" id="pass" placeholder="••••••••"></div>
+      ${tab==='login'
+        ?`<button class="btn btn-primary" onclick="doLogin()">Войти</button>`
+        :`<button class="btn btn-primary" onclick="doReg()">Создать аккаунт</button>`}
+      <div class="auth-err" id="auth-err"></div>
+    </div>
+  </div>`;
+}
+
+async function doLogin(){
+  const e=document.getElementById('email').value;
+  const p=document.getElementById('pass').value;
+  const {error}=await sb.auth.signInWithPassword({email:e,password:p});
+  if(error)document.getElementById('auth-err').textContent=error.message;
+}
+async function doReg(){
+  const e=document.getElementById('email').value;
+  const p=document.getElementById('pass').value;
+  const {error}=await sb.auth.signUp({email:e,password:p});
+  if(error)document.getElementById('auth-err').textContent=error.message;
+  else document.getElementById('auth-err').style.color='var(--ok)',document.getElementById('auth-err').textContent='Проверьте почту для подтверждения!';
+}
+async function doLogout(){await sb.auth.signOut();}
+
+// ── HOME ──
+async function showHome(){
+  showLoading();
+  const {data:trips}=await sb.from('trips').select('*').order('created_at');
+  const segsAll = trips?.length
+    ? (await sb.from('segments').select('*').in('trip_id',trips.map(t=>t.id))).data || []
+    : [];
+
+  const cards = (trips||[]).map(t=>{
+    const segs = segsAll.filter(s=>s.trip_id===t.id);
+    const total = segs.reduce((a,s)=>a+(+s.price_usd||0),0);
+    const dates = segs.length ? `${fmtD(segs[0].date_from)} – ${fmtD(segs[segs.length-1].date_from)}` : '—';
+    const route = segs.length ? `${segs[0].from_city} → ${segs[segs.length-1].to_city}` : '—';
+    return `
+    <div class="trip-card" onclick="openTrip('${t.id}','${t.name.replace(/'/g,"\\'")}')">
+      <button class="trip-del" onclick="event.stopPropagation();delTrip('${t.id}')">✕</button>
+      <h3>${t.name}</h3>
+      <div class="trip-meta">
+        <span>📍 ${route}</span>
+        <span>📅 ${dates}</span>
+        <span>🧩 ${segs.length} сегментов</span>
+      </div>
+      <div class="trip-price">${total>0?fmt(total):'—'}</div>
+    </div>`;
+  }).join('');
+
+  app.innerHTML=`
+  <div class="header">
+    <h1>✈ Мои Поездки</h1>
+    <span class="user-email">${currentUser?.email||''}</span>
+    <button class="logout-btn" onclick="doLogout()">Выйти</button>
+  </div>
+  <div class="home">
+    <div class="home-title">Мои отпуска</div>
+    <div class="trips-grid">
+      ${cards}
+      <div class="add-trip-box">
+        <input type="text" id="new-trip-name" placeholder="Название поездки (напр. Израиль 2026)">
+        <button class="btn-add" onclick="addTrip()">+ Добавить поездку</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+async function addTrip(){
+  const name=document.getElementById('new-trip-name').value.trim();
+  if(!name)return;
+  await sb.from('trips').insert({name,user_id:currentUser.id});
+  showHome();
+}
+
+async function delTrip(id){
+  if(!confirm('Удалить поездку со всеми сегментами?'))return;
+  await sb.from('trips').delete().eq('id',id);
+  showHome();
+}
+
+// ── TRIP DETAIL ──
+async function openTrip(id,name){
+  currentTrip={id,name};
+  showLoading();
+  const {data}=await sb.from('segments').select('*').eq('trip_id',id).order('position');
+  currentSegs=data||[];
+  renderTrip();
+}
+
+function renderTrip(){
+  const segs=currentSegs;
+  const total=segs.reduce((a,s)=>a+(+s.price_usd||0),0);
+
+  app.innerHTML=`
+  <div class="header">
+    <button class="back-btn" onclick="showHome()">← Назад</button>
+    <h1>${currentTrip.name}</h1>
+    <span class="user-email">${fmt(total)}</span>
+    <button class="logout-btn" onclick="doLogout()">Выйти</button>
+  </div>
+  <div id="alerts-box" class="alerts"></div>
+  <div class="trip-detail">
+    <div class="segments">
+      <div class="stitle">Сегменты маршрута</div>
+      <div class="seg-list" id="seg-list"></div>
+      ${renderAddSeg()}
+    </div>
+    <div class="sidebar">
+      <div class="sc"><h3>📅 Хронология</h3><div class="tl" id="tl"></div></div>
+      <div class="sc"><h3>💰 Бюджет (грн)</h3><div class="bgt" id="bgt"></div><div class="btotal"><span>ИТОГО</span><span class="am" id="btotal-val">—</span></div></div>
+      <div class="sc"><h3>🧳 Багаж</h3><div class="lug" id="lug"></div></div>
+    </div>
+  </div>`;
+
+  renderSegList();
+  renderAlerts();
+  renderTL();
+  renderBgt();
+  renderLug();
+}
+
+function renderSegList(){
+  document.getElementById('seg-list').innerHTML=currentSegs.map((s,i)=>`
+  <div class="seg ${s.luggage_ok?'':'haswarn'}">
+    <div class="seg-hdr" onclick="togSeg(${i})">
+      <div class="sicon icon-${s.type}">${icons[s.type]||'📍'}</div>
+      <div class="sinfo">
+        <div class="sroute">
+          <span class="tpill tp-${s.type}">${tlabel[s.type]||s.type}</span>
+          ${s.from_city||'?'}<span class="arr">→</span>${s.to_city||'?'}
+          ${s.luggage_ok?'':'<span class="wbadge">⚠ багаж</span>'}
         </div>
-        <div class="seg-meta">
-          <span>📅 ${fmtD(s.dateFrom)}</span>
-          <span>⏰ ${s.timeDep!=='—'?s.timeDep+' → '+s.timeArr:'уточнить'}</span>
-          <span>⏱ ${s.duration}</span>
+        <div class="smeta">
+          <span>📅 ${fmtD(s.date_from)}</span>
+          <span>⏰ ${s.time_dep&&s.time_dep!=='—'?s.time_dep+'→'+(s.time_arr||'?'):'уточнить'}</span>
+          <span>⏱ ${s.duration||'—'}</span>
         </div>
       </div>
-      <div class="seg-price">${fmt(s.priceUSD)}<div class="usd">~$${s.priceUSD}</div></div>
+      <div class="sprice">${fmt(+s.price_usd||0)}<div class="usd">~$${s.price_usd||0}</div></div>
       <span class="chev" id="ch${i}">▼</span>
     </div>
     <div class="seg-edit" id="ed${i}">
       <div class="frow">
-        <div class="field"><label>Дата выезда</label><input type="date" value="${s.dateFrom}" onchange="upd(${i},'dateFrom',this.value)"></div>
-        <div class="field"><label>Отправление</label><input type="time" value="${s.timeDep!=='—'?s.timeDep:''}" onchange="upd(${i},'timeDep',this.value||'—')"></div>
-        <div class="field"><label>Прибытие</label><input type="time" value="${s.timeArr!=='—'?s.timeArr:''}" onchange="upd(${i},'timeArr',this.value||'—')"></div>
-        <div class="field"><label>Цена (USD)</label><input type="number" value="${s.priceUSD}" min="0" onchange="upd(${i},'priceUSD',+this.value)"></div>
+        <div class="efield"><label>Откуда</label><input value="${s.from_city||''}" onchange="updSeg(${i},'from_city',this.value)"></div>
+        <div class="efield"><label>Куда</label><input value="${s.to_city||''}" onchange="updSeg(${i},'to_city',this.value)"></div>
       </div>
       <div class="frow">
-        <div class="field" style="flex:2"><label>Перевозчик</label><input type="text" value="${s.carrier}" onchange="upd(${i},'carrier',this.value)"></div>
-        <div class="field"><label>Где купить</label><input type="text" value="${s.booking}" onchange="upd(${i},'booking',this.value)"></div>
+        <div class="efield"><label>Дата</label><input type="date" value="${s.date_from||''}" onchange="updSeg(${i},'date_from',this.value)"></div>
+        <div class="efield"><label>Выезд</label><input type="time" value="${s.time_dep&&s.time_dep!=='—'?s.time_dep:''}" onchange="updSeg(${i},'time_dep',this.value||'—')"></div>
+        <div class="efield"><label>Прибытие</label><input type="time" value="${s.time_arr&&s.time_arr!=='—'?s.time_arr:''}" onchange="updSeg(${i},'time_arr',this.value||'—')"></div>
       </div>
-      <div class="nbox ${s.noteType==='info'?'info':''}">${s.noteType==='info'?'ℹ️':'⚠️'} ${s.notes}</div>
-      ${s.luggageNote?`<div class="nbox">${s.luggageNote}</div>`:''}
-      <button class="sbtn" onclick="tog(${i})">Сохранить ✓</button>
+      <div class="frow">
+        <div class="efield"><label>Цена $</label><input type="number" value="${s.price_usd||0}" min="0" onchange="updSeg(${i},'price_usd',+this.value)"></div>
+        <div class="efield"><label>Длительность</label><input value="${s.duration||''}" onchange="updSeg(${i},'duration',this.value)"></div>
+      </div>
+      <div class="frow">
+        <div class="efield" style="flex:2"><label>Перевозчик</label><input value="${s.carrier||''}" onchange="updSeg(${i},'carrier',this.value)"></div>
+        <div class="efield"><label>Где купить</label><input value="${s.booking||''}" onchange="updSeg(${i},'booking',this.value)"></div>
+      </div>
+      <div class="frow">
+        <div class="efield" style="flex:2"><label>Адрес/аэропорт отправления</label><input value="${s.dep_address||''}" placeholder="напр. Аэропорт Бен-Гурион, Терминал 3" onchange="updSeg(${i},'dep_address',this.value)"></div>
+        <div class="efield" style="flex:2"><label>Адрес/аэропорт прибытия</label><input value="${s.arr_address||''}" placeholder="напр. Франкфурт FRA, Терминал 1" onchange="updSeg(${i},'arr_address',this.value)"></div>
+      </div>
+      <div class="efield"><label>Заметка</label><input value="${s.notes||''}" onchange="updSeg(${i},'notes',this.value)"></div>
+      <div class="row-btns">
+        <button class="delbtn" onclick="delSeg(${i})">🗑 Удалить</button>
+        <button class="sbtn" onclick="saveSeg(${i})">Сохранить ✓</button>
+      </div>
     </div>
   </div>`).join('');
 }
 
-function tog(i){
+function renderAddSeg(){
+  return `<div class="add-seg-box" style="margin-top:10px">
+    <div class="stitle">+ Добавить сегмент</div>
+    <div class="seg-type-row">
+      <button class="type-btn ${newSegType==='train'?'active':''}" onclick="setType('train')">🚂 Поезд</button>
+      <button class="type-btn ${newSegType==='bus'?'active':''}" onclick="setType('bus')">🚌 Автобус</button>
+      <button class="type-btn ${newSegType==='flight'?'active':''}" onclick="setType('flight')">✈️ Рейс</button>
+    </div>
+    <div class="frow" style="margin-bottom:8px">
+      <div class="efield"><label>Откуда</label><input id="ns-from" placeholder="Киев"></div>
+      <div class="efield"><label>Куда</label><input id="ns-to" placeholder="Варшава"></div>
+      <div class="efield"><label>Дата</label><input type="date" id="ns-date"></div>
+      <div class="efield"><label>Цена $</label><input type="number" id="ns-price" min="0" value="0"></div>
+    </div>
+    <button class="btn-add" onclick="addSeg()">+ Добавить</button>
+  </div>`;
+}
+
+function setType(t){newSegType=t;renderTrip();}
+
+async function addSeg(){
+  const from=document.getElementById('ns-from').value.trim();
+  const to=document.getElementById('ns-to').value.trim();
+  const date=document.getElementById('ns-date').value;
+  const price=+document.getElementById('ns-price').value||0;
+  if(!from||!to)return alert('Укажите откуда и куда');
+  const pos=currentSegs.length;
+  const {data,error}=await sb.from('segments').insert({
+    trip_id:currentTrip.id,user_id:currentUser.id,
+    type:newSegType,icon:icons[newSegType],
+    from_city:from,to_city:to,date_from:date,
+    price_usd:price,position:pos,
+    luggage_ok:true,note_type:'info'
+  }).select().single();
+  if(!error){currentSegs.push(data);renderTrip();}
+}
+
+function togSeg(i){
   const e=document.getElementById(`ed${i}`),c=document.getElementById(`ch${i}`);
   const was=e.classList.contains('open');
   document.querySelectorAll('.seg-edit').forEach(x=>x.classList.remove('open'));
   document.querySelectorAll('.chev').forEach(x=>x.classList.remove('open'));
   if(!was){e.classList.add('open');c.classList.add('open');}
 }
-function upd(i,k,v){state[i][k]=v;renderAll();setTimeout(()=>{document.getElementById(`ed${i}`).classList.add('open');document.getElementById(`ch${i}`).classList.add('open');},10);}
+
+function updSeg(i,k,v){
+  currentSegs[i][k]=v;
+  renderSegList();
+  renderAlerts();
+  renderTL();
+  renderBgt();
+  renderLug();
+  setTimeout(()=>{
+    const e=document.getElementById(`ed${i}`),c=document.getElementById(`ch${i}`);
+    if(e)e.classList.add('open');
+    if(c)c.classList.add('open');
+  },10);
+}
+
+async function saveSeg(i){
+  const s=currentSegs[i];
+  await sb.from('segments').update({
+    from_city:s.from_city,to_city:s.to_city,
+    date_from:s.date_from,date_to:s.date_to,
+    time_dep:s.time_dep,time_arr:s.time_arr,
+    price_usd:s.price_usd,carrier:s.carrier,
+    duration:s.duration,booking:s.booking,
+    notes:s.notes,dep_address:s.dep_address,
+    arr_address:s.arr_address,luggage_ok:s.luggage_ok
+  }).eq('id',s.id);
+  togSeg(i);
+}
+
+async function delSeg(i){
+  if(!confirm('Удалить сегмент?'))return;
+  await sb.from('segments').delete().eq('id',currentSegs[i].id);
+  currentSegs.splice(i,1);
+  renderTrip();
+}
+
+function renderAlerts(){
+  const a=[];
+  if(currentSegs.some(s=>!s.luggage_ok))
+    a.push({t:'warn',i:'🧳',txt:'Возможны ограничения по багажу. Уточните правила перевозчика.'});
+  a.push({t:'warn',i:'💡',txt:'Цены ориентировочные — обновляйте после бронирования.'});
+  if(currentSegs.length>1) a.push({t:'ok',i:'✓',txt:'Маршрут настроен. Не забудьте сохранить каждый сегмент.'});
+  const box=document.getElementById('alerts-box');
+  if(box)box.innerHTML=a.map(x=>`<div class="alert ${x.t}"><span>${x.i}</span><span>${x.txt}</span></div>`).join('');
+}
 
 function renderTL(){
-  const ev=[
-    {d:'20 июня',l:'Выезд из Киева (поезд 06:28)',t:'d'},
-    {d:'20 июня, 17:27',l:'Хелм → пересадка на Варшаву',t:'t'},
-    {d:'20 июня, 21:00',l:'Прибытие в Варшаву',t:'t'},
-    {d:'21 июня, ~22:00',l:'Ночной автобус → Франкфурт 🚌',t:'d'},
-    {d:'22–27 июня',l:'6 дней во Франкфурте 🇩🇪',t:'s'},
-    {d:'28 июня',l:'Рейс FRA → TLV ✈️',t:'f'},
-    {d:'28 июня – 3 июля',l:'Тель-Авив 🇮🇱',t:'s'},
-    {d:'3 июля',l:'Рейс TLV → Кишинёв ✈️',t:'f'},
-    {d:'4 июля, утро',l:'Автобус Кишинёв → Киев 🚌',t:'d'},
-    {d:'4 июля, вечер',l:'🏠 Дома!',t:'a'},
-  ];
-  document.getElementById('tl').innerHTML=ev.map((e,i)=>`
+  const tl=document.getElementById('tl');
+  if(!tl)return;
+  if(!currentSegs.length){tl.innerHTML='<div style="color:var(--muted);font-size:11px;padding:4px">Нет сегментов</div>';return;}
+  tl.innerHTML=currentSegs.map((s,i)=>`
   <div class="tli">
     <div class="tdc">
-      <div class="td ${e.t==='f'?'flight':e.t==='a'?'arrive':''}"></div>
-      ${i<ev.length-1?'<div class="tline"></div>':''}
+      <div class="td ${s.type==='flight'?'flight':''}"></div>
+      ${i<currentSegs.length-1?'<div class="tline"></div>':''}
     </div>
-    <div class="tco"><div class="tdate">${e.d}</div><div class="tlbl">${e.l}</div></div>
+    <div class="tco">
+      <div class="tdate">${fmtD(s.date_from)} ${s.time_dep&&s.time_dep!=='—'?s.time_dep:''}</div>
+      <div class="tlbl">${icons[s.type]} ${s.from_city||'?'} → ${s.to_city||'?'}</div>
+      ${s.dep_address?`<div class="tsub">📍 ${s.dep_address}</div>`:''}
+      ${s.arr_address?`<div class="tsub">🏁 ${s.arr_address}</div>`:''}
+      ${s.carrier?`<div class="tsub">${s.carrier}</div>`:''}
+    </div>
   </div>`).join('');
 }
 
 function renderBgt(){
+  const bgt=document.getElementById('bgt');
+  const btv=document.getElementById('btotal-val');
+  if(!bgt)return;
   let tot=0;
-  document.getElementById('bgt').innerHTML=state.map(s=>{
-    const u=s.priceUSD*UAH;tot+=u;
-    return `<div class="brow"><span class="lb">${s.from.split(' ')[0]} → ${s.to.split('(')[0].trim().split(' ')[0]}</span><span class="am">${Math.round(u).toLocaleString('ru-RU')} ₴</span></div>`;
+  bgt.innerHTML=currentSegs.map(s=>{
+    const u=(+s.price_usd||0)*UAH;tot+=u;
+    return`<div class="brow"><span class="lb">${s.from_city||'?'}→${s.to_city||'?'}</span><span class="am">${Math.round(u).toLocaleString('ru-RU')} ₴</span></div>`;
   }).join('');
-  const ts=Math.round(tot).toLocaleString('ru-RU')+' ₴';
-  document.getElementById('btotal').textContent=ts;
-  document.getElementById('total-uah').textContent=ts;
+  if(btv)btv.textContent=Math.round(tot).toLocaleString('ru-RU')+' ₴';
+  const th=document.querySelector('.header .user-email');
+  if(th)th.textContent=Math.round(tot).toLocaleString('ru-RU')+' ₴';
 }
 
 function renderLug(){
-  document.getElementById('lug').innerHTML=`
-    <div style="color:var(--muted);margin-bottom:5px">Ваш багаж:</div>
-    <div style="margin-bottom:7px">🧳 Чемодан 55×40×20 (ручная кладь)<br>🎒 Рюкзак 40×30×20</div>
-    <div class="lok">✓ Поезд УЗ (Киев–Хелм) — без ограничений</div>
-    <div class="lok">✓ PKP (Хелм–Варшава) — без ограничений</div>
-    <div class="lok">✓ FlixBus — 1 чемодан + 1 ручная кладь бесплатно</div>
-    <div class="lwrn">⚠ FRA→TLV: зависит от авиакомпании<br>&nbsp;&nbsp;El Al / Aegean — ОК<br>&nbsp;&nbsp;Ryanair — рюкзак = 2-й предмет, доплата!</div>
-    <div class="lok">✓ FlyOne (TLV→RMO) — обычно ОК</div>
-    <div class="lok">✓ Автобус Кишинёв–Киев — без ограничений</div>`;
+  const lug=document.getElementById('lug');
+  if(!lug)return;
+  const hasFlight=currentSegs.some(s=>s.type==='flight');
+  lug.innerHTML=`
+    <div style="color:var(--muted);margin-bottom:4px">Ваш багаж:</div>
+    <div style="margin-bottom:6px">🧳 Чемодан 55×40×20<br>🎒 Рюкзак 40×30×20</div>
+    ${currentSegs.map(s=>`<div class="${s.luggage_ok!==false?'lok':'lwrn'}">${s.luggage_ok!==false?'✓':'⚠'} ${s.from_city||'?'}→${s.to_city||'?'}: ${s.luggage_ok!==false?'ОК':'уточните!'}</div>`).join('')}
+    ${hasFlight?'<div class="lwrn" style="margin-top:4px">⚠ Ryanair — рюкзак = 2-й предмет, доплата!</div>':''}`;
 }
 
-renderAll();
+init();
 </script>
 </body>
 </html>
