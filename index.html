@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Мои Поездки</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -14,61 +14,64 @@
   --mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif;--display:'Syne',sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh;}
+html{font-size:15px;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:1rem;min-height:100vh;-webkit-text-size-adjust:100%;}
 
 /* AUTH */
-.auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
-.auth-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:36px;width:100%;max-width:380px;}
-.auth-box h1{font-family:var(--display);font-size:24px;font-weight:800;color:var(--accent);margin-bottom:6px;}
-.auth-box .sub{color:var(--muted);font-size:12px;font-family:var(--mono);margin-bottom:28px;}
-.auth-tabs{display:flex;gap:4px;margin-bottom:24px;background:var(--surface2);border-radius:8px;padding:4px;}
-.auth-tab{flex:1;padding:8px;border:none;background:none;color:var(--muted);font-family:var(--mono);font-size:12px;border-radius:6px;cursor:pointer;transition:.2s;}
+.auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px;}
+.auth-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px 24px;width:100%;max-width:360px;}
+.auth-box h1{font-family:var(--display);font-size:22px;font-weight:800;color:var(--accent);margin-bottom:4px;}
+.auth-box .sub{color:var(--muted);font-size:12px;font-family:var(--mono);margin-bottom:24px;}
+.auth-tabs{display:flex;gap:4px;margin-bottom:20px;background:var(--surface2);border-radius:8px;padding:4px;}
+.auth-tab{flex:1;padding:9px;border:none;background:none;color:var(--muted);font-family:var(--mono);font-size:12px;border-radius:6px;cursor:pointer;transition:.2s;}
 .auth-tab.active{background:var(--accent2);color:#fff;}
-.field{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;}
-.field label{font-size:10px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
-.field input{background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--mono);font-size:13px;padding:10px 12px;outline:none;transition:.2s;}
-.field input:focus{border-color:var(--accent2);}
-.btn{width:100%;padding:11px;border:none;border-radius:8px;font-family:var(--mono);font-size:13px;cursor:pointer;transition:.2s;}
-.btn-primary{background:var(--accent2);color:#fff;}
+.afield{display:flex;flex-direction:column;gap:5px;margin-bottom:13px;}
+.afield label{font-size:10px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+.afield input{background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--mono);font-size:14px;padding:11px 12px;outline:none;transition:.2s;width:100%;}
+.afield input:focus{border-color:var(--accent2);}
+.btn-primary{width:100%;padding:12px;border:none;border-radius:8px;font-family:var(--mono);font-size:13px;cursor:pointer;background:var(--accent2);color:#fff;transition:.2s;}
 .btn-primary:hover{opacity:.88;}
-.btn-danger{background:rgba(240,80,96,.15);color:var(--danger);border:1px solid rgba(240,80,96,.3);}
-.btn-ok{background:rgba(61,214,140,.12);color:var(--ok);border:1px solid rgba(61,214,140,.25);}
-.auth-err{color:var(--danger);font-size:11px;font-family:var(--mono);margin-top:10px;text-align:center;}
+.auth-err{color:var(--danger);font-size:11px;font-family:var(--mono);margin-top:10px;text-align:center;min-height:16px;}
 
 /* HEADER */
-.header{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;position:sticky;top:0;background:var(--bg);z-index:100;}
-.header h1{font-family:var(--display);font-size:17px;font-weight:800;color:var(--accent);flex:1;}
-.user-email{font-family:var(--mono);font-size:10px;color:var(--muted);}
-.logout-btn{background:none;border:1px solid var(--border);color:var(--muted);font-family:var(--mono);font-size:10px;padding:4px 10px;border-radius:5px;cursor:pointer;}
-.back-btn{background:none;border:none;color:var(--accent2);font-family:var(--mono);font-size:12px;cursor:pointer;padding:4px 8px;}
+.header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;position:sticky;top:0;background:var(--bg);z-index:100;}
+.header h1{font-family:var(--display);font-size:16px;font-weight:800;color:var(--accent);flex:1;}
+.user-email{font-family:var(--mono);font-size:10px;color:var(--muted);display:none;}
+@media(min-width:500px){.user-email{display:block;}}
+.logout-btn{background:none;border:1px solid var(--border);color:var(--muted);font-family:var(--mono);font-size:11px;padding:5px 10px;border-radius:5px;cursor:pointer;white-space:nowrap;}
+.back-btn{background:none;border:none;color:var(--accent2);font-family:var(--mono);font-size:12px;cursor:pointer;padding:4px 6px;white-space:nowrap;}
 
-/* HOME - TRIPS LIST */
-.home{padding:20px;}
-.home-title{font-family:var(--display);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:14px;}
-.trips-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin-bottom:16px;}
-.trip-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;cursor:pointer;transition:.2s;position:relative;}
+/* HOME */
+.home{padding:16px;}
+.home-title{font-family:var(--display);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:12px;}
+.trips-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;margin-bottom:12px;}
+.trip-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;cursor:pointer;transition:.2s;position:relative;}
 .trip-card:hover{border-color:var(--accent2);}
-.trip-card h3{font-family:var(--display);font-size:15px;font-weight:700;margin-bottom:6px;}
+.trip-card h3{font-family:var(--display);font-size:15px;font-weight:700;margin-bottom:6px;padding-right:24px;}
 .trip-meta{font-family:var(--mono);font-size:10px;color:var(--muted);display:flex;flex-direction:column;gap:3px;}
-.trip-price{font-family:var(--mono);font-size:16px;font-weight:500;color:var(--ok);margin-top:10px;}
-.trip-del{position:absolute;top:10px;right:10px;background:none;border:none;color:var(--muted);font-size:14px;cursor:pointer;padding:4px;border-radius:4px;}
+.trip-price{font-family:var(--mono);font-size:15px;font-weight:500;color:var(--ok);margin-top:10px;}
+.trip-del{position:absolute;top:10px;right:10px;background:none;border:none;color:var(--muted);font-size:15px;cursor:pointer;padding:4px;line-height:1;}
 .trip-del:hover{color:var(--danger);}
-.add-trip-box{background:var(--surface2);border:2px dashed var(--border);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:10px;align-items:center;}
-.add-trip-box input{background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--sans);font-size:14px;padding:10px 14px;outline:none;width:100%;}
+.add-trip-box{background:var(--surface2);border:2px dashed var(--border);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:9px;}
+.add-trip-box input{background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--sans);font-size:14px;padding:10px 12px;outline:none;width:100%;}
 .add-trip-box input:focus{border-color:var(--accent2);}
-.btn-add{background:var(--accent2);color:#fff;border:none;border-radius:8px;padding:10px 20px;font-family:var(--mono);font-size:12px;cursor:pointer;width:100%;}
+.btn-add{background:var(--accent2);color:#fff;border:none;border-radius:8px;padding:11px;font-family:var(--mono);font-size:12px;cursor:pointer;width:100%;}
 
 /* TRIP DETAIL */
-.trip-detail{display:grid;grid-template-columns:1fr 290px;min-height:calc(100vh - 57px);}
-@media(max-width:700px){.trip-detail{grid-template-columns:1fr;}}
-.segments{padding:16px 20px;border-right:1px solid var(--border);}
+.trip-detail{display:grid;grid-template-columns:1fr 270px;min-height:calc(100vh - 53px);}
+@media(max-width:680px){
+  .trip-detail{grid-template-columns:1fr;}
+  .sidebar{border-left:none;border-top:1px solid var(--border);}
+}
+.segments{padding:14px 16px;border-right:1px solid var(--border);}
 .seg-list{display:flex;flex-direction:column;gap:8px;}
 .stitle{font-family:var(--display);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:8px;}
 
+/* SEGMENTS */
 .seg{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;transition:.2s;}
 .seg.haswarn{border-color:var(--warn);}
-.seg-hdr{display:flex;align-items:center;gap:8px;padding:10px 13px;cursor:pointer;user-select:none;-webkit-user-select:none;}
-.sicon{width:30px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;}
+.seg-hdr{display:flex;align-items:center;gap:8px;padding:10px 12px;cursor:pointer;user-select:none;-webkit-user-select:none;}
+.sicon{width:30px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
 .icon-train{background:rgba(124,111,240,.15);}
 .icon-bus{background:rgba(61,214,140,.12);}
 .icon-flight{background:rgba(240,192,64,.15);}
@@ -86,45 +89,55 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 .tp-bus{background:rgba(61,214,140,.15);color:#5dd6a0;}
 .tp-flight{background:rgba(240,192,64,.2);color:var(--accent);}
 
-.seg-edit{display:none;border-top:1px solid var(--border);padding:12px;background:var(--surface2);flex-direction:column;gap:10px;}
+/* SEG EDIT */
+.seg-edit{display:none;border-top:1px solid var(--border);padding:12px;background:var(--surface2);flex-direction:column;gap:9px;}
 .seg-edit.open{display:flex;}
-.frow{display:flex;gap:8px;flex-wrap:wrap;}
-.efield{display:flex;flex-direction:column;gap:3px;flex:1;min-width:90px;}
+.frow{display:flex;gap:7px;flex-wrap:wrap;}
+.efield{display:flex;flex-direction:column;gap:3px;flex:1;min-width:85px;}
 .efield label{font-size:9px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
-.efield input,.efield select{background:var(--surface);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:var(--mono);font-size:11px;padding:6px 7px;outline:none;width:100%;}
+.efield input,.efield select{background:var(--surface);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:var(--mono);font-size:12px;padding:7px 8px;outline:none;width:100%;}
 .efield input:focus,.efield select:focus{border-color:var(--accent2);}
+
+/* SEARCH BTN */
+.search-btn{display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:7px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:var(--mono);font-size:10px;cursor:pointer;text-decoration:none;width:100%;transition:.2s;}
+.search-btn:hover{border-color:var(--accent2);color:var(--accent2);}
+.search-btn .sb-icon{font-size:13px;}
+.search-btn .sb-label{flex:1;text-align:left;}
+.search-btn .sb-arrow{color:var(--muted);}
+.search-btns{display:flex;flex-direction:column;gap:5px;}
+.search-title{font-size:9px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;}
+
 .nbox{background:rgba(240,120,80,.08);border:1px solid rgba(240,120,80,.25);border-radius:6px;padding:7px 10px;font-size:10px;color:var(--warn);font-family:var(--mono);line-height:1.6;}
 .nbox.info{background:rgba(124,111,240,.08);border-color:rgba(124,111,240,.25);color:#a09af0;}
-.row-btns{display:flex;gap:8px;justify-content:space-between;}
-.sbtn{background:var(--accent2);color:#fff;border:none;border-radius:5px;padding:6px 12px;font-family:var(--mono);font-size:10px;cursor:pointer;}
-.delbtn{background:rgba(240,80,96,.12);color:var(--danger);border:1px solid rgba(240,80,96,.3);border-radius:5px;padding:6px 12px;font-family:var(--mono);font-size:10px;cursor:pointer;}
+.row-btns{display:flex;gap:7px;justify-content:space-between;}
+.sbtn{background:var(--accent2);color:#fff;border:none;border-radius:5px;padding:7px 13px;font-family:var(--mono);font-size:10px;cursor:pointer;}
+.delbtn{background:rgba(240,80,96,.12);color:var(--danger);border:1px solid rgba(240,80,96,.3);border-radius:5px;padding:7px 13px;font-family:var(--mono);font-size:10px;cursor:pointer;}
 
+/* ADD SEG */
 .add-seg-box{background:var(--surface2);border:1px dashed var(--border);border-radius:10px;padding:12px;margin-top:8px;}
-.add-seg-box .stitle{margin-bottom:10px;}
-.seg-type-row{display:flex;gap:6px;margin-bottom:10px;}
-.type-btn{flex:1;padding:8px;border:1px solid var(--border);background:var(--surface);color:var(--muted);border-radius:6px;font-family:var(--mono);font-size:10px;cursor:pointer;text-align:center;}
+.seg-type-row{display:flex;gap:5px;margin-bottom:9px;}
+.type-btn{flex:1;padding:8px 4px;border:1px solid var(--border);background:var(--surface);color:var(--muted);border-radius:6px;font-family:var(--mono);font-size:10px;cursor:pointer;text-align:center;transition:.2s;}
 .type-btn.active{border-color:var(--accent2);color:var(--accent2);background:rgba(124,111,240,.1);}
 
 /* ALERTS */
-.alerts{padding:10px 20px 6px;}
+.alerts{padding:10px 16px 6px;}
 .alert{display:flex;align-items:flex-start;gap:6px;padding:7px 10px;border-radius:7px;margin-bottom:5px;font-size:11px;font-family:var(--mono);line-height:1.5;}
-.alert.danger{background:rgba(240,80,96,.1);border:1px solid rgba(240,80,96,.25);color:#f08090;}
 .alert.warn{background:rgba(240,120,80,.1);border:1px solid rgba(240,120,80,.25);color:var(--warn);}
 .alert.ok{background:rgba(61,214,140,.08);border:1px solid rgba(61,214,140,.2);color:var(--ok);}
 
 /* SIDEBAR */
-.sidebar{padding:16px;display:flex;flex-direction:column;gap:12px;overflow-y:auto;}
+.sidebar{padding:14px;display:flex;flex-direction:column;gap:11px;overflow-y:auto;}
 .sc{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
-.sc h3{padding:8px 12px;font-family:var(--display);font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);}
-.bgt{padding:8px 12px;}
+.sc h3{padding:8px 11px;font-family:var(--display);font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);}
+.bgt{padding:7px 11px;}
 .brow{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--border);font-size:10px;}
 .brow:last-child{border-bottom:none;}
-.brow .lb{color:var(--muted);font-family:var(--mono);font-size:9px;}
+.brow .lb{color:var(--muted);font-family:var(--mono);font-size:9px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .brow .am{font-family:var(--mono);color:var(--text);}
-.btotal{display:flex;justify-content:space-between;align-items:baseline;padding:8px 12px;border-top:2px solid var(--border);font-family:var(--display);font-weight:700;font-size:11px;}
+.btotal{display:flex;justify-content:space-between;align-items:baseline;padding:8px 11px;border-top:2px solid var(--border);font-family:var(--display);font-weight:700;font-size:11px;}
 .btotal .am{color:var(--accent);font-size:15px;}
-.tl{padding:8px 12px;display:flex;flex-direction:column;}
-.tli{display:flex;gap:8px;padding-bottom:8px;}
+.tl{padding:8px 11px;display:flex;flex-direction:column;}
+.tli{display:flex;gap:8px;padding-bottom:9px;}
 .tli:last-child{padding-bottom:0;}
 .tdc{display:flex;flex-direction:column;align-items:center;width:12px;flex-shrink:0;}
 .td{width:8px;height:8px;border-radius:50%;background:var(--accent2);border:2px solid var(--bg);margin-top:2px;flex-shrink:0;}
@@ -133,43 +146,58 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 .tline{flex:1;width:1px;background:var(--border);margin-top:2px;}
 .tco{flex:1;}
 .tdate{font-family:var(--mono);font-size:9px;color:var(--muted);}
-.tlbl{font-size:10px;font-weight:500;margin-top:1px;}
-.tsub{font-size:9px;color:var(--muted);font-family:var(--mono);}
-.lug{padding:8px 12px;font-size:10px;font-family:var(--mono);line-height:1.8;}
+.tlbl{font-size:11px;font-weight:500;margin-top:1px;}
+.tsub{font-size:9px;color:var(--muted);font-family:var(--mono);margin-top:1px;}
+.lug{padding:8px 11px;font-size:10px;font-family:var(--mono);line-height:1.9;}
 .lok{color:var(--ok);}
 .lwrn{color:var(--warn);}
 
 .loading{display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:var(--mono);color:var(--muted);}
-.spinner{width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--accent2);border-radius:50%;animation:spin .7s linear infinite;margin-right:10px;}
+.spinner{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--accent2);border-radius:50%;animation:spin .7s linear infinite;margin-right:10px;}
 @keyframes spin{to{transform:rotate(360deg);}}
 </style>
 </head>
 <body>
-
 <div id="app"></div>
-
 <script>
-const SUPA_URL = 'https://fbcdmhvjfnjioecqlnpf.supabase.co';
-const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZiY2RtaHZqZm5qaW9lY3FsbnBmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NDYzNTYsImV4cCI6MjA5NDUyMjM1Nn0.XnvAFJSVjP2vC0rL4guedpievJqm6Jp3sIxiSLwueRQ';
-const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
-
-const UAH = 41;
-let currentUser = null;
-let currentTrip = null;
-let currentSegs = [];
-let newSegType = 'flight';
-
-const app = document.getElementById('app');
-
+const SUPA_URL='https://fbcdmhvjfnjioecqlnpf.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZiY2RtaHZqZm5qaW9lY3FsbnBmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NDYzNTYsImV4cCI6MjA5NDUyMjM1Nn0.XnvAFJSVjP2vC0rL4guedpievJqm6Jp3sIxiSLwueRQ';
+const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
+const UAH=41;
+let currentUser=null,currentTrip=null,currentSegs=[],newSegType='flight';
+const app=document.getElementById('app');
 function fmt(u){return Math.round(u*UAH).toLocaleString('ru-RU')+' ₴';}
 function fmtD(d){if(!d)return'?';const[,m,day]=d.split('-');const mn=['','янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];return`${+day} ${mn[+m]}`;}
 const tlabel={train:'ПОЕЗД',bus:'АВТОБУС',flight:'РЕЙС'};
 const icons={train:'🚂',bus:'🚌',flight:'✈️'};
 
-// ── INIT ──
+// Генерация ссылок поиска
+function searchLinks(s){
+  const from=encodeURIComponent(s.from_city||'');
+  const to=encodeURIComponent(s.to_city||'');
+  const date=s.date_from||'';
+  const dateGF=date; // YYYY-MM-DD
+  const dateFB=date.replace(/-/g,'-');
+  const links=[];
+  if(s.type==='flight'){
+    links.push({icon:'🔍',label:'Google Flights',url:`https://www.google.com/travel/flights/search?tfs=CBwQAhoeEgoyMDI2LTA2LTI4agcIARIDREVyBwgBEgNUTFY&hl=ru`});
+    links.push({icon:'✈',label:'Skyscanner',url:`https://www.skyscanner.com/transport/flights/${s.from_city||''}/${s.to_city||''}/${date.replace(/-/g,'').slice(2)}/`});
+    links.push({icon:'💰',label:'Kiwi.com',url:`https://www.kiwi.com/en/search/results/${encodeURIComponent(s.from_city||'')}/${encodeURIComponent(s.to_city||'')}/${date}/no-return`});
+  } else if(s.type==='bus'){
+    links.push({icon:'🚌',label:'FlixBus',url:`https://shop.flixbus.com/search?departureCity=${from}&arrivalCity=${to}&route=${from}-${to}&rideDate=${date}&adult=1`});
+    links.push({icon:'🔍',label:'Busbud',url:`https://www.busbud.com/en/bus-${s.from_city||''}-${s.to_city||''}`});
+    links.push({icon:'🚌',label:'Ecolines',url:`https://www.ecolines.net/`});
+  } else if(s.type==='train'){
+    links.push({icon:'🚂',label:'УЗ (Укрзалізниця)',url:`https://booking.uz.gov.ua/?from=2218800&to=5100400&date=${date}&time=00%3A00&adult=1&child=0`});
+    links.push({icon:'🚆',label:'PKP (Польша)',url:`https://www.pkp.pl/en/timetable`});
+    links.push({icon:'🔍',label:'Rail.cc',url:`https://rail.cc/ru/train/${encodeURIComponent(s.from_city||'')}-to-${encodeURIComponent(s.to_city||'')}`});
+  }
+  return links;
+}
+
 async function init(){
   showLoading();
-  const {data:{session}} = await sb.auth.getSession();
+  const {data:{session}}=await sb.auth.getSession();
   if(session){currentUser=session.user;showHome();}
   else showAuth();
   sb.auth.onAuthStateChange((_,s)=>{
@@ -178,11 +206,8 @@ async function init(){
   });
 }
 
-function showLoading(){
-  app.innerHTML=`<div class="loading"><div class="spinner"></div>Загрузка...</div>`;
-}
+function showLoading(){app.innerHTML=`<div class="loading"><div class="spinner"></div>Загрузка...</div>`;}
 
-// ── AUTH ──
 function showAuth(tab='login'){
   app.innerHTML=`
   <div class="auth-wrap">
@@ -193,11 +218,11 @@ function showAuth(tab='login'){
         <button class="auth-tab ${tab==='login'?'active':''}" onclick="showAuth('login')">Войти</button>
         <button class="auth-tab ${tab==='reg'?'active':''}" onclick="showAuth('reg')">Регистрация</button>
       </div>
-      <div class="field"><label>Email</label><input type="email" id="email" placeholder="you@example.com"></div>
-      <div class="field"><label>Пароль</label><input type="password" id="pass" placeholder="••••••••"></div>
+      <div class="afield"><label>Email</label><input type="email" id="email" placeholder="you@example.com"></div>
+      <div class="afield"><label>Пароль</label><input type="password" id="pass" placeholder="минимум 6 символов"></div>
       ${tab==='login'
-        ?`<button class="btn btn-primary" onclick="doLogin()">Войти</button>`
-        :`<button class="btn btn-primary" onclick="doReg()">Создать аккаунт</button>`}
+        ?`<button class="btn-primary" onclick="doLogin()">Войти</button>`
+        :`<button class="btn-primary" onclick="doReg()">Создать аккаунт</button>`}
       <div class="auth-err" id="auth-err"></div>
     </div>
   </div>`;
@@ -212,27 +237,23 @@ async function doLogin(){
 async function doReg(){
   const e=document.getElementById('email').value;
   const p=document.getElementById('pass').value;
-  const {error}=await sb.auth.signUp({email:e,password:p});
-  if(error)document.getElementById('auth-err').textContent=error.message;
-  else document.getElementById('auth-err').style.color='var(--ok)',document.getElementById('auth-err').textContent='Проверьте почту для подтверждения!';
+  const {error}=await sb.auth.signUp({email:e,password:p,options:{emailRedirectTo:'https://izienglish.github.io/my_trip/'}});
+  const el=document.getElementById('auth-err');
+  if(error){el.style.color='var(--danger)';el.textContent=error.message;}
+  else{el.style.color='var(--ok)';el.textContent='Проверьте почту — придёт письмо с подтверждением!';}
 }
 async function doLogout(){await sb.auth.signOut();}
 
-// ── HOME ──
 async function showHome(){
   showLoading();
   const {data:trips}=await sb.from('trips').select('*').order('created_at');
-  const segsAll = trips?.length
-    ? (await sb.from('segments').select('*').in('trip_id',trips.map(t=>t.id))).data || []
-    : [];
-
-  const cards = (trips||[]).map(t=>{
-    const segs = segsAll.filter(s=>s.trip_id===t.id);
-    const total = segs.reduce((a,s)=>a+(+s.price_usd||0),0);
-    const dates = segs.length ? `${fmtD(segs[0].date_from)} – ${fmtD(segs[segs.length-1].date_from)}` : '—';
-    const route = segs.length ? `${segs[0].from_city} → ${segs[segs.length-1].to_city}` : '—';
-    return `
-    <div class="trip-card" onclick="openTrip('${t.id}','${t.name.replace(/'/g,"\\'")}')">
+  const segsAll=trips?.length?(await sb.from('segments').select('*').in('trip_id',trips.map(t=>t.id))).data||[]:[];
+  const cards=(trips||[]).map(t=>{
+    const segs=segsAll.filter(s=>s.trip_id===t.id).sort((a,b)=>a.position-b.position);
+    const total=segs.reduce((a,s)=>a+(+s.price_usd||0),0);
+    const dates=segs.length?`${fmtD(segs[0].date_from)} – ${fmtD(segs[segs.length-1].date_from)}`:'—';
+    const route=segs.length?`${segs[0].from_city||'?'} → ${segs[segs.length-1].to_city||'?'}`:'—';
+    return`<div class="trip-card" onclick="openTrip('${t.id}','${t.name.replace(/'/g,"\\'")}')">
       <button class="trip-del" onclick="event.stopPropagation();delTrip('${t.id}')">✕</button>
       <h3>${t.name}</h3>
       <div class="trip-meta">
@@ -243,7 +264,6 @@ async function showHome(){
       <div class="trip-price">${total>0?fmt(total):'—'}</div>
     </div>`;
   }).join('');
-
   app.innerHTML=`
   <div class="header">
     <h1>✈ Мои Поездки</h1>
@@ -255,7 +275,7 @@ async function showHome(){
     <div class="trips-grid">
       ${cards}
       <div class="add-trip-box">
-        <input type="text" id="new-trip-name" placeholder="Название поездки (напр. Израиль 2026)">
+        <input type="text" id="new-trip-name" placeholder="Название (напр. Израиль 2026)">
         <button class="btn-add" onclick="addTrip()">+ Добавить поездку</button>
       </div>
     </div>
@@ -268,31 +288,26 @@ async function addTrip(){
   await sb.from('trips').insert({name,user_id:currentUser.id});
   showHome();
 }
-
 async function delTrip(id){
   if(!confirm('Удалить поездку со всеми сегментами?'))return;
   await sb.from('trips').delete().eq('id',id);
   showHome();
 }
 
-// ── TRIP DETAIL ──
 async function openTrip(id,name){
-  currentTrip={id,name};
-  showLoading();
+  currentTrip={id,name};showLoading();
   const {data}=await sb.from('segments').select('*').eq('trip_id',id).order('position');
   currentSegs=data||[];
   renderTrip();
 }
 
 function renderTrip(){
-  const segs=currentSegs;
-  const total=segs.reduce((a,s)=>a+(+s.price_usd||0),0);
-
+  const total=currentSegs.reduce((a,s)=>a+(+s.price_usd||0),0);
   app.innerHTML=`
   <div class="header">
     <button class="back-btn" onclick="showHome()">← Назад</button>
     <h1>${currentTrip.name}</h1>
-    <span class="user-email">${fmt(total)}</span>
+    <span class="user-email" id="trip-total">${fmt(total)}</span>
     <button class="logout-btn" onclick="doLogout()">Выйти</button>
   </div>
   <div id="alerts-box" class="alerts"></div>
@@ -300,7 +315,21 @@ function renderTrip(){
     <div class="segments">
       <div class="stitle">Сегменты маршрута</div>
       <div class="seg-list" id="seg-list"></div>
-      ${renderAddSeg()}
+      <div class="add-seg-box" style="margin-top:10px">
+        <div class="stitle">+ Добавить сегмент</div>
+        <div class="seg-type-row">
+          <button class="type-btn ${newSegType==='train'?'active':''}" onclick="setType('train')">🚂 Поезд</button>
+          <button class="type-btn ${newSegType==='bus'?'active':''}" onclick="setType('bus')">🚌 Автобус</button>
+          <button class="type-btn ${newSegType==='flight'?'active':''}" onclick="setType('flight')">✈️ Рейс</button>
+        </div>
+        <div class="frow" style="margin-bottom:8px">
+          <div class="efield"><label>Откуда</label><input id="ns-from" placeholder="Киев"></div>
+          <div class="efield"><label>Куда</label><input id="ns-to" placeholder="Варшава"></div>
+          <div class="efield"><label>Дата</label><input type="date" id="ns-date"></div>
+          <div class="efield"><label>Цена $</label><input type="number" id="ns-price" min="0" value="0"></div>
+        </div>
+        <button class="btn-add" onclick="addSeg()">+ Добавить</button>
+      </div>
     </div>
     <div class="sidebar">
       <div class="sc"><h3>📅 Хронология</h3><div class="tl" id="tl"></div></div>
@@ -308,24 +337,25 @@ function renderTrip(){
       <div class="sc"><h3>🧳 Багаж</h3><div class="lug" id="lug"></div></div>
     </div>
   </div>`;
-
-  renderSegList();
-  renderAlerts();
-  renderTL();
-  renderBgt();
-  renderLug();
+  renderSegList();renderAlerts();renderTL();renderBgt();renderLug();
 }
 
 function renderSegList(){
-  document.getElementById('seg-list').innerHTML=currentSegs.map((s,i)=>`
-  <div class="seg ${s.luggage_ok?'':'haswarn'}">
+  document.getElementById('seg-list').innerHTML=currentSegs.map((s,i)=>{
+    const links=searchLinks(s);
+    const linksHTML=links.map(l=>`<a class="search-btn" href="${l.url}" target="_blank" rel="noopener">
+      <span class="sb-icon">${l.icon}</span>
+      <span class="sb-label">${l.label}</span>
+      <span class="sb-arrow">↗</span>
+    </a>`).join('');
+    return`<div class="seg ${s.luggage_ok===false?'haswarn':''}">
     <div class="seg-hdr" onclick="togSeg(${i})">
       <div class="sicon icon-${s.type}">${icons[s.type]||'📍'}</div>
       <div class="sinfo">
         <div class="sroute">
           <span class="tpill tp-${s.type}">${tlabel[s.type]||s.type}</span>
           ${s.from_city||'?'}<span class="arr">→</span>${s.to_city||'?'}
-          ${s.luggage_ok?'':'<span class="wbadge">⚠ багаж</span>'}
+          ${s.luggage_ok===false?'<span class="wbadge">⚠ багаж</span>':''}
         </div>
         <div class="smeta">
           <span>📅 ${fmtD(s.date_from)}</span>
@@ -348,44 +378,37 @@ function renderSegList(){
       </div>
       <div class="frow">
         <div class="efield"><label>Цена $</label><input type="number" value="${s.price_usd||0}" min="0" onchange="updSeg(${i},'price_usd',+this.value)"></div>
-        <div class="efield"><label>Длительность</label><input value="${s.duration||''}" onchange="updSeg(${i},'duration',this.value)"></div>
+        <div class="efield"><label>Длительность</label><input value="${s.duration||''}" placeholder="~4 ч" onchange="updSeg(${i},'duration',this.value)"></div>
       </div>
       <div class="frow">
-        <div class="efield" style="flex:2"><label>Перевозчик</label><input value="${s.carrier||''}" onchange="updSeg(${i},'carrier',this.value)"></div>
-        <div class="efield"><label>Где купить</label><input value="${s.booking||''}" onchange="updSeg(${i},'booking',this.value)"></div>
+        <div class="efield" style="flex:2"><label>Перевозчик</label><input value="${s.carrier||''}" placeholder="Lufthansa, FlixBus..." onchange="updSeg(${i},'carrier',this.value)"></div>
+        <div class="efield"><label>Где купить</label><input value="${s.booking||''}" placeholder="flixbus.com" onchange="updSeg(${i},'booking',this.value)"></div>
       </div>
       <div class="frow">
-        <div class="efield" style="flex:2"><label>Адрес/аэропорт отправления</label><input value="${s.dep_address||''}" placeholder="напр. Аэропорт Бен-Гурион, Терминал 3" onchange="updSeg(${i},'dep_address',this.value)"></div>
-        <div class="efield" style="flex:2"><label>Адрес/аэропорт прибытия</label><input value="${s.arr_address||''}" placeholder="напр. Франкфурт FRA, Терминал 1" onchange="updSeg(${i},'arr_address',this.value)"></div>
+        <div class="efield"><label>Адрес отправления</label><input value="${s.dep_address||''}" placeholder="Аэропорт FRA, Терминал 1" onchange="updSeg(${i},'dep_address',this.value)"></div>
+        <div class="efield"><label>Адрес прибытия</label><input value="${s.arr_address||''}" placeholder="Аэропорт TLV, Терминал 3" onchange="updSeg(${i},'arr_address',this.value)"></div>
       </div>
-      <div class="efield"><label>Заметка</label><input value="${s.notes||''}" onchange="updSeg(${i},'notes',this.value)"></div>
+      <div class="efield"><label>Заметка</label><input value="${s.notes||''}" placeholder="доп. информация" onchange="updSeg(${i},'notes',this.value)"></div>
+
+      <div class="search-btns">
+        <div class="search-title">🔎 Найти билеты (откроется в браузере)</div>
+        ${linksHTML}
+      </div>
+
       <div class="row-btns">
         <button class="delbtn" onclick="delSeg(${i})">🗑 Удалить</button>
         <button class="sbtn" onclick="saveSeg(${i})">Сохранить ✓</button>
       </div>
     </div>
-  </div>`).join('');
-}
-
-function renderAddSeg(){
-  return `<div class="add-seg-box" style="margin-top:10px">
-    <div class="stitle">+ Добавить сегмент</div>
-    <div class="seg-type-row">
-      <button class="type-btn ${newSegType==='train'?'active':''}" onclick="setType('train')">🚂 Поезд</button>
-      <button class="type-btn ${newSegType==='bus'?'active':''}" onclick="setType('bus')">🚌 Автобус</button>
-      <button class="type-btn ${newSegType==='flight'?'active':''}" onclick="setType('flight')">✈️ Рейс</button>
-    </div>
-    <div class="frow" style="margin-bottom:8px">
-      <div class="efield"><label>Откуда</label><input id="ns-from" placeholder="Киев"></div>
-      <div class="efield"><label>Куда</label><input id="ns-to" placeholder="Варшава"></div>
-      <div class="efield"><label>Дата</label><input type="date" id="ns-date"></div>
-      <div class="efield"><label>Цена $</label><input type="number" id="ns-price" min="0" value="0"></div>
-    </div>
-    <button class="btn-add" onclick="addSeg()">+ Добавить</button>
   </div>`;
+  }).join('');
 }
 
-function setType(t){newSegType=t;renderTrip();}
+function setType(t){
+  newSegType=t;
+  document.querySelectorAll('.type-btn').forEach(b=>b.classList.remove('active'));
+  event.target.classList.add('active');
+}
 
 async function addSeg(){
   const from=document.getElementById('ns-from').value.trim();
@@ -393,13 +416,11 @@ async function addSeg(){
   const date=document.getElementById('ns-date').value;
   const price=+document.getElementById('ns-price').value||0;
   if(!from||!to)return alert('Укажите откуда и куда');
-  const pos=currentSegs.length;
   const {data,error}=await sb.from('segments').insert({
     trip_id:currentTrip.id,user_id:currentUser.id,
-    type:newSegType,icon:icons[newSegType],
-    from_city:from,to_city:to,date_from:date,
-    price_usd:price,position:pos,
-    luggage_ok:true,note_type:'info'
+    type:newSegType,from_city:from,to_city:to,
+    date_from:date,price_usd:price,
+    position:currentSegs.length,luggage_ok:true,note_type:'info'
   }).select().single();
   if(!error){currentSegs.push(data);renderTrip();}
 }
@@ -411,55 +432,44 @@ function togSeg(i){
   document.querySelectorAll('.chev').forEach(x=>x.classList.remove('open'));
   if(!was){e.classList.add('open');c.classList.add('open');}
 }
-
 function updSeg(i,k,v){
   currentSegs[i][k]=v;
-  renderSegList();
-  renderAlerts();
-  renderTL();
-  renderBgt();
-  renderLug();
+  renderSegList();renderAlerts();renderTL();renderBgt();renderLug();
   setTimeout(()=>{
     const e=document.getElementById(`ed${i}`),c=document.getElementById(`ch${i}`);
-    if(e)e.classList.add('open');
-    if(c)c.classList.add('open');
+    if(e)e.classList.add('open');if(c)c.classList.add('open');
   },10);
 }
-
 async function saveSeg(i){
   const s=currentSegs[i];
   await sb.from('segments').update({
     from_city:s.from_city,to_city:s.to_city,
-    date_from:s.date_from,date_to:s.date_to,
-    time_dep:s.time_dep,time_arr:s.time_arr,
-    price_usd:s.price_usd,carrier:s.carrier,
-    duration:s.duration,booking:s.booking,
-    notes:s.notes,dep_address:s.dep_address,
-    arr_address:s.arr_address,luggage_ok:s.luggage_ok
+    date_from:s.date_from,time_dep:s.time_dep,time_arr:s.time_arr,
+    price_usd:s.price_usd,carrier:s.carrier,duration:s.duration,
+    booking:s.booking,notes:s.notes,
+    dep_address:s.dep_address,arr_address:s.arr_address,
+    luggage_ok:s.luggage_ok
   }).eq('id',s.id);
   togSeg(i);
 }
-
 async function delSeg(i){
   if(!confirm('Удалить сегмент?'))return;
   await sb.from('segments').delete().eq('id',currentSegs[i].id);
-  currentSegs.splice(i,1);
-  renderTrip();
+  currentSegs.splice(i,1);renderTrip();
 }
 
 function renderAlerts(){
   const a=[];
-  if(currentSegs.some(s=>!s.luggage_ok))
-    a.push({t:'warn',i:'🧳',txt:'Возможны ограничения по багажу. Уточните правила перевозчика.'});
-  a.push({t:'warn',i:'💡',txt:'Цены ориентировочные — обновляйте после бронирования.'});
-  if(currentSegs.length>1) a.push({t:'ok',i:'✓',txt:'Маршрут настроен. Не забудьте сохранить каждый сегмент.'});
+  if(currentSegs.some(s=>s.luggage_ok===false))
+    a.push({t:'warn',txt:'⚠️ Возможны ограничения по багажу. Уточните правила перевозчика.'});
+  if(currentSegs.length>0)
+    a.push({t:'ok',txt:'✓ Не забудьте нажать «Сохранить» после редактирования каждого сегмента.'});
   const box=document.getElementById('alerts-box');
-  if(box)box.innerHTML=a.map(x=>`<div class="alert ${x.t}"><span>${x.i}</span><span>${x.txt}</span></div>`).join('');
+  if(box)box.innerHTML=a.map(x=>`<div class="alert ${x.t}">${x.txt}</div>`).join('');
 }
 
 function renderTL(){
-  const tl=document.getElementById('tl');
-  if(!tl)return;
+  const tl=document.getElementById('tl');if(!tl)return;
   if(!currentSegs.length){tl.innerHTML='<div style="color:var(--muted);font-size:11px;padding:4px">Нет сегментов</div>';return;}
   tl.innerHTML=currentSegs.map((s,i)=>`
   <div class="tli">
@@ -468,7 +478,7 @@ function renderTL(){
       ${i<currentSegs.length-1?'<div class="tline"></div>':''}
     </div>
     <div class="tco">
-      <div class="tdate">${fmtD(s.date_from)} ${s.time_dep&&s.time_dep!=='—'?s.time_dep:''}</div>
+      <div class="tdate">${fmtD(s.date_from)}${s.time_dep&&s.time_dep!=='—'?' · '+s.time_dep:''}</div>
       <div class="tlbl">${icons[s.type]} ${s.from_city||'?'} → ${s.to_city||'?'}</div>
       ${s.dep_address?`<div class="tsub">📍 ${s.dep_address}</div>`:''}
       ${s.arr_address?`<div class="tsub">🏁 ${s.arr_address}</div>`:''}
@@ -478,28 +488,24 @@ function renderTL(){
 }
 
 function renderBgt(){
-  const bgt=document.getElementById('bgt');
-  const btv=document.getElementById('btotal-val');
+  const bgt=document.getElementById('bgt'),btv=document.getElementById('btotal-val'),th=document.getElementById('trip-total');
   if(!bgt)return;
   let tot=0;
   bgt.innerHTML=currentSegs.map(s=>{
     const u=(+s.price_usd||0)*UAH;tot+=u;
     return`<div class="brow"><span class="lb">${s.from_city||'?'}→${s.to_city||'?'}</span><span class="am">${Math.round(u).toLocaleString('ru-RU')} ₴</span></div>`;
   }).join('');
-  if(btv)btv.textContent=Math.round(tot).toLocaleString('ru-RU')+' ₴';
-  const th=document.querySelector('.header .user-email');
-  if(th)th.textContent=Math.round(tot).toLocaleString('ru-RU')+' ₴';
+  const ts=Math.round(tot).toLocaleString('ru-RU')+' ₴';
+  if(btv)btv.textContent=ts;
+  if(th)th.textContent=ts;
 }
 
 function renderLug(){
-  const lug=document.getElementById('lug');
-  if(!lug)return;
-  const hasFlight=currentSegs.some(s=>s.type==='flight');
-  lug.innerHTML=`
-    <div style="color:var(--muted);margin-bottom:4px">Ваш багаж:</div>
-    <div style="margin-bottom:6px">🧳 Чемодан 55×40×20<br>🎒 Рюкзак 40×30×20</div>
-    ${currentSegs.map(s=>`<div class="${s.luggage_ok!==false?'lok':'lwrn'}">${s.luggage_ok!==false?'✓':'⚠'} ${s.from_city||'?'}→${s.to_city||'?'}: ${s.luggage_ok!==false?'ОК':'уточните!'}</div>`).join('')}
-    ${hasFlight?'<div class="lwrn" style="margin-top:4px">⚠ Ryanair — рюкзак = 2-й предмет, доплата!</div>':''}`;
+  const lug=document.getElementById('lug');if(!lug)return;
+  if(!currentSegs.length){lug.innerHTML='<div style="color:var(--muted)">Нет сегментов</div>';return;}
+  lug.innerHTML=currentSegs.map(s=>
+    `<div class="${s.luggage_ok===false?'lwrn':'lok'}">${s.luggage_ok===false?'⚠':'✓'} ${s.from_city||'?'}→${s.to_city||'?'}: ${s.luggage_ok===false?'уточните!':'ОК'}</div>`
+  ).join('')+`<div class="lwrn" style="margin-top:6px">⚠ Ryanair — рюкзак = 2-й предмет</div>`;
 }
 
 init();
