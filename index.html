@@ -44,11 +44,14 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .trips-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:10px;margin-bottom:12px;}
 .trip-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;cursor:pointer;transition:.2s;position:relative;}
 .trip-card:hover{border-color:var(--accent2);}
-.trip-card h3{font-family:var(--display);font-size:15px;font-weight:700;margin-bottom:6px;padding-right:24px;}
+.trip-card h3{font-family:var(--display);font-size:15px;font-weight:700;margin-bottom:6px;padding-right:60px;}
 .trip-meta{font-family:var(--mono);font-size:10px;color:var(--muted);display:flex;flex-direction:column;gap:3px;}
 .trip-price{font-family:var(--mono);font-size:15px;font-weight:500;color:var(--ok);margin-top:10px;}
-.trip-del{position:absolute;top:10px;right:10px;background:none;border:none;color:var(--muted);font-size:15px;cursor:pointer;padding:4px;}
-.trip-del:hover{color:var(--danger);}
+.trip-actions{position:absolute;top:10px;right:10px;display:flex;gap:4px;}
+.trip-action-btn{background:none;border:none;color:var(--muted);font-size:14px;cursor:pointer;padding:4px;border-radius:4px;transition:.2s;}
+.trip-action-btn:hover{color:var(--accent2);background:var(--surface2);}
+.trip-action-btn.del:hover{color:var(--danger);}
+
 .add-trip-box{background:var(--surface2);border:2px dashed var(--border);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:9px;}
 .add-trip-box input{background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--sans);font-size:14px;padding:10px 12px;outline:none;width:100%;}
 .add-trip-box input:focus{border-color:var(--accent2);}
@@ -99,6 +102,21 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .cur-btn.active{border-color:var(--accent2);color:var(--accent2);background:rgba(124,111,240,.1);}
 .price-hint{font-size:10px;color:var(--ok);font-family:var(--mono);padding:5px 8px;background:rgba(61,214,140,.06);border-radius:5px;border:1px solid rgba(61,214,140,.15);}
 
+/* TICKETS SECTION */
+.tickets-section{display:flex;flex-direction:column;gap:6px;}
+.tickets-label{font-size:9px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+.ticket-list{display:flex;flex-direction:column;gap:5px;}
+.ticket-item{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--surface);border:1px solid var(--border);border-radius:6px;}
+.ticket-icon{font-size:14px;flex-shrink:0;}
+.ticket-name{font-family:var(--mono);font-size:10px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.ticket-open{background:none;border:none;color:var(--accent2);font-family:var(--mono);font-size:10px;cursor:pointer;padding:2px 6px;border-radius:4px;}
+.ticket-open:hover{background:rgba(124,111,240,.1);}
+.ticket-del{background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;padding:2px 4px;}
+.ticket-del:hover{color:var(--danger);}
+.upload-btn{display:flex;align-items:center;gap:6px;padding:8px 12px;border:1px dashed var(--border);border-radius:6px;background:none;color:var(--muted);font-family:var(--mono);font-size:11px;cursor:pointer;width:100%;transition:.2s;}
+.upload-btn:hover{border-color:var(--accent2);color:var(--accent2);}
+.upload-progress{font-size:10px;color:var(--ok);font-family:var(--mono);}
+
 .search-btns{display:flex;flex-direction:column;gap:5px;}
 .search-title{font-size:9px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;}
 .search-btn{display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:7px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:var(--mono);font-size:11px;cursor:pointer;text-decoration:none;width:100%;transition:.2s;}
@@ -114,6 +132,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .seg-type-row{display:flex;gap:5px;margin-bottom:9px;}
 .type-btn{flex:1;padding:8px 4px;border:1px solid var(--border);background:var(--surface);color:var(--muted);border-radius:6px;font-family:var(--mono);font-size:10px;cursor:pointer;text-align:center;transition:.2s;}
 .type-btn.active{border-color:var(--accent2);color:var(--accent2);background:rgba(124,111,240,.1);}
+
+/* CALENDAR EXPORT BTN */
+.cal-btn{display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;background:rgba(61,214,140,.08);border:1px solid rgba(61,214,140,.25);border-radius:8px;color:var(--ok);font-family:var(--mono);font-size:12px;cursor:pointer;transition:.2s;margin-top:4px;}
+.cal-btn:hover{background:rgba(61,214,140,.14);}
 
 .alerts{padding:8px 16px 4px;}
 .alert{display:flex;align-items:flex-start;gap:6px;padding:7px 10px;border-radius:7px;margin-bottom:5px;font-size:11px;font-family:var(--mono);line-height:1.5;}
@@ -153,6 +175,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 </head>
 <body>
 <div id="app"></div>
+<input type="file" id="file-input" accept="image/*,.pdf" style="display:none" onchange="handleFileUpload(event)">
+
 <script>
 const SUPA_URL='https://fbcdmhvjfnjioecqlnpf.supabase.co';
 const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZiY2RtaHZqZm5qaW9lY3FsbnBmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NDYzNTYsImV4cCI6MjA5NDUyMjM1Nn0.XnvAFJSVjP2vC0rL4guedpievJqm6Jp3sIxiSLwueRQ';
@@ -162,39 +186,23 @@ let RATES={USD:44,EUR:51,UAH:1};
 let ratesUpdated='загрузка...';
 let currentUser=null,currentTrip=null,currentSegs=[],newSegType='flight';
 let drafts={};
-let openSegIdx=null; // какой сегмент открыт
+let openSegIdx=null;
+let uploadingSegIdx=null;
 
 const app=document.getElementById('app');
 
-// ── СОСТОЯНИЕ НАВИГАЦИИ ──
-// Сохраняем в sessionStorage (переживает переход на другую вкладку и возврат)
-function saveNav(){
-  try{
-    sessionStorage.setItem('nav',JSON.stringify({
-      tripId:currentTrip?.id,
-      tripName:currentTrip?.name,
-      openSegIdx
-    }));
-  }catch(e){}
-}
-function loadNav(){
-  try{const d=sessionStorage.getItem('nav');return d?JSON.parse(d):null;}
-  catch(e){return null;}
-}
+function saveNav(){try{sessionStorage.setItem('nav',JSON.stringify({tripId:currentTrip?.id,tripName:currentTrip?.name,openSegIdx}));}catch(e){}}
+function loadNav(){try{const d=sessionStorage.getItem('nav');return d?JSON.parse(d):null;}catch(e){return null;}}
 function clearNav(){try{sessionStorage.removeItem('nav');}catch(e){}}
 
 async function fetchRates(){
   try{
     const r=await fetch('https://api.exchangerate-api.com/v4/latest/UAH');
     const d=await r.json();
-    if(d.rates){
-      RATES.USD=+(1/d.rates.USD).toFixed(2);
-      RATES.EUR=+(1/d.rates.EUR).toFixed(2);
-      ratesUpdated='только что';
-      const rb=document.getElementById('rate-badge-val');
-      if(rb)rb.innerHTML=`<b>$${RATES.USD}₴</b> · <b>€${RATES.EUR}₴</b>`;
-      renderRatesCard();
-    }
+    if(d.rates){RATES.USD=+(1/d.rates.USD).toFixed(2);RATES.EUR=+(1/d.rates.EUR).toFixed(2);ratesUpdated='только что';}
+    const rb=document.getElementById('rate-badge-val');
+    if(rb)rb.innerHTML=`<b>$${RATES.USD}₴</b> · <b>€${RATES.EUR}₴</b>`;
+    renderRatesCard();
   }catch(e){ratesUpdated='офлайн, курс примерный';}
 }
 
@@ -211,7 +219,7 @@ function clearDraft(id){delete drafts[id];try{localStorage.setItem('d_'+currentT
 function getSeg(i){const s=currentSegs[i];return drafts[s.id]?{...s,...drafts[s.id]}:s;}
 function hasDraft(i){return!!drafts[currentSegs[i]?.id];}
 
-function links(s){
+function getLinks(s){
   const f=s.from_city||'',t=s.to_city||'',d=s.date_from||'';
   if(s.type==='flight')return[
     {icon:'🔍',label:'Google Flights',url:'https://www.google.com/travel/flights?hl=ru'},
@@ -230,41 +238,167 @@ function links(s){
   ];
 }
 
-// ── INIT ──
+// ── CALENDAR ICS EXPORT ──
+function exportToCalendar(){
+  const segs=currentSegs.map((seg,i)=>getSeg(i)).filter(s=>s.date_from);
+  if(!segs.length){alert('Нет сегментов с датами!');return;}
+
+  function icsDate(dateStr,timeStr){
+    if(!dateStr)return null;
+    const d=dateStr.replace(/-/g,'');
+    if(!timeStr||timeStr==='—')return d;
+    const t=timeStr.replace(':','')+'00';
+    return d+'T'+t+'00';
+  }
+
+  function escape(s){return(s||'').replace(/,/g,'\\,').replace(/;/g,'\\;').replace(/\n/g,'\\n');}
+
+  const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//МоиПоездки//RU','CALSCALE:GREGORIAN','METHOD:PUBLISH'];
+
+  segs.forEach((s,idx)=>{
+    const uid=`seg-${idx}-${Date.now()}@mytrip`;
+    const dtstart=icsDate(s.date_from,s.time_dep);
+    const dtend=icsDate(s.date_from,s.time_arr)||dtstart;
+    const title=`${IC[s.type]||''} ${s.from_city||'?'} → ${s.to_city||'?'}`;
+    const desc=[
+      s.carrier?`Перевозчик: ${s.carrier}`:'',
+      s.duration?`Длительность: ${s.duration}`:'',
+      s.dep_address?`Отправление: ${s.dep_address}`:'',
+      s.arr_address?`Прибытие: ${s.arr_address}`:'',
+      s.notes?`Заметка: ${s.notes}`:'',
+      s.price_amount?`Стоимость: ${s.price_amount} ${CS[s.price_currency||'USD']}`:'',
+    ].filter(Boolean).join('\\n');
+
+    lines.push('BEGIN:VEVENT');
+    lines.push(`UID:${uid}`);
+    lines.push(`DTSTART:${dtstart}`);
+    lines.push(`DTEND:${dtend}`);
+    lines.push(`SUMMARY:${escape(title)}`);
+    if(desc)lines.push(`DESCRIPTION:${escape(desc)}`);
+    if(s.dep_address)lines.push(`LOCATION:${escape(s.dep_address)}`);
+    lines.push('END:VEVENT');
+  });
+
+  lines.push('END:VCALENDAR');
+  const blob=new Blob([lines.join('\r\n')],{type:'text/calendar;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=`${currentTrip.name.replace(/\s+/g,'_')}.ics`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ── FILE UPLOAD ──
+function triggerUpload(segIdx){
+  uploadingSegIdx=segIdx;
+  document.getElementById('file-input').click();
+}
+
+async function handleFileUpload(event){
+  const file=event.target.files[0];
+  if(!file||uploadingSegIdx===null)return;
+  event.target.value='';
+
+  const i=uploadingSegIdx;
+  const seg=currentSegs[i];
+  const ext=file.name.split('.').pop();
+  const path=`${currentUser.id}/${seg.id}/${Date.now()}.${ext}`;
+
+  // Показать прогресс
+  const pb=document.getElementById(`upload-prog-${i}`);
+  if(pb)pb.textContent='⏳ Загрузка...';
+
+  const {error}=await sb.storage.from('tickets').upload(path,file);
+  if(error){if(pb)pb.textContent='❌ Ошибка загрузки';return;}
+
+  // Добавить файл в список
+  const files=Array.isArray(seg.ticket_files)?[...seg.ticket_files]:[];
+  files.push({name:file.name,path,type:file.type});
+  const {error:e2}=await sb.from('segments').update({ticket_files:files}).eq('id',seg.id);
+  if(!e2){
+    currentSegs[i].ticket_files=files;
+    clearDraft(seg.id);
+    renderTrip();
+    setTimeout(()=>{
+      const e=document.getElementById(`ed${i}`),c=document.getElementById(`ch${i}`);
+      if(e){e.classList.add('open');if(c)c.classList.add('open');}
+    },50);
+  }
+}
+
+async function openTicket(path){
+  const {data}=await sb.storage.from('tickets').createSignedUrl(path,3600);
+  if(data?.signedUrl)window.open(data.signedUrl,'_blank');
+}
+
+async function deleteTicket(segIdx,fileIdx){
+  if(!confirm('Удалить файл?'))return;
+  const seg=currentSegs[segIdx];
+  const files=Array.isArray(seg.ticket_files)?[...seg.ticket_files]:[];
+  const path=files[fileIdx].path;
+  await sb.storage.from('tickets').remove([path]);
+  files.splice(fileIdx,1);
+  await sb.from('segments').update({ticket_files:files}).eq('id',seg.id);
+  currentSegs[segIdx].ticket_files=files;
+  renderTrip();
+  setTimeout(()=>{
+    const e=document.getElementById(`ed${segIdx}`),c=document.getElementById(`ch${segIdx}`);
+    if(e){e.classList.add('open');if(c)c.classList.add('open');}
+  },50);
+}
+
+// ── DUPLICATE TRIP ──
+async function duplicateTrip(id,name,event){
+  event.stopPropagation();
+  const newName=prompt('Название копии:',name+' (копия)');
+  if(!newName)return;
+
+  const {data:newTrip}=await sb.from('trips').insert({name:newName,user_id:currentUser.id}).select().single();
+  if(!newTrip)return;
+
+  const {data:segs}=await sb.from('segments').select('*').eq('trip_id',id).order('position');
+  if(segs?.length){
+    const copies=segs.map(s=>({
+      trip_id:newTrip.id,user_id:currentUser.id,
+      type:s.type,from_city:s.from_city,to_city:s.to_city,
+      date_from:s.date_from,time_dep:s.time_dep,time_arr:s.time_arr,
+      price_amount:s.price_amount,price_currency:s.price_currency,
+      carrier:s.carrier,duration:s.duration,notes:s.notes,
+      dep_address:s.dep_address,arr_address:s.arr_address,
+      position:s.position,luggage_ok:s.luggage_ok,
+      ticket_files:'[]'
+    }));
+    await sb.from('segments').insert(copies);
+  }
+  showHome();
+}
+
 async function init(){
   showLoading();
   fetchRates();
   const {data:{session}}=await sb.auth.getSession();
   if(session){
     currentUser=session.user;
-    // Восстановить навигацию если была открыта поездка
     const nav=loadNav();
-    if(nav?.tripId){
-      await restoreTrip(nav.tripId,nav.tripName,nav.openSegIdx);
-    } else {
-      showHome();
-    }
-  } else {
-    showAuth();
-  }
+    if(nav?.tripId)await restoreTrip(nav.tripId,nav.tripName,nav.openSegIdx);
+    else showHome();
+  } else showAuth();
   sb.auth.onAuthStateChange((_,s)=>{
-    if(s){currentUser=s.user;const nav=loadNav();if(nav?.tripId){restoreTrip(nav.tripId,nav.tripName,nav.openSegIdx);}else showHome();}
+    if(s){currentUser=s.user;const nav=loadNav();if(nav?.tripId)restoreTrip(nav.tripId,nav.tripName,nav.openSegIdx);else showHome();}
     else{currentUser=null;clearNav();showAuth();}
   });
 }
 
 async function restoreTrip(id,name,segIdx){
-  currentTrip={id,name};
-  loadDrafts(id);
+  currentTrip={id,name};loadDrafts(id);
   const {data}=await sb.from('segments').select('*').eq('trip_id',id).order('position');
-  currentSegs=data||[];
-  openSegIdx=segIdx;
+  currentSegs=data||[];openSegIdx=segIdx;
   renderTrip();
-  // Открыть нужный сегмент
   if(segIdx!==null&&segIdx!==undefined){
     setTimeout(()=>{
       const e=document.getElementById(`ed${segIdx}`),c=document.getElementById(`ch${segIdx}`);
-      if(e){e.classList.add('open');c&&c.classList.add('open');}
+      if(e){e.classList.add('open');if(c)c.classList.add('open');}
     },100);
   }
 }
@@ -302,17 +436,19 @@ async function doReg(){
 async function doLogout(){clearNav();await sb.auth.signOut();}
 
 async function showHome(){
-  clearNav();
-  showLoading();
+  clearNav();showLoading();
   const {data:trips}=await sb.from('trips').select('*').order('created_at');
   const sa=trips?.length?(await sb.from('segments').select('*').in('trip_id',trips.map(t=>t.id))).data||[]:[];
   const cards=(trips||[]).map(t=>{
     const segs=sa.filter(s=>s.trip_id===t.id).sort((a,b)=>a.position-b.position);
-    const total=segs.reduce((a,s)=>a+toUAH(+s.price_amount||0,s.price_currency||'USD'),0);
+    const total=segs.reduce((a,s)=>a+toUAH(+s.price_amount||+s.price_usd||0,s.price_currency||'USD'),0);
     const dates=segs.length?`${fmtD(segs[0].date_from)} – ${fmtD(segs[segs.length-1].date_from)}`:'—';
     const route=segs.length?`${segs[0].from_city||'?'} → ${segs[segs.length-1].to_city||'?'}`:'—';
     return`<div class="trip-card" onclick="openTrip('${t.id}','${t.name.replace(/'/g,"\\'")}')">
-      <button class="trip-del" onclick="event.stopPropagation();delTrip('${t.id}')">✕</button>
+      <div class="trip-actions">
+        <button class="trip-action-btn" title="Дублировать поездку" onclick="duplicateTrip('${t.id}','${t.name.replace(/'/g,"\\'")}',event)">⧉</button>
+        <button class="trip-action-btn del" title="Удалить поездку" onclick="event.stopPropagation();delTrip('${t.id}')">✕</button>
+      </div>
       <h3>${t.name}</h3>
       <div class="trip-meta"><span>📍 ${route}</span><span>📅 ${dates}</span><span>🧩 ${segs.length} сегм.</span></div>
       <div class="trip-price">${total>0?fmt(total):'—'}</div>
@@ -339,8 +475,7 @@ async function showHome(){
 async function addTrip(){
   const name=document.getElementById('ntn').value.trim();
   if(!name)return;
-  await sb.from('trips').insert({name,user_id:currentUser.id});
-  showHome();
+  await sb.from('trips').insert({name,user_id:currentUser.id});showHome();
 }
 async function delTrip(id){
   if(!confirm('Удалить поездку со всеми сегментами?'))return;
@@ -348,22 +483,13 @@ async function delTrip(id){
 }
 
 async function openTrip(id,name){
-  currentTrip={id,name};
-  openSegIdx=null;
-  loadDrafts(id);
-  showLoading();
+  currentTrip={id,name};openSegIdx=null;loadDrafts(id);showLoading();
   const {data}=await sb.from('segments').select('*').eq('trip_id',id).order('position');
-  currentSegs=data||[];
-  saveNav();
-  renderTrip();
-}
-
-function calcTotal(){
-  return currentSegs.reduce((a,s,i)=>{const d=getSeg(i);return a+toUAH(+d.price_amount||0,d.price_currency||'USD');},0);
+  currentSegs=data||[];saveNav();renderTrip();
 }
 
 function renderTrip(){
-  const total=calcTotal();
+  const total=currentSegs.reduce((a,s,i)=>{const d=getSeg(i);return a+toUAH(+d.price_amount||+d.price_usd||0,d.price_currency||'USD');},0);
   app.innerHTML=`
   <div class="header">
     <button class="back-btn" onclick="showHome()">← Назад</button>
@@ -393,7 +519,22 @@ function renderTrip(){
     </div>
     <div class="sidebar">
       <div class="sc"><h3>📅 Хронология</h3><div class="tl" id="tl"></div></div>
-      <div class="sc"><h3>💰 Бюджет</h3><div class="bgt" id="bgt"></div><div class="btotal"><span>ИТОГО</span><span class="am" id="btotal-val">—</span></div></div>
+      <div class="sc">
+        <h3>💰 Бюджет</h3>
+        <div class="bgt" id="bgt"></div>
+        <div class="btotal"><span>ИТОГО</span><span class="am" id="btotal-val">—</span></div>
+      </div>
+      <div class="sc">
+        <h3>📆 Экспорт в календарь</h3>
+        <div style="padding:10px 11px">
+          <div style="font-size:10px;color:var(--muted);font-family:var(--mono);margin-bottom:8px;line-height:1.5">
+            Скачайте .ics файл и откройте его — все сегменты добавятся в Календарь на iPhone или Google Calendar автоматически.
+          </div>
+          <button class="cal-btn" onclick="exportToCalendar()">
+            📆 Скачать .ics для календаря
+          </button>
+        </div>
+      </div>
       <div class="sc"><h3>💱 Курс валют</h3><div class="rates-card" id="rates-card"></div></div>
     </div>
   </div>`;
@@ -413,14 +554,35 @@ function renderSegList(){
   document.getElementById('seg-list').innerHTML=currentSegs.map((seg,i)=>{
     const s=getSeg(i);
     const isDraft=hasDraft(i);
-    const uah=toUAH(+s.price_amount||0,s.price_currency||'USD');
+    const uah=toUAH(+s.price_amount||+s.price_usd||0,s.price_currency||'USD');
     const cur=s.price_currency||'USD';
     const sym=CS[cur]||'$';
-    const lnks=links(s);
+    const lnks=getLinks(s);
     const lhtml=lnks.map(l=>`<a class="search-btn" href="${l.url}" target="_blank" rel="noopener">
       <span>${l.icon}</span><span class="sb-label">${l.label}</span><span class="sb-arrow">↗</span>
     </a>`).join('');
     const phint=cur==='UAH'?`${s.price_amount||0} ₴`:cur==='USD'?`${s.price_amount||0} × ${RATES.USD} = ${fmt(uah)}`:`${s.price_amount||0} × ${RATES.EUR} = ${fmt(uah)}`;
+
+    // Билеты
+    const files=Array.isArray(s.ticket_files)?s.ticket_files:[];
+    const ticketsHTML=`
+    <div class="tickets-section">
+      <div class="tickets-label">🎫 Билеты и документы</div>
+      <div class="ticket-list">
+        ${files.map((f,fi)=>`
+        <div class="ticket-item">
+          <span class="ticket-icon">${f.type?.includes('pdf')?'📄':'🖼'}</span>
+          <span class="ticket-name" title="${f.name}">${f.name}</span>
+          <button class="ticket-open" onclick="openTicket('${f.path}')">Открыть</button>
+          <button class="ticket-del" onclick="deleteTicket(${i},${fi})">✕</button>
+        </div>`).join('')}
+      </div>
+      <button class="upload-btn" onclick="triggerUpload(${i})">
+        📎 Добавить фото или PDF билета
+      </button>
+      <div class="upload-progress" id="upload-prog-${i}"></div>
+    </div>`;
+
     return`<div class="seg ${isDraft?'draft':''}">
     <div class="seg-hdr" onclick="togSeg(${i})">
       <div class="sicon icon-${s.type}">${IC[s.type]||'📍'}</div>
@@ -429,6 +591,7 @@ function renderSegList(){
           <span class="tpill tp-${s.type}">${TL[s.type]||s.type}</span>
           ${s.from_city||'?'}<span class="arr">→</span>${s.to_city||'?'}
           ${isDraft?'<span class="draftbadge">● черновик</span>':''}
+          ${files.length?`<span class="draftbadge" style="background:rgba(61,214,140,.1);color:var(--ok);border-color:rgba(61,214,140,.3)">🎫 ${files.length}</span>`:''}
         </div>
         <div class="smeta">
           <span>📅 ${fmtD(s.date_from)}</span>
@@ -436,7 +599,7 @@ function renderSegList(){
           <span>⏱ ${s.duration||'—'}</span>
         </div>
       </div>
-      <div class="sprice">${fmt(uah)}<div class="orig">${s.price_amount||0}${sym}</div></div>
+      <div class="sprice">${fmt(uah)}<div class="orig">${s.price_amount||s.price_usd||0}${sym}</div></div>
       <span class="chev" id="ch${i}">▼</span>
     </div>
     <div class="seg-edit" id="ed${i}">
@@ -452,7 +615,7 @@ function renderSegList(){
       <div class="price-block">
         <label>Стоимость</label>
         <div class="price-inner">
-          <input type="number" value="${s.price_amount||0}" min="0" onchange="ds(${i},'price_amount',+this.value)">
+          <input type="number" value="${s.price_amount||s.price_usd||0}" min="0" onchange="ds(${i},'price_amount',+this.value)">
           <div class="cur-row">
             <button class="cur-btn ${cur==='UAH'?'active':''}" onclick="setCur(${i},'UAH')">₴</button>
             <button class="cur-btn ${cur==='USD'?'active':''}" onclick="setCur(${i},'USD')">$</button>
@@ -470,6 +633,7 @@ function renderSegList(){
         <div class="efield"><label>Адрес прибыт.</label><input value="${s.arr_address||''}" placeholder="TLV, Терминал 3" onchange="ds(${i},'arr_address',this.value)"></div>
       </div>
       <div class="efield"><label>Заметка</label><input value="${s.notes||''}" placeholder="доп. информация" onchange="ds(${i},'notes',this.value)"></div>
+      ${ticketsHTML}
       <div class="search-btns">
         <div class="search-title">🔎 Найти билеты</div>
         ${lhtml}
@@ -488,13 +652,9 @@ function togSeg(i){
   const was=e.classList.contains('open');
   document.querySelectorAll('.seg-edit').forEach(x=>x.classList.remove('open'));
   document.querySelectorAll('.chev').forEach(x=>x.classList.remove('open'));
-  if(!was){
-    e.classList.add('open');c.classList.add('open');
-    openSegIdx=i;
-  } else {
-    openSegIdx=null;
-  }
-  saveNav(); // сохраняем какой сегмент открыт
+  if(!was){e.classList.add('open');c.classList.add('open');openSegIdx=i;}
+  else openSegIdx=null;
+  saveNav();
 }
 
 function setCur(i,cur){
@@ -508,9 +668,8 @@ function ds(i,k,v){
   const seg=currentSegs[i];
   const upd={...(drafts[seg.id]||{}),[k]:v};
   saveDraft(seg.id,upd);
-  // Обновляем только нужное без перерисовки всего
   const s=getSeg(i);
-  const uah=toUAH(+s.price_amount||0,s.price_currency||'USD');
+  const uah=toUAH(+s.price_amount||+s.price_usd||0,s.price_currency||'USD');
   const cur=s.price_currency||'USD';
   const ph=document.getElementById(`ph${i}`);
   if(ph)ph.textContent=cur==='UAH'?`${s.price_amount||0} ₴`:cur==='USD'?`${s.price_amount||0} × ${RATES.USD} = ${fmt(uah)}`:`${s.price_amount||0} × ${RATES.EUR} = ${fmt(uah)}`;
@@ -536,7 +695,7 @@ async function addSeg(){
     trip_id:currentTrip.id,user_id:currentUser.id,
     type:newSegType,from_city:from,to_city:to,
     date_from:date,price_amount:0,price_currency:'USD',
-    position:currentSegs.length,luggage_ok:true
+    position:currentSegs.length,luggage_ok:true,ticket_files:[]
   }).select().single();
   if(!error){currentSegs.push(data);renderTrip();}
 }
@@ -551,22 +710,14 @@ async function saveSeg(i){
     carrier:d.carrier,duration:d.duration,
     notes:d.notes,dep_address:d.dep_address,arr_address:d.arr_address,
   }).eq('id',seg.id);
-  if(!error){
-    Object.assign(currentSegs[i],d);
-    clearDraft(seg.id);
-    openSegIdx=null;
-    saveNav();
-    renderTrip();
-  }
+  if(!error){Object.assign(currentSegs[i],d);clearDraft(seg.id);openSegIdx=null;saveNav();renderTrip();}
 }
 
 async function delSeg(i){
   if(!confirm('Удалить сегмент?'))return;
   clearDraft(currentSegs[i].id);
   await sb.from('segments').delete().eq('id',currentSegs[i].id);
-  currentSegs.splice(i,1);
-  openSegIdx=null;saveNav();
-  renderTrip();
+  currentSegs.splice(i,1);openSegIdx=null;saveNav();renderTrip();
 }
 
 function renderAlerts(){
@@ -605,11 +756,10 @@ function renderBgt(){
   if(!bgt)return;
   let tot=0;
   bgt.innerHTML=currentSegs.map((seg,i)=>{
-    const s=getSeg(i);const uah=toUAH(+s.price_amount||0,s.price_currency||'USD');tot+=uah;
+    const s=getSeg(i);const uah=toUAH(+s.price_amount||+s.price_usd||0,s.price_currency||'USD');tot+=uah;
     return`<div class="brow"><span class="lb">${s.from_city||'?'}→${s.to_city||'?'}</span><span class="am">${fmt(uah)}</span></div>`;
   }).join('');
-  const ts=fmt(tot);
-  if(btv)btv.textContent=ts;if(th)th.textContent=ts;
+  const ts=fmt(tot);if(btv)btv.textContent=ts;if(th)th.textContent=ts;
 }
 
 init();
