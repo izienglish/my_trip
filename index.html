@@ -31,7 +31,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .btn-primary{width:100%;padding:12px;border:none;border-radius:8px;font-family:var(--mono);font-size:13px;cursor:pointer;background:var(--accent2);color:#fff;}
 .auth-err{font-size:11px;font-family:var(--mono);margin-top:10px;text-align:center;min-height:16px;color:var(--danger);}
 
-.header{padding:11px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;position:sticky;top:0;background:var(--bg);z-index:100;flex-wrap:wrap;}
+.header{padding:11px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;position:sticky;top:0;background:var(--bg);z-index:100;}
 .header h1{font-family:var(--display);font-size:16px;font-weight:800;color:var(--accent);flex:1;}
 .rate-badge{font-family:var(--mono);font-size:10px;color:var(--muted);white-space:nowrap;}
 .rate-badge b{color:var(--ok);}
@@ -42,13 +42,18 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .home{padding:16px;}
 .home-title{font-family:var(--display);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:12px;}
 .trips-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:10px;margin-bottom:12px;}
+
 .trip-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;cursor:pointer;transition:.2s;position:relative;}
 .trip-card:hover{border-color:var(--accent2);}
-.trip-card h3{font-family:var(--display);font-size:15px;font-weight:700;margin-bottom:6px;padding-right:60px;}
+.trip-card-name{display:flex;align-items:center;gap:6px;margin-bottom:6px;padding-right:60px;}
+.trip-card-name h3{font-family:var(--display);font-size:15px;font-weight:700;flex:1;}
+.trip-rename-input{font-family:var(--display);font-size:15px;font-weight:700;background:var(--surface2);border:1px solid var(--accent2);border-radius:6px;color:var(--text);padding:3px 7px;outline:none;flex:1;display:none;}
+.trip-rename-input.active{display:block;}
+.trip-card-name h3.hidden{display:none;}
 .trip-meta{font-family:var(--mono);font-size:10px;color:var(--muted);display:flex;flex-direction:column;gap:3px;}
 .trip-price{font-family:var(--mono);font-size:15px;font-weight:500;color:var(--ok);margin-top:10px;}
 .trip-actions{position:absolute;top:10px;right:10px;display:flex;gap:4px;}
-.trip-action-btn{background:none;border:none;color:var(--muted);font-size:14px;cursor:pointer;padding:4px;border-radius:4px;transition:.2s;}
+.trip-action-btn{background:none;border:none;color:var(--muted);font-size:14px;cursor:pointer;padding:4px;border-radius:4px;transition:.2s;line-height:1;}
 .trip-action-btn:hover{color:var(--accent2);background:var(--surface2);}
 .trip-action-btn.del:hover{color:var(--danger);}
 
@@ -77,6 +82,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .sprice{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--ok);text-align:right;flex-shrink:0;}
 .sprice .orig{font-size:9px;color:var(--muted);}
 .draftbadge{background:rgba(240,192,64,.15);color:var(--accent);border:1px solid rgba(240,192,64,.3);border-radius:3px;padding:1px 4px;font-size:8px;font-family:var(--mono);}
+.filebadge{background:rgba(61,214,140,.1);color:var(--ok);border:1px solid rgba(61,214,140,.3);border-radius:3px;padding:1px 4px;font-size:8px;font-family:var(--mono);}
 .chev{color:var(--muted);transition:transform .2s;font-size:9px;margin-left:2px;flex-shrink:0;}
 .chev.open{transform:rotate(180deg);}
 .tpill{font-family:var(--mono);font-size:8px;padding:1px 4px;border-radius:3px;font-weight:500;}
@@ -89,7 +95,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .frow{display:flex;gap:7px;flex-wrap:wrap;}
 .efield{display:flex;flex-direction:column;gap:3px;flex:1;min-width:85px;}
 .efield label{font-size:9px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
-.efield input,.efield select{background:var(--surface);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:var(--mono);font-size:13px;padding:8px;outline:none;width:100%;}
+.efield input{background:var(--surface);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:var(--mono);font-size:13px;padding:8px;outline:none;width:100%;}
 .efield input:focus{border-color:var(--accent2);}
 
 .price-block{display:flex;flex-direction:column;gap:5px;}
@@ -102,15 +108,12 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .cur-btn.active{border-color:var(--accent2);color:var(--accent2);background:rgba(124,111,240,.1);}
 .price-hint{font-size:10px;color:var(--ok);font-family:var(--mono);padding:5px 8px;background:rgba(61,214,140,.06);border-radius:5px;border:1px solid rgba(61,214,140,.15);}
 
-/* TICKETS SECTION */
 .tickets-section{display:flex;flex-direction:column;gap:6px;}
 .tickets-label{font-size:9px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
 .ticket-list{display:flex;flex-direction:column;gap:5px;}
 .ticket-item{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--surface);border:1px solid var(--border);border-radius:6px;}
-.ticket-icon{font-size:14px;flex-shrink:0;}
 .ticket-name{font-family:var(--mono);font-size:10px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.ticket-open{background:none;border:none;color:var(--accent2);font-family:var(--mono);font-size:10px;cursor:pointer;padding:2px 6px;border-radius:4px;}
-.ticket-open:hover{background:rgba(124,111,240,.1);}
+.ticket-open{background:none;border:none;color:var(--accent2);font-family:var(--mono);font-size:10px;cursor:pointer;padding:2px 6px;border-radius:4px;white-space:nowrap;}
 .ticket-del{background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;padding:2px 4px;}
 .ticket-del:hover{color:var(--danger);}
 .upload-btn{display:flex;align-items:center;gap:6px;padding:8px 12px;border:1px dashed var(--border);border-radius:6px;background:none;color:var(--muted);font-family:var(--mono);font-size:11px;cursor:pointer;width:100%;transition:.2s;}
@@ -133,8 +136,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .type-btn{flex:1;padding:8px 4px;border:1px solid var(--border);background:var(--surface);color:var(--muted);border-radius:6px;font-family:var(--mono);font-size:10px;cursor:pointer;text-align:center;transition:.2s;}
 .type-btn.active{border-color:var(--accent2);color:var(--accent2);background:rgba(124,111,240,.1);}
 
-/* CALENDAR EXPORT BTN */
-.cal-btn{display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;background:rgba(61,214,140,.08);border:1px solid rgba(61,214,140,.25);border-radius:8px;color:var(--ok);font-family:var(--mono);font-size:12px;cursor:pointer;transition:.2s;margin-top:4px;}
+.cal-btn{display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;background:rgba(61,214,140,.08);border:1px solid rgba(61,214,140,.25);border-radius:8px;color:var(--ok);font-family:var(--mono);font-size:12px;cursor:pointer;transition:.2s;}
 .cal-btn:hover{background:rgba(61,214,140,.14);}
 
 .alerts{padding:8px 16px 4px;}
@@ -176,7 +178,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 <body>
 <div id="app"></div>
 <input type="file" id="file-input" accept="image/*,.pdf" style="display:none" onchange="handleFileUpload(event)">
-
 <script>
 const SUPA_URL='https://fbcdmhvjfnjioecqlnpf.supabase.co';
 const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZiY2RtaHZqZm5qaW9lY3FsbnBmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NDYzNTYsImV4cCI6MjA5NDUyMjM1Nn0.XnvAFJSVjP2vC0rL4guedpievJqm6Jp3sIxiSLwueRQ';
@@ -185,10 +186,7 @@ const sb=supabase.createClient(SUPA_URL,SUPA_KEY);
 let RATES={USD:44,EUR:51,UAH:1};
 let ratesUpdated='загрузка...';
 let currentUser=null,currentTrip=null,currentSegs=[],newSegType='flight';
-let drafts={};
-let openSegIdx=null;
-let uploadingSegIdx=null;
-
+let drafts={},openSegIdx=null,uploadingSegIdx=null;
 const app=document.getElementById('app');
 
 function saveNav(){try{sessionStorage.setItem('nav',JSON.stringify({tripId:currentTrip?.id,tripName:currentTrip?.name,openSegIdx}));}catch(e){}}
@@ -238,81 +236,123 @@ function getLinks(s){
   ];
 }
 
-// ── CALENDAR ICS EXPORT ──
+// ── ICS CALENDAR EXPORT (fixed) ──
 function exportToCalendar(){
-  const segs=currentSegs.map((seg,i)=>getSeg(i)).filter(s=>s.date_from);
-  if(!segs.length){alert('Нет сегментов с датами!');return;}
+  const segs=currentSegs.map((s,i)=>getSeg(i)).filter(s=>s.date_from);
+  if(!segs.length){alert('Нет сегментов с датами для экспорта!');return;}
 
-  function icsDate(dateStr,timeStr){
+  // Формат даты для ICS: YYYYMMDD
+  function icsDateOnly(dateStr){
+    if(!dateStr)return null;
+    return dateStr.replace(/-/g,'');
+  }
+
+  // Формат даты+времени для ICS: YYYYMMDDTHHmmss
+  function icsDateTime(dateStr,timeStr){
     if(!dateStr)return null;
     const d=dateStr.replace(/-/g,'');
-    if(!timeStr||timeStr==='—')return d;
+    if(!timeStr||timeStr==='—'||timeStr==='')return d; // без времени — только дата
     const t=timeStr.replace(':','')+'00';
     return d+'T'+t+'00';
   }
 
-  function escape(s){return(s||'').replace(/,/g,'\\,').replace(/;/g,'\\;').replace(/\n/g,'\\n');}
+  function esc(s){return(s||'').replace(/\\/g,'\\\\').replace(/,/g,'\\,').replace(/;/g,'\\;').replace(/\n/g,'\\n');}
 
-  const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//МоиПоездки//RU','CALSCALE:GREGORIAN','METHOD:PUBLISH'];
+  const lines=[
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//МоиПоездки//RU',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    'X-WR-CALNAME:'+esc(currentTrip.name),
+    'X-WR-TIMEZONE:Europe/Kiev',
+  ];
 
   segs.forEach((s,idx)=>{
-    const uid=`seg-${idx}-${Date.now()}@mytrip`;
-    const dtstart=icsDate(s.date_from,s.time_dep);
-    const dtend=icsDate(s.date_from,s.time_arr)||dtstart;
+    const hasTime=s.time_dep&&s.time_dep!=='—'&&s.time_dep!=='';
+    const hasArrTime=s.time_arr&&s.time_arr!=='—'&&s.time_arr!=='';
+
+    let dtstart,dtend,allDay=false;
+
+    if(hasTime){
+      dtstart=icsDateTime(s.date_from,s.time_dep);
+      // Если время прибытия тоже есть — используем его, иначе +2 часа
+      if(hasArrTime){
+        dtend=icsDateTime(s.date_from,s.time_arr);
+      } else {
+        // Прибавить 2 часа к времени отправления
+        const [hh,mm]=(s.time_dep||'00:00').split(':').map(Number);
+        const endH=String((hh+2)%24).padStart(2,'0');
+        dtend=icsDateTime(s.date_from,`${endH}:${String(mm).padStart(2,'0')}`);
+      }
+    } else {
+      // Без времени — событие на весь день
+      allDay=true;
+      dtstart=icsDateOnly(s.date_from);
+      // Следующий день для DTEND при all-day
+      const dt=new Date(s.date_from);
+      dt.setDate(dt.getDate()+1);
+      dtend=dt.toISOString().slice(0,10).replace(/-/g,'');
+    }
+
     const title=`${IC[s.type]||''} ${s.from_city||'?'} → ${s.to_city||'?'}`;
-    const desc=[
+    const descParts=[
       s.carrier?`Перевозчик: ${s.carrier}`:'',
       s.duration?`Длительность: ${s.duration}`:'',
       s.dep_address?`Отправление: ${s.dep_address}`:'',
       s.arr_address?`Прибытие: ${s.arr_address}`:'',
       s.notes?`Заметка: ${s.notes}`:'',
       s.price_amount?`Стоимость: ${s.price_amount} ${CS[s.price_currency||'USD']}`:'',
-    ].filter(Boolean).join('\\n');
+    ].filter(Boolean);
+
+    const uid=`mytrip-${currentTrip.id}-seg${idx}-${Date.now()}@mytrip.app`;
+    const now=new Date().toISOString().replace(/[-:]/g,'').slice(0,15)+'Z';
 
     lines.push('BEGIN:VEVENT');
     lines.push(`UID:${uid}`);
-    lines.push(`DTSTART:${dtstart}`);
-    lines.push(`DTEND:${dtend}`);
-    lines.push(`SUMMARY:${escape(title)}`);
-    if(desc)lines.push(`DESCRIPTION:${escape(desc)}`);
-    if(s.dep_address)lines.push(`LOCATION:${escape(s.dep_address)}`);
+    lines.push(`DTSTAMP:${now}`);
+    if(allDay){
+      lines.push(`DTSTART;VALUE=DATE:${dtstart}`);
+      lines.push(`DTEND;VALUE=DATE:${dtend}`);
+    } else {
+      lines.push(`DTSTART:${dtstart}`);
+      lines.push(`DTEND:${dtend}`);
+    }
+    lines.push(`SUMMARY:${esc(title)}`);
+    if(descParts.length)lines.push(`DESCRIPTION:${esc(descParts.join('\\n'))}`);
+    if(s.dep_address)lines.push(`LOCATION:${esc(s.dep_address)}`);
     lines.push('END:VEVENT');
   });
 
   lines.push('END:VCALENDAR');
-  const blob=new Blob([lines.join('\r\n')],{type:'text/calendar;charset=utf-8'});
+
+  const content=lines.join('\r\n');
+  const blob=new Blob([content],{type:'text/calendar;charset=utf-8'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
   a.href=url;
-  a.download=`${currentTrip.name.replace(/\s+/g,'_')}.ics`;
+  a.download=`${(currentTrip.name||'trip').replace(/\s+/g,'_')}.ics`;
+  document.body.appendChild(a);
   a.click();
+  document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
 
 // ── FILE UPLOAD ──
-function triggerUpload(segIdx){
-  uploadingSegIdx=segIdx;
-  document.getElementById('file-input').click();
-}
+function triggerUpload(segIdx){uploadingSegIdx=segIdx;document.getElementById('file-input').click();}
 
 async function handleFileUpload(event){
   const file=event.target.files[0];
   if(!file||uploadingSegIdx===null)return;
   event.target.value='';
-
   const i=uploadingSegIdx;
   const seg=currentSegs[i];
   const ext=file.name.split('.').pop();
   const path=`${currentUser.id}/${seg.id}/${Date.now()}.${ext}`;
-
-  // Показать прогресс
   const pb=document.getElementById(`upload-prog-${i}`);
   if(pb)pb.textContent='⏳ Загрузка...';
-
   const {error}=await sb.storage.from('tickets').upload(path,file);
-  if(error){if(pb)pb.textContent='❌ Ошибка загрузки';return;}
-
-  // Добавить файл в список
+  if(error){if(pb)pb.textContent='❌ Ошибка: '+error.message;return;}
   const files=Array.isArray(seg.ticket_files)?[...seg.ticket_files]:[];
   files.push({name:file.name,path,type:file.type});
   const {error:e2}=await sb.from('segments').update({ticket_files:files}).eq('id',seg.id);
@@ -320,10 +360,7 @@ async function handleFileUpload(event){
     currentSegs[i].ticket_files=files;
     clearDraft(seg.id);
     renderTrip();
-    setTimeout(()=>{
-      const e=document.getElementById(`ed${i}`),c=document.getElementById(`ch${i}`);
-      if(e){e.classList.add('open');if(c)c.classList.add('open');}
-    },50);
+    setTimeout(()=>{const e=document.getElementById(`ed${i}`),c=document.getElementById(`ch${i}`);if(e){e.classList.add('open');if(c)c.classList.add('open');}},50);
   }
 }
 
@@ -332,20 +369,42 @@ async function openTicket(path){
   if(data?.signedUrl)window.open(data.signedUrl,'_blank');
 }
 
-async function deleteTicket(segIdx,fileIdx){
+async function deleteTicket(si,fi){
   if(!confirm('Удалить файл?'))return;
-  const seg=currentSegs[segIdx];
-  const files=Array.isArray(seg.ticket_files)?[...seg.ticket_files]:[];
-  const path=files[fileIdx].path;
-  await sb.storage.from('tickets').remove([path]);
-  files.splice(fileIdx,1);
+  const seg=currentSegs[si];
+  const files=[...( Array.isArray(seg.ticket_files)?seg.ticket_files:[])];
+  await sb.storage.from('tickets').remove([files[fi].path]);
+  files.splice(fi,1);
   await sb.from('segments').update({ticket_files:files}).eq('id',seg.id);
-  currentSegs[segIdx].ticket_files=files;
+  currentSegs[si].ticket_files=files;
   renderTrip();
-  setTimeout(()=>{
-    const e=document.getElementById(`ed${segIdx}`),c=document.getElementById(`ch${segIdx}`);
-    if(e){e.classList.add('open');if(c)c.classList.add('open');}
-  },50);
+  setTimeout(()=>{const e=document.getElementById(`ed${si}`),c=document.getElementById(`ch${si}`);if(e){e.classList.add('open');if(c)c.classList.add('open');}},50);
+}
+
+// ── RENAME TRIP ──
+function startRename(id,event){
+  event.stopPropagation();
+  const inp=document.getElementById(`rename-${id}`);
+  const h3=document.getElementById(`tripname-${id}`);
+  if(!inp||!h3)return;
+  inp.classList.add('active');
+  h3.classList.add('hidden');
+  inp.focus();
+  inp.select();
+}
+
+async function saveRename(id,event){
+  event.stopPropagation();
+  const inp=document.getElementById(`rename-${id}`);
+  const h3=document.getElementById(`tripname-${id}`);
+  if(!inp||!h3)return;
+  const newName=inp.value.trim();
+  if(!newName){inp.classList.remove('active');h3.classList.remove('hidden');return;}
+  await sb.from('trips').update({name:newName}).eq('id',id);
+  h3.textContent=newName;
+  inp.classList.remove('active');
+  h3.classList.remove('hidden');
+  if(currentTrip?.id===id)currentTrip.name=newName;
 }
 
 // ── DUPLICATE TRIP ──
@@ -353,10 +412,8 @@ async function duplicateTrip(id,name,event){
   event.stopPropagation();
   const newName=prompt('Название копии:',name+' (копия)');
   if(!newName)return;
-
   const {data:newTrip}=await sb.from('trips').insert({name:newName,user_id:currentUser.id}).select().single();
   if(!newTrip)return;
-
   const {data:segs}=await sb.from('segments').select('*').eq('trip_id',id).order('position');
   if(segs?.length){
     const copies=segs.map(s=>({
@@ -366,8 +423,7 @@ async function duplicateTrip(id,name,event){
       price_amount:s.price_amount,price_currency:s.price_currency,
       carrier:s.carrier,duration:s.duration,notes:s.notes,
       dep_address:s.dep_address,arr_address:s.arr_address,
-      position:s.position,luggage_ok:s.luggage_ok,
-      ticket_files:'[]'
+      position:s.position,luggage_ok:s.luggage_ok,ticket_files:[]
     }));
     await sb.from('segments').insert(copies);
   }
@@ -375,15 +431,10 @@ async function duplicateTrip(id,name,event){
 }
 
 async function init(){
-  showLoading();
-  fetchRates();
+  showLoading();fetchRates();
   const {data:{session}}=await sb.auth.getSession();
-  if(session){
-    currentUser=session.user;
-    const nav=loadNav();
-    if(nav?.tripId)await restoreTrip(nav.tripId,nav.tripName,nav.openSegIdx);
-    else showHome();
-  } else showAuth();
+  if(session){currentUser=session.user;const nav=loadNav();if(nav?.tripId)await restoreTrip(nav.tripId,nav.tripName,nav.openSegIdx);else showHome();}
+  else showAuth();
   sb.auth.onAuthStateChange((_,s)=>{
     if(s){currentUser=s.user;const nav=loadNav();if(nav?.tripId)restoreTrip(nav.tripId,nav.tripName,nav.openSegIdx);else showHome();}
     else{currentUser=null;clearNav();showAuth();}
@@ -393,40 +444,27 @@ async function init(){
 async function restoreTrip(id,name,segIdx){
   currentTrip={id,name};loadDrafts(id);
   const {data}=await sb.from('segments').select('*').eq('trip_id',id).order('position');
-  currentSegs=data||[];openSegIdx=segIdx;
-  renderTrip();
-  if(segIdx!==null&&segIdx!==undefined){
-    setTimeout(()=>{
-      const e=document.getElementById(`ed${segIdx}`),c=document.getElementById(`ch${segIdx}`);
-      if(e){e.classList.add('open');if(c)c.classList.add('open');}
-    },100);
-  }
+  currentSegs=data||[];openSegIdx=segIdx;renderTrip();
+  if(segIdx!=null)setTimeout(()=>{const e=document.getElementById(`ed${segIdx}`),c=document.getElementById(`ch${segIdx}`);if(e){e.classList.add('open');if(c)c.classList.add('open');}},100);
 }
 
 function showLoading(){app.innerHTML=`<div class="loading"><div class="spinner"></div>Загрузка...</div>`;}
 
 function showAuth(tab='login'){
   clearNav();
-  app.innerHTML=`
-  <div class="auth-wrap"><div class="auth-box">
-    <h1>✈ Мои Поездки</h1>
-    <div class="sub">Планировщик маршрутов</div>
+  app.innerHTML=`<div class="auth-wrap"><div class="auth-box">
+    <h1>✈ Мои Поездки</h1><div class="sub">Планировщик маршрутов</div>
     <div class="auth-tabs">
       <button class="auth-tab ${tab==='login'?'active':''}" onclick="showAuth('login')">Войти</button>
       <button class="auth-tab ${tab==='reg'?'active':''}" onclick="showAuth('reg')">Регистрация</button>
     </div>
     <div class="afield"><label>Email</label><input type="email" id="em" placeholder="you@example.com"></div>
     <div class="afield"><label>Пароль</label><input type="password" id="pw" placeholder="минимум 6 символов"></div>
-    ${tab==='login'
-      ?`<button class="btn-primary" onclick="doLogin()">Войти</button>`
-      :`<button class="btn-primary" onclick="doReg()">Создать аккаунт</button>`}
+    ${tab==='login'?`<button class="btn-primary" onclick="doLogin()">Войти</button>`:`<button class="btn-primary" onclick="doReg()">Создать аккаунт</button>`}
     <div class="auth-err" id="aerr"></div>
   </div></div>`;
 }
-async function doLogin(){
-  const {error}=await sb.auth.signInWithPassword({email:document.getElementById('em').value,password:document.getElementById('pw').value});
-  if(error)document.getElementById('aerr').textContent=error.message;
-}
+async function doLogin(){const {error}=await sb.auth.signInWithPassword({email:document.getElementById('em').value,password:document.getElementById('pw').value});if(error)document.getElementById('aerr').textContent=error.message;}
 async function doReg(){
   const {error}=await sb.auth.signUp({email:document.getElementById('em').value,password:document.getElementById('pw').value,options:{emailRedirectTo:'https://izienglish.github.io/my_trip/'}});
   const el=document.getElementById('aerr');
@@ -444,12 +482,20 @@ async function showHome(){
     const total=segs.reduce((a,s)=>a+toUAH(+s.price_amount||+s.price_usd||0,s.price_currency||'USD'),0);
     const dates=segs.length?`${fmtD(segs[0].date_from)} – ${fmtD(segs[segs.length-1].date_from)}`:'—';
     const route=segs.length?`${segs[0].from_city||'?'} → ${segs[segs.length-1].to_city||'?'}`:'—';
-    return`<div class="trip-card" onclick="openTrip('${t.id}','${t.name.replace(/'/g,"\\'")}')">
+    const safeId=t.id.replace(/-/g,'');
+    const safeName=t.name.replace(/'/g,"\\'").replace(/"/g,'&quot;');
+    return`<div class="trip-card" onclick="openTrip('${t.id}','${safeName}')">
       <div class="trip-actions">
-        <button class="trip-action-btn" title="Дублировать поездку" onclick="duplicateTrip('${t.id}','${t.name.replace(/'/g,"\\'")}',event)">⧉</button>
-        <button class="trip-action-btn del" title="Удалить поездку" onclick="event.stopPropagation();delTrip('${t.id}')">✕</button>
+        <button class="trip-action-btn" title="Переименовать" onclick="startRename('${t.id}',event)">✏️</button>
+        <button class="trip-action-btn" title="Дублировать" onclick="duplicateTrip('${t.id}','${safeName}',event)">⧉</button>
+        <button class="trip-action-btn del" title="Удалить" onclick="event.stopPropagation();delTrip('${t.id}')">✕</button>
       </div>
-      <h3>${t.name}</h3>
+      <div class="trip-card-name">
+        <h3 id="tripname-${t.id}">${t.name}</h3>
+        <input class="trip-rename-input" id="rename-${t.id}" value="${safeName}"
+          onblur="saveRename('${t.id}',event)"
+          onkeydown="if(event.key==='Enter')saveRename('${t.id}',event)">
+      </div>
       <div class="trip-meta"><span>📍 ${route}</span><span>📅 ${dates}</span><span>🧩 ${segs.length} сегм.</span></div>
       <div class="trip-price">${total>0?fmt(total):'—'}</div>
     </div>`;
@@ -472,15 +518,8 @@ async function showHome(){
   </div>`;
 }
 
-async function addTrip(){
-  const name=document.getElementById('ntn').value.trim();
-  if(!name)return;
-  await sb.from('trips').insert({name,user_id:currentUser.id});showHome();
-}
-async function delTrip(id){
-  if(!confirm('Удалить поездку со всеми сегментами?'))return;
-  await sb.from('trips').delete().eq('id',id);showHome();
-}
+async function addTrip(){const name=document.getElementById('ntn').value.trim();if(!name)return;await sb.from('trips').insert({name,user_id:currentUser.id});showHome();}
+async function delTrip(id){if(!confirm('Удалить поездку со всеми сегментами?'))return;await sb.from('trips').delete().eq('id',id);showHome();}
 
 async function openTrip(id,name){
   currentTrip={id,name};openSegIdx=null;loadDrafts(id);showLoading();
@@ -519,20 +558,12 @@ function renderTrip(){
     </div>
     <div class="sidebar">
       <div class="sc"><h3>📅 Хронология</h3><div class="tl" id="tl"></div></div>
-      <div class="sc">
-        <h3>💰 Бюджет</h3>
-        <div class="bgt" id="bgt"></div>
-        <div class="btotal"><span>ИТОГО</span><span class="am" id="btotal-val">—</span></div>
-      </div>
+      <div class="sc"><h3>💰 Бюджет</h3><div class="bgt" id="bgt"></div><div class="btotal"><span>ИТОГО</span><span class="am" id="btotal-val">—</span></div></div>
       <div class="sc">
         <h3>📆 Экспорт в календарь</h3>
         <div style="padding:10px 11px">
-          <div style="font-size:10px;color:var(--muted);font-family:var(--mono);margin-bottom:8px;line-height:1.5">
-            Скачайте .ics файл и откройте его — все сегменты добавятся в Календарь на iPhone или Google Calendar автоматически.
-          </div>
-          <button class="cal-btn" onclick="exportToCalendar()">
-            📆 Скачать .ics для календаря
-          </button>
+          <div style="font-size:10px;color:var(--muted);font-family:var(--mono);margin-bottom:8px;line-height:1.5">Скачайте .ics и откройте на телефоне — все сегменты добавятся в Календарь автоматически.</div>
+          <button class="cal-btn" onclick="exportToCalendar()">📆 Скачать .ics для календаря</button>
         </div>
       </div>
       <div class="sc"><h3>💱 Курс валют</h3><div class="rates-card" id="rates-card"></div></div>
@@ -543,8 +574,7 @@ function renderTrip(){
 
 function renderRatesCard(){
   const el=document.getElementById('rates-card');if(!el)return;
-  el.innerHTML=`
-    <div class="rate-row"><span>1 USD</span><span class="rv">= ${RATES.USD} ₴</span></div>
+  el.innerHTML=`<div class="rate-row"><span>1 USD</span><span class="rv">= ${RATES.USD} ₴</span></div>
     <div class="rate-row"><span>1 EUR</span><span class="rv">= ${RATES.EUR} ₴</span></div>
     <div class="rate-row"><span>1 UAH</span><span class="rv">= 1 ₴</span></div>
     <div class="rate-upd">🔄 ${ratesUpdated}</div>`;
@@ -556,30 +586,19 @@ function renderSegList(){
     const isDraft=hasDraft(i);
     const uah=toUAH(+s.price_amount||+s.price_usd||0,s.price_currency||'USD');
     const cur=s.price_currency||'USD';
-    const sym=CS[cur]||'$';
-    const lnks=getLinks(s);
-    const lhtml=lnks.map(l=>`<a class="search-btn" href="${l.url}" target="_blank" rel="noopener">
-      <span>${l.icon}</span><span class="sb-label">${l.label}</span><span class="sb-arrow">↗</span>
-    </a>`).join('');
-    const phint=cur==='UAH'?`${s.price_amount||0} ₴`:cur==='USD'?`${s.price_amount||0} × ${RATES.USD} = ${fmt(uah)}`:`${s.price_amount||0} × ${RATES.EUR} = ${fmt(uah)}`;
-
-    // Билеты
     const files=Array.isArray(s.ticket_files)?s.ticket_files:[];
-    const ticketsHTML=`
-    <div class="tickets-section">
+    const phint=cur==='UAH'?`${s.price_amount||0} ₴`:cur==='USD'?`${s.price_amount||0} × ${RATES.USD} = ${fmt(uah)}`:`${s.price_amount||0} × ${RATES.EUR} = ${fmt(uah)}`;
+    const lhtml=getLinks(s).map(l=>`<a class="search-btn" href="${l.url}" target="_blank" rel="noopener"><span>${l.icon}</span><span class="sb-label">${l.label}</span><span class="sb-arrow">↗</span></a>`).join('');
+    const ticketsHTML=`<div class="tickets-section">
       <div class="tickets-label">🎫 Билеты и документы</div>
-      <div class="ticket-list">
-        ${files.map((f,fi)=>`
+      <div class="ticket-list">${files.map((f,fi)=>`
         <div class="ticket-item">
-          <span class="ticket-icon">${f.type?.includes('pdf')?'📄':'🖼'}</span>
+          <span>${f.type?.includes('pdf')?'📄':'🖼'}</span>
           <span class="ticket-name" title="${f.name}">${f.name}</span>
           <button class="ticket-open" onclick="openTicket('${f.path}')">Открыть</button>
           <button class="ticket-del" onclick="deleteTicket(${i},${fi})">✕</button>
-        </div>`).join('')}
-      </div>
-      <button class="upload-btn" onclick="triggerUpload(${i})">
-        📎 Добавить фото или PDF билета
-      </button>
+        </div>`).join('')}</div>
+      <button class="upload-btn" onclick="triggerUpload(${i})">📎 Добавить фото или PDF билета</button>
       <div class="upload-progress" id="upload-prog-${i}"></div>
     </div>`;
 
@@ -591,7 +610,7 @@ function renderSegList(){
           <span class="tpill tp-${s.type}">${TL[s.type]||s.type}</span>
           ${s.from_city||'?'}<span class="arr">→</span>${s.to_city||'?'}
           ${isDraft?'<span class="draftbadge">● черновик</span>':''}
-          ${files.length?`<span class="draftbadge" style="background:rgba(61,214,140,.1);color:var(--ok);border-color:rgba(61,214,140,.3)">🎫 ${files.length}</span>`:''}
+          ${files.length?`<span class="filebadge">🎫 ${files.length}</span>`:''}
         </div>
         <div class="smeta">
           <span>📅 ${fmtD(s.date_from)}</span>
@@ -599,7 +618,7 @@ function renderSegList(){
           <span>⏱ ${s.duration||'—'}</span>
         </div>
       </div>
-      <div class="sprice">${fmt(uah)}<div class="orig">${s.price_amount||s.price_usd||0}${sym}</div></div>
+      <div class="sprice">${fmt(uah)}<div class="orig">${s.price_amount||s.price_usd||0}${CS[cur]||'$'}</div></div>
       <span class="chev" id="ch${i}">▼</span>
     </div>
     <div class="seg-edit" id="ed${i}">
@@ -634,10 +653,7 @@ function renderSegList(){
       </div>
       <div class="efield"><label>Заметка</label><input value="${s.notes||''}" placeholder="доп. информация" onchange="ds(${i},'notes',this.value)"></div>
       ${ticketsHTML}
-      <div class="search-btns">
-        <div class="search-title">🔎 Найти билеты</div>
-        ${lhtml}
-      </div>
+      <div class="search-btns"><div class="search-title">🔎 Найти билеты</div>${lhtml}</div>
       <div class="row-btns">
         <button class="delbtn" onclick="delSeg(${i})">🗑 Удалить</button>
         <button class="sbtn" onclick="saveSeg(${i})">💾 Сохранить</button>
@@ -652,8 +668,7 @@ function togSeg(i){
   const was=e.classList.contains('open');
   document.querySelectorAll('.seg-edit').forEach(x=>x.classList.remove('open'));
   document.querySelectorAll('.chev').forEach(x=>x.classList.remove('open'));
-  if(!was){e.classList.add('open');c.classList.add('open');openSegIdx=i;}
-  else openSegIdx=null;
+  if(!was){e.classList.add('open');c.classList.add('open');openSegIdx=i;}else openSegIdx=null;
   saveNav();
 }
 
@@ -680,11 +695,7 @@ function ds(i,k,v){
   renderBgt();renderTL();renderAlerts();
 }
 
-function setType(t,btn){
-  newSegType=t;
-  document.querySelectorAll('#type-row .type-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-}
+function setType(t,btn){newSegType=t;document.querySelectorAll('#type-row .type-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
 
 async function addSeg(){
   const from=document.getElementById('ns-from').value.trim();
@@ -701,8 +712,7 @@ async function addSeg(){
 }
 
 async function saveSeg(i){
-  const seg=currentSegs[i];
-  const d=getSeg(i);
+  const seg=currentSegs[i];const d=getSeg(i);
   const {error}=await sb.from('segments').update({
     from_city:d.from_city,to_city:d.to_city,
     date_from:d.date_from,time_dep:d.time_dep,time_arr:d.time_arr,
@@ -722,10 +732,8 @@ async function delSeg(i){
 
 function renderAlerts(){
   const a=[];
-  if(currentSegs.some((_,i)=>hasDraft(i)))
-    a.push({t:'info',txt:'💾 Есть несохранённые изменения. Нажмите «Сохранить» когда закончите.'});
-  else if(currentSegs.length>0)
-    a.push({t:'ok',txt:'✓ Все сохранено. При переходе на другой сайт страница восстановится автоматически.'});
+  if(currentSegs.some((_,i)=>hasDraft(i)))a.push({t:'info',txt:'💾 Есть несохранённые изменения. Нажмите «Сохранить» когда закончите.'});
+  else if(currentSegs.length>0)a.push({t:'ok',txt:'✓ Все сохранено. При переходе на другой сайт страница восстановится автоматически.'});
   const box=document.getElementById('alerts-box');
   if(box)box.innerHTML=a.map(x=>`<div class="alert ${x.t}">${x.txt}</div>`).join('');
 }
@@ -736,10 +744,7 @@ function renderTL(){
   tl.innerHTML=currentSegs.map((seg,i)=>{
     const s=getSeg(i);
     return`<div class="tli">
-    <div class="tdc">
-      <div class="td ${s.type==='flight'?'flight':''}"></div>
-      ${i<currentSegs.length-1?'<div class="tline"></div>':''}
-    </div>
+    <div class="tdc"><div class="td ${s.type==='flight'?'flight':''}"></div>${i<currentSegs.length-1?'<div class="tline"></div>':''}</div>
     <div class="tco">
       <div class="tdate">${fmtD(s.date_from)}${s.time_dep&&s.time_dep!=='—'?' · '+s.time_dep:''}</div>
       <div class="tlbl">${IC[s.type]} ${s.from_city||'?'} → ${s.to_city||'?'}</div>
