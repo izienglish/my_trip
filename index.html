@@ -241,100 +241,121 @@ function exportToCalendar(){
   const segs=currentSegs.map((s,i)=>getSeg(i)).filter(s=>s.date_from);
   if(!segs.length){alert('Нет сегментов с датами для экспорта!');return;}
 
-  // Формат даты для ICS: YYYYMMDD
-  function icsDateOnly(dateStr){
-    if(!dateStr)return null;
-    return dateStr.replace(/-/g,'');
-  }
+  function icsDateOnly(d){return d.replace(/-/g,'');}
 
-  // Формат даты+времени для ICS: YYYYMMDDTHHmmss
   function icsDateTime(dateStr,timeStr){
-    if(!dateStr)return null;
     const d=dateStr.replace(/-/g,'');
-    if(!timeStr||timeStr==='—'||timeStr==='')return d; // без времени — только дата
+    if(!timeStr||timeStr==='—'||timeStr==='')return null;
     const t=timeStr.replace(':','')+'00';
     return d+'T'+t+'00';
   }
 
-  function esc(s){return(s||'').replace(/\\/g,'\\\\').replace(/,/g,'\\,').replace(/;/g,'\\;').replace(/\n/g,'\\n');}
+  // Экранирование без URL — убираем длинные ссылки из заметок
+  function esc(s){
+    if(!s)return'';
+    // Убрать URL (начинаются с http)
+    const clean=s.replace(/https?:\/\/\S+/g,'[ссылка]').replace(/\\/g,'\\\\').replace(/,/g,'\\,').replace(/;/g,'\\;');
+    return clean;
+  }
 
-  const lines=[
+  // Перенос длинных строк по стандарту ICS (макс 75 байт)
+  function foldLine(line){
+    const bytes=new TextEncoder().encode(line);
+    if(bytes.length<=75)return line;
+    const result=[];
+    let pos=0;
+    let first=true;
+    while(pos<line.length){
+      const prefix=first?'':' ';
+      const maxLen=first?75:74;
+      // Берём по символам пока не превысим лимит байт
+      let chunk='';
+      let byteLen=0;
+      for(let i=pos;i<line.length;i++){
+        const cb=new TextEncoder().encode(line[i]).length;
+        if(byteLen+cb>(first?75:74))break;
+        chunk+=line[i];byteLen+=cb;
+      }
+      if(!chunk)chunk=line[pos]; // минимум 1 символ
+      result.push(prefix+chunk);
+      pos+=chunk.length;
+      first=false;
+    }
+    return result.join('\r\n');
+  }
+
+  const rawLines=[
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//МоиПоездки//RU',
+    'PRODID:-//MoiPoezdki//RU',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
-    'X-WR-CALNAME:'+esc(currentTrip.name),
-    'X-WR-TIMEZONE:Europe/Kiev',
   ];
 
   segs.forEach((s,idx)=>{
-    const hasTime=s.time_dep&&s.time_dep!=='—'&&s.time_dep!=='';
+    const hasDepTime=s.time_dep&&s.time_dep!=='—'&&s.time_dep!=='';
     const hasArrTime=s.time_arr&&s.time_arr!=='—'&&s.time_arr!=='';
-
     let dtstart,dtend,allDay=false;
 
-    if(hasTime){
+    if(hasDepTime){
       dtstart=icsDateTime(s.date_from,s.time_dep);
-      // Если время прибытия тоже есть — используем его, иначе +2 часа
       if(hasArrTime){
         dtend=icsDateTime(s.date_from,s.time_arr);
+        // Если время прибытия меньше отправления — следующий день
+        if(s.time_arr<s.time_dep){
+          const dt=new Date(s.date_from);dt.setDate(dt.getDate()+1);
+          dtend=icsDateTime(dt.toISOString().slice(0,10),s.time_arr);
+        }
       } else {
-        // Прибавить 2 часа к времени отправления
-        const [hh,mm]=(s.time_dep||'00:00').split(':').map(Number);
+        const[hh,mm]=(s.time_dep||'00:00').split(':').map(Number);
         const endH=String((hh+2)%24).padStart(2,'0');
         dtend=icsDateTime(s.date_from,`${endH}:${String(mm).padStart(2,'0')}`);
       }
     } else {
-      // Без времени — событие на весь день
       allDay=true;
       dtstart=icsDateOnly(s.date_from);
-      // Следующий день для DTEND при all-day
-      const dt=new Date(s.date_from);
-      dt.setDate(dt.getDate()+1);
+      const dt=new Date(s.date_from);dt.setDate(dt.getDate()+1);
       dtend=dt.toISOString().slice(0,10).replace(/-/g,'');
     }
 
-    const title=`${IC[s.type]||''} ${s.from_city||'?'} → ${s.to_city||'?'}`;
+    const title=`${IC[s.type]||''} ${s.from_city||'?'} - ${s.to_city||'?'}`;
     const descParts=[
       s.carrier?`Перевозчик: ${s.carrier}`:'',
       s.duration?`Длительность: ${s.duration}`:'',
       s.dep_address?`Отправление: ${s.dep_address}`:'',
       s.arr_address?`Прибытие: ${s.arr_address}`:'',
-      s.notes?`Заметка: ${s.notes}`:'',
       s.price_amount?`Стоимость: ${s.price_amount} ${CS[s.price_currency||'USD']}`:'',
     ].filter(Boolean);
 
-    const uid=`mytrip-${currentTrip.id}-seg${idx}-${Date.now()}@mytrip.app`;
-    const now=new Date().toISOString().replace(/[-:]/g,'').slice(0,15)+'Z';
+    const uid=`seg${idx}-${currentTrip.id.slice(0,8)}@mytrip`;
+    const now=new Date().toISOString().replace(/[-:.]/g,'').slice(0,15)+'Z';
 
-    lines.push('BEGIN:VEVENT');
-    lines.push(`UID:${uid}`);
-    lines.push(`DTSTAMP:${now}`);
+    rawLines.push('BEGIN:VEVENT');
+    rawLines.push('UID:'+uid);
+    rawLines.push('DTSTAMP:'+now);
     if(allDay){
-      lines.push(`DTSTART;VALUE=DATE:${dtstart}`);
-      lines.push(`DTEND;VALUE=DATE:${dtend}`);
+      rawLines.push('DTSTART;VALUE=DATE:'+dtstart);
+      rawLines.push('DTEND;VALUE=DATE:'+dtend);
     } else {
-      lines.push(`DTSTART:${dtstart}`);
-      lines.push(`DTEND:${dtend}`);
+      rawLines.push('DTSTART:'+dtstart);
+      rawLines.push('DTEND:'+dtend);
     }
-    lines.push(`SUMMARY:${esc(title)}`);
-    if(descParts.length)lines.push(`DESCRIPTION:${esc(descParts.join('\\n'))}`);
-    if(s.dep_address)lines.push(`LOCATION:${esc(s.dep_address)}`);
-    lines.push('END:VEVENT');
+    rawLines.push('SUMMARY:'+esc(title));
+    if(descParts.length)rawLines.push('DESCRIPTION:'+esc(descParts.join(' | ')));
+    if(s.dep_address)rawLines.push('LOCATION:'+esc(s.dep_address));
+    rawLines.push('END:VEVENT');
   });
 
-  lines.push('END:VCALENDAR');
+  rawLines.push('END:VCALENDAR');
 
-  const content=lines.join('\r\n');
+  // Применяем folding к каждой строке
+  const content=rawLines.map(foldLine).join('\r\n');
   const blob=new Blob([content],{type:'text/calendar;charset=utf-8'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
   a.href=url;
   a.download=`${(currentTrip.name||'trip').replace(/\s+/g,'_')}.ics`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
 
