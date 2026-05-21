@@ -244,7 +244,10 @@ function buildICS(){
   // Только ASCII — убираем эмодзи и спецсимволы из служебных полей
   function toAsciiSummary(s){
     const typeMap={train:'Train',bus:'Bus',flight:'Flight'};
-    return`${typeMap[s.type]||s.type}: ${s.from_city||'?'} - ${s.to_city||'?'}`;
+    const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    let dateStr='';
+    if(s.date_from){const[,m,d]=s.date_from.split('-');dateStr=` (${+d} ${months[+m-1]})`;}
+    return`${typeMap[s.type]||s.type}: ${s.from_city||'?'} - ${s.to_city||'?'}${dateStr}`;
   }
 
   // Экранирование текста для ICS
@@ -693,7 +696,16 @@ function renderSegList(){
         </div>
         <div class="smeta">
           <span>📅 ${fmtD(s.date_from)}</span>
-          <span>⏰ ${s.time_dep&&s.time_dep!=='—'?s.time_dep+'→'+(s.time_arr||'?'):'уточнить'}</span>
+          <span>⏰ ${(()=>{
+            if(!s.time_dep||s.time_dep==='—')return'уточнить';
+            let arr=s.time_arr&&s.time_arr!=='—'?s.time_arr:'?';
+            let suffix='';
+            if(s.time_arr&&s.time_arr!=='—'&&s.time_arr<s.time_dep&&s.date_from){
+              const dt=new Date(s.date_from);dt.setDate(dt.getDate()+1);
+              suffix=` <span style="color:var(--accent);font-size:8px">${fmtD(dt.toISOString().slice(0,10))}</span>`;
+            }
+            return s.time_dep+'→'+arr+suffix;
+          })()}</span>
           <span>⏱ ${s.duration||'—'}</span>
         </div>
       </div>
@@ -708,7 +720,17 @@ function renderSegList(){
       <div class="frow">
         <div class="efield"><label>Дата</label><input type="date" value="${s.date_from||''}" onchange="ds(${i},'date_from',this.value)"></div>
         <div class="efield"><label>Выезд</label><input type="time" value="${s.time_dep&&s.time_dep!=='—'?s.time_dep:''}" onchange="ds(${i},'time_dep',this.value||'—')"></div>
-        <div class="efield"><label>Прибытие</label><input type="time" value="${s.time_arr&&s.time_arr!=='—'?s.time_arr:''}" onchange="ds(${i},'time_arr',this.value||'—')"></div>
+        <div class="efield">
+          <label>Прибытие ${(()=>{
+            if(s.time_arr&&s.time_arr!=='—'&&s.time_dep&&s.time_dep!=='—'&&s.time_arr<s.time_dep&&s.date_from){
+              const dt=new Date(s.date_from);dt.setDate(dt.getDate()+1);
+              const arrDate=dt.toISOString().slice(0,10);
+              return`<span style="color:var(--accent);font-size:9px;background:rgba(240,192,64,.15);padding:1px 5px;border-radius:3px;border:1px solid rgba(240,192,64,.3)">${fmtD(arrDate)}</span>`;
+            }
+            return'';
+          })()}</label>
+          <input type="time" value="${s.time_arr&&s.time_arr!=='—'?s.time_arr:''}" onchange="ds(${i},'time_arr',this.value||'—')">
+        </div>
       </div>
       <div class="price-block">
         <label>Стоимость</label>
