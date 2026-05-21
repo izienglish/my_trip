@@ -236,127 +236,175 @@ function getLinks(s){
   ];
 }
 
-// ── ICS CALENDAR EXPORT (fixed) ──
-function exportToCalendar(){
+// ── ICS CALENDAR EXPORT ──
+function buildICS(){
   const segs=currentSegs.map((s,i)=>getSeg(i)).filter(s=>s.date_from);
-  if(!segs.length){alert('Нет сегментов с датами для экспорта!');return;}
+  if(!segs.length)return null;
 
-  function icsDateOnly(d){return d.replace(/-/g,'');}
-
-  function icsDateTime(dateStr,timeStr){
-    const d=dateStr.replace(/-/g,'');
-    if(!timeStr||timeStr==='—'||timeStr==='')return null;
-    const t=timeStr.replace(':','')+'00';
-    return d+'T'+t+'00';
+  // Только ASCII — убираем эмодзи и спецсимволы из служебных полей
+  function toAsciiSummary(s){
+    const typeMap={train:'Train',bus:'Bus',flight:'Flight'};
+    return`${typeMap[s.type]||s.type}: ${s.from_city||'?'} - ${s.to_city||'?'}`;
   }
 
-  // Экранирование без URL — убираем длинные ссылки из заметок
-  function esc(s){
-    if(!s)return'';
-    // Убрать URL (начинаются с http)
-    const clean=s.replace(/https?:\/\/\S+/g,'[ссылка]').replace(/\\/g,'\\\\').replace(/,/g,'\\,').replace(/;/g,'\\;');
-    return clean;
+  // Экранирование текста для ICS
+  function esc(str){
+    if(!str)return'';
+    return str
+      .replace(/https?:\/\/\S+/g,'') // убрать URL
+      .replace(/\\/g,'\\\\')
+      .replace(/;/g,'\\;')
+      .replace(/,/g,'\\,')
+      .replace(/\n/g,'\\n')
+      .trim();
   }
 
-  // Перенос длинных строк по стандарту ICS (макс 75 байт)
-  function foldLine(line){
-    const bytes=new TextEncoder().encode(line);
-    if(bytes.length<=75)return line;
-    const result=[];
-    let pos=0;
-    let first=true;
-    while(pos<line.length){
-      const prefix=first?'':' ';
-      const maxLen=first?75:74;
-      // Берём по символам пока не превысим лимит байт
-      let chunk='';
-      let byteLen=0;
-      for(let i=pos;i<line.length;i++){
-        const cb=new TextEncoder().encode(line[i]).length;
-        if(byteLen+cb>(first?75:74))break;
-        chunk+=line[i];byteLen+=cb;
+  // Folding строк по RFC 5545 (макс 75 октетов)
+  function fold(line){
+    const enc=new TextEncoder();
+    if(enc.encode(line).length<=75)return line;
+    const chars=[...line];
+    const out=[];
+    let cur='';let curBytes=0;let first=true;
+    for(const ch of chars){
+      const chBytes=enc.encode(ch).length;
+      const limit=first?75:74;
+      if(curBytes+chBytes>limit){
+        out.push(cur);
+        cur=(first?'':' ')+ch;
+        curBytes=(first?0:1)+chBytes;
+        first=false;
+      } else {
+        cur+=ch;curBytes+=chBytes;
       }
-      if(!chunk)chunk=line[pos]; // минимум 1 символ
-      result.push(prefix+chunk);
-      pos+=chunk.length;
-      first=false;
     }
-    return result.join('\r\n');
+    if(cur)out.push(cur);
+    return out.join('\r\n ');
   }
 
-  const rawLines=[
+  function dtOnly(d){return d.replace(/-/g,'');}
+  function dtTime(date,time){
+    if(!time||time==='—'||time==='')return null;
+    return date.replace(/-/g,'')+`T${time.replace(':','')}00`;
+  }
+  function nextDay(d){
+    const dt=new Date(d);dt.setDate(dt.getDate()+1);
+    return dt.toISOString().slice(0,10).replace(/-/g,'');
+  }
+
+  const now=new Date().toISOString().replace(/[-:.]/g,'').slice(0,15)+'Z';
+
+  const lines=[
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//MoiPoezdki//RU',
+    'PRODID:-//MyTrip//EN',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
   ];
 
-  segs.forEach((s,idx)=>{
-    const hasDepTime=s.time_dep&&s.time_dep!=='—'&&s.time_dep!=='';
-    const hasArrTime=s.time_arr&&s.time_arr!=='—'&&s.time_arr!=='';
+  segs.forEach((s,i)=>{
+    const hasD=s.time_dep&&s.time_dep!=='—'&&s.time_dep!=='';
+    const hasA=s.time_arr&&s.time_arr!=='—'&&s.time_arr!=='';
     let dtstart,dtend,allDay=false;
 
-    if(hasDepTime){
-      dtstart=icsDateTime(s.date_from,s.time_dep);
-      if(hasArrTime){
-        dtend=icsDateTime(s.date_from,s.time_arr);
-        // Если время прибытия меньше отправления — следующий день
-        if(s.time_arr<s.time_dep){
-          const dt=new Date(s.date_from);dt.setDate(dt.getDate()+1);
-          dtend=icsDateTime(dt.toISOString().slice(0,10),s.time_arr);
-        }
+    if(hasD){
+      dtstart=dtTime(s.date_from,s.time_dep);
+      if(hasA){
+        // Если прибытие раньше отправления — следующий день
+        const arrDate=s.time_arr<s.time_dep?nextDay(s.date_from):s.date_from;
+        dtend=dtTime(arrDate,s.time_arr);
       } else {
-        const[hh,mm]=(s.time_dep||'00:00').split(':').map(Number);
-        const endH=String((hh+2)%24).padStart(2,'0');
-        dtend=icsDateTime(s.date_from,`${endH}:${String(mm).padStart(2,'0')}`);
+        // +2 часа
+        const[h,m]=(s.time_dep).split(':').map(Number);
+        const eh=String((h+2)%24).padStart(2,'0');
+        const em=String(m).padStart(2,'0');
+        dtend=dtTime(s.date_from,`${eh}:${em}`);
       }
     } else {
       allDay=true;
-      dtstart=icsDateOnly(s.date_from);
-      const dt=new Date(s.date_from);dt.setDate(dt.getDate()+1);
-      dtend=dt.toISOString().slice(0,10).replace(/-/g,'');
+      dtstart=dtOnly(s.date_from);
+      dtend=nextDay(s.date_from);
     }
 
-    const title=`${IC[s.type]||''} ${s.from_city||'?'} - ${s.to_city||'?'}`;
+    const summary=toAsciiSummary(s);
     const descParts=[
-      s.carrier?`Перевозчик: ${s.carrier}`:'',
-      s.duration?`Длительность: ${s.duration}`:'',
-      s.dep_address?`Отправление: ${s.dep_address}`:'',
-      s.arr_address?`Прибытие: ${s.arr_address}`:'',
-      s.price_amount?`Стоимость: ${s.price_amount} ${CS[s.price_currency||'USD']}`:'',
+      s.carrier&&`Carrier: ${s.carrier}`,
+      s.duration&&`Duration: ${s.duration}`,
+      s.dep_address&&`From: ${s.dep_address}`,
+      s.arr_address&&`To: ${s.arr_address}`,
+      s.price_amount&&`Price: ${s.price_amount} ${s.price_currency||'USD'}`,
     ].filter(Boolean);
 
-    const uid=`seg${idx}-${currentTrip.id.slice(0,8)}@mytrip`;
-    const now=new Date().toISOString().replace(/[-:.]/g,'').slice(0,15)+'Z';
-
-    rawLines.push('BEGIN:VEVENT');
-    rawLines.push('UID:'+uid);
-    rawLines.push('DTSTAMP:'+now);
-    if(allDay){
-      rawLines.push('DTSTART;VALUE=DATE:'+dtstart);
-      rawLines.push('DTEND;VALUE=DATE:'+dtend);
-    } else {
-      rawLines.push('DTSTART:'+dtstart);
-      rawLines.push('DTEND:'+dtend);
-    }
-    rawLines.push('SUMMARY:'+esc(title));
-    if(descParts.length)rawLines.push('DESCRIPTION:'+esc(descParts.join(' | ')));
-    if(s.dep_address)rawLines.push('LOCATION:'+esc(s.dep_address));
-    rawLines.push('END:VEVENT');
+    lines.push('BEGIN:VEVENT');
+    lines.push(`UID:seg${i}-${currentTrip.id.replace(/-/g,'').slice(0,12)}@mytrip`);
+    lines.push(`DTSTAMP:${now}`);
+    lines.push(allDay?`DTSTART;VALUE=DATE:${dtstart}`:`DTSTART:${dtstart}`);
+    lines.push(allDay?`DTEND;VALUE=DATE:${dtend}`:`DTEND:${dtend}`);
+    lines.push(`SUMMARY:${esc(summary)}`);
+    if(descParts.length)lines.push(`DESCRIPTION:${esc(descParts.join(' | '))}`);
+    if(s.dep_address)lines.push(`LOCATION:${esc(s.dep_address)}`);
+    lines.push('END:VEVENT');
   });
 
-  rawLines.push('END:VCALENDAR');
+  lines.push('END:VCALENDAR');
+  return lines.map(fold).join('\r\n');
+}
 
-  // Применяем folding к каждой строке
-  const content=rawLines.map(foldLine).join('\r\n');
-  const blob=new Blob([content],{type:'text/calendar;charset=utf-8'});
+function exportToCalendar(){
+  const content=buildICS();
+  if(!content){alert('Нет сегментов с датами!');return;}
+  const blob=new Blob([content],{type:'text/calendar'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
   a.href=url;
-  a.download=`${(currentTrip.name||'trip').replace(/\s+/g,'_')}.ics`;
-  document.body.appendChild(a);a.click();document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  a.download=`${(currentTrip.name||'trip').replace(/[^a-zA-Z0-9_-]/g,'_')}.ics`;
+  document.body.appendChild(a);a.click();
+  document.body.removeChild(a);URL.revokeObjectURL(url);
+}
+
+// Google Calendar links for each segment
+function openGoogleCalendar(){
+  const segs=currentSegs.map((s,i)=>getSeg(i)).filter(s=>s.date_from);
+  if(!segs.length){alert('Нет сегментов с датами!');return;}
+
+  segs.forEach((s,i)=>{
+    setTimeout(()=>{
+      const hasD=s.time_dep&&s.time_dep!=='—'&&s.time_dep!=='';
+      const hasA=s.time_arr&&s.time_arr!=='—'&&s.time_arr!=='';
+      const typeNames={train:'Поезд',bus:'Автобус',flight:'Рейс'};
+      const title=`${typeNames[s.type]||s.type}: ${s.from_city||'?'} → ${s.to_city||'?'}`;
+
+      let dates;
+      if(hasD){
+        const dStr=s.date_from.replace(/-/g,'');
+        const tDep=s.time_dep.replace(':','')+'00';
+        let arrDate=s.date_from;
+        if(hasA&&s.time_arr<s.time_dep){
+          const dt=new Date(s.date_from);dt.setDate(dt.getDate()+1);
+          arrDate=dt.toISOString().slice(0,10);
+        }
+        const tArr=hasA?(s.time_arr.replace(':','')+'00'):
+          (()=>{const[h,m]=s.time_dep.split(':').map(Number);return String((h+2)%24).padStart(2,'0')+String(m).padStart(2,'0')+'00';})();
+        dates=`${dStr}T${tDep}/${arrDate.replace(/-/g,'')}T${tArr}`;
+      } else {
+        const d=s.date_from.replace(/-/g,'');
+        dates=`${d}/${d}`;
+      }
+
+      const details=[
+        s.carrier&&`Перевозчик: ${s.carrier}`,
+        s.duration&&`Длительность: ${s.duration}`,
+        s.price_amount&&`Стоимость: ${s.price_amount} ${s.price_currency||'USD'}`,
+      ].filter(Boolean).join('\n');
+
+      const url=`https://calendar.google.com/calendar/render?action=TEMPLATE`+
+        `&text=${encodeURIComponent(title)}`+
+        `&dates=${encodeURIComponent(dates)}`+
+        `&details=${encodeURIComponent(details)}`+
+        `&location=${encodeURIComponent(s.dep_address||'')}`;
+      window.open(url,'_blank');
+    },i*500);
+  });
 }
 
 // ── FILE UPLOAD ──
@@ -581,10 +629,20 @@ function renderTrip(){
       <div class="sc"><h3>📅 Хронология</h3><div class="tl" id="tl"></div></div>
       <div class="sc"><h3>💰 Бюджет</h3><div class="bgt" id="bgt"></div><div class="btotal"><span>ИТОГО</span><span class="am" id="btotal-val">—</span></div></div>
       <div class="sc">
-        <h3>📆 Экспорт в календарь</h3>
-        <div style="padding:10px 11px">
-          <div style="font-size:10px;color:var(--muted);font-family:var(--mono);margin-bottom:8px;line-height:1.5">Скачайте .ics и откройте на телефоне — все сегменты добавятся в Календарь автоматически.</div>
-          <button class="cal-btn" onclick="exportToCalendar()">📆 Скачать .ics для календаря</button>
+        <h3>📆 Добавить в календарь</h3>
+        <div style="padding:10px 11px;display:flex;flex-direction:column;gap:7px;">
+          <div style="font-size:10px;color:var(--muted);font-family:var(--mono);line-height:1.5">
+            Все сегменты маршрута раскинутся по датам.
+          </div>
+          <button class="cal-btn" style="background:rgba(66,133,244,.1);border-color:rgba(66,133,244,.3);color:#6ab0f5;" onclick="openGoogleCalendar()">
+            <span>📅</span> Добавить в Google Calendar
+          </button>
+          <button class="cal-btn" onclick="exportToCalendar()">
+            <span>⬇️</span> Скачать .ics (Mac / Outlook)
+          </button>
+          <div style="font-size:9px;color:var(--muted);font-family:var(--mono);line-height:1.5">
+            📱 iPhone: скачайте .ics → отправьте себе на email → откройте вложение в приложении Почта
+          </div>
         </div>
       </div>
       <div class="sc"><h3>💱 Курс валют</h3><div class="rates-card" id="rates-card"></div></div>
