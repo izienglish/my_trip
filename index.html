@@ -438,28 +438,43 @@ function exportToCalendar(){
   document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
 }
 
+function gcalUrl(s){
+  const hasD=s.time_dep&&s.time_dep!=='—'&&s.time_dep!=='';
+  const hasA=s.time_arr&&s.time_arr!=='—'&&s.time_arr!=='';
+  const names={train:'Поезд',bus:'Автобус',flight:'Рейс'};
+  const title=`${names[s.type]||s.type}: ${s.from_city||'?'} - ${s.to_city||'?'}`;
+  let dates;
+  if(hasD){
+    const dStr=s.date_from.replace(/-/g,'');const tDep=s.time_dep.replace(':','')+'00';
+    let arrDate=s.date_from;
+    if(hasA&&s.time_arr<s.time_dep){const dt=new Date(s.date_from);dt.setDate(dt.getDate()+1);arrDate=dt.toISOString().slice(0,10);}
+    const tArr=hasA?(s.time_arr.replace(':','')+'00'):(()=>{const[h,m]=s.time_dep.split(':').map(Number);return String((h+2)%24).padStart(2,'0')+String(m).padStart(2,'0')+'00';})();
+    dates=`${dStr}T${tDep}/${arrDate.replace(/-/g,'')}T${tArr}`;
+  }else{const d=(s.date_from||'20260101').replace(/-/g,'');dates=`${d}/${d}`;}
+  const details=[s.carrier&&`Перевозчик: ${s.carrier}`,s.duration&&`Длительность: ${s.duration}`,s.price_amount&&`Стоимость: ${s.price_amount} ${s.price_currency||'USD'}`].filter(Boolean).join('\n');
+  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${encodeURIComponent(dates)}&details=${encodeURIComponent(details)}&location=${encodeURIComponent(s.dep_address||'')}`;
+}
+
 function openGoogleCalendar(){
+  // Show modal with links for each segment
   const segs=currentSegs.map((s,i)=>getSeg(i)).filter(s=>s.date_from);
   if(!segs.length){alert('Нет сегментов с датами!');return;}
-  segs.forEach((s,i)=>{
-    setTimeout(()=>{
-      const hasD=s.time_dep&&s.time_dep!=='—'&&s.time_dep!=='';
-      const hasA=s.time_arr&&s.time_arr!=='—'&&s.time_arr!=='';
-      const names={train:'Поезд',bus:'Автобус',flight:'Рейс'};
-      const title=`${names[s.type]||s.type}: ${s.from_city||'?'} → ${s.to_city||'?'}`;
-      let dates;
-      if(hasD){
-        const dStr=s.date_from.replace(/-/g,'');const tDep=s.time_dep.replace(':','')+'00';
-        let arrDate=s.date_from;
-        if(hasA&&s.time_arr<s.time_dep){const dt=new Date(s.date_from);dt.setDate(dt.getDate()+1);arrDate=dt.toISOString().slice(0,10);}
-        const tArr=hasA?(s.time_arr.replace(':','')+'00'):(()=>{const[h,m]=s.time_dep.split(':').map(Number);return String((h+2)%24).padStart(2,'0')+String(m).padStart(2,'0')+'00';})();
-        dates=`${dStr}T${tDep}/${arrDate.replace(/-/g,'')}T${tArr}`;
-      }else{const d=s.date_from.replace(/-/g,'');dates=`${d}/${d}`;}
-      const details=[s.carrier&&`Перевозчик: ${s.carrier}`,s.duration&&`Длительность: ${s.duration}`,s.price_amount&&`Стоимость: ${s.price_amount} ${s.price_currency||'USD'}`].filter(Boolean).join('\n');
-      const url=`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${encodeURIComponent(dates)}&details=${encodeURIComponent(details)}&location=${encodeURIComponent(s.dep_address||'')}`;
-      window.open(url,'_blank');
-    },i*600);
-  });
+  const linksHTML=segs.map(s=>`
+    <a href="${gcalUrl(s)}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;color:var(--text);text-decoration:none;font-family:var(--mono);font-size:11px;margin-bottom:6px;">
+      <span>${IC[s.type]||'📍'}</span>
+      <span style="flex:1">${s.from_city||'?'} → ${s.to_city||'?'} · ${fmtD(s.date_from)}</span>
+      <span style="color:var(--accent2)">+ добавить ↗</span>
+    </a>`).join('');
+  const modal=document.createElement('div');
+  modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
+  modal.innerHTML=`<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;max-width:480px;width:100%;max-height:80vh;overflow-y:auto;">
+    <div style="font-family:var(--display);font-size:15px;font-weight:700;margin-bottom:6px;">Добавить в Google Calendar</div>
+    <div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:14px;">Нажмите на каждый сегмент — откроется Google Calendar с заполненными данными. Нажмите "Сохранить" в каждом.</div>
+    ${linksHTML}
+    <button onclick="this.closest('div').parentNode.remove()" style="width:100%;padding:9px;border:1px solid var(--border);background:none;color:var(--muted);border-radius:7px;font-family:var(--mono);font-size:11px;cursor:pointer;margin-top:4px;">Закрыть</button>
+  </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click',e=>{if(e.target===modal)modal.remove();});
 }
 
 // ── FILE UPLOAD ──
@@ -688,41 +703,63 @@ function addCustomItem(cat){
 function parsePaste(){
   const text=document.getElementById('paste-input').value;
   if(!text.trim()){alert('Вставьте текст письма');return;}
+  // Autosave text to localStorage
+  try{localStorage.setItem('paste_draft_'+currentTrip?.id, text);}catch(e){}
   const result={type:'flight',from:'',to:'',date:'',timeDep:'',timeArr:'',carrier:'',price:''};
+  const lines=text.split(/\n/).map(l=>l.trim()).filter(Boolean);
 
-  // Type detection
-  if(/поїзд|поезд|train|залізниця|залізнич|pkp|uz\./i.test(text))result.type='train';
+  // Type detection - flight first (most common)
+  if(/рейс|flight|авіа|самолет|авіакомпанія|airline|boarding|посадк/i.test(text))result.type='flight';
+  else if(/поїзд|поезд|train|залізниця|pkp|uz\.|вагон|купе|плацкарт/i.test(text))result.type='train';
   else if(/автобус|bus|flixbus|ecolines/i.test(text))result.type='bus';
   else result.type='flight';
 
-  // Date patterns
-  const dateMatch=text.match(/(\d{2})[.\-\/](\d{2})[.\-\/](\d{2,4})/);
-  if(dateMatch){
-    const[,d,m,y]=dateMatch;
-    const yr=y.length===2?'20'+y:y;
-    result.date=`${yr}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
+  // Date: try ISO first (YYYY-MM-DD)
+  const isoDate=text.match(/\b(202[0-9])-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])\b/);
+  if(isoDate){result.date=isoDate[0];}
+  else {
+    // DD.MM.YYYY or DD/MM/YYYY
+    const dmyMatch=text.match(/\b(0?[1-9]|[12]\d|3[01])[.\/](0?[1-9]|1[0-2])[.\/](202\d)\b/);
+    if(dmyMatch){const[,d,m,y]=dmyMatch;result.date=`${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;}
+    else {
+      // "21 июн" or "21 июня"
+      const months={янв:'01',фев:'02',мар:'03',апр:'04',май:'05',мая:'05',июн:'06',июня:'06',июл:'07',июля:'07',авг:'08',сен:'09',окт:'10',ноя:'11',дек:'12'};
+      const ruDate=text.match(/\b(\d{1,2})\s+(янв|фев|мар|апр|май|мая|июн|июня|июл|июля|авг|сен|окт|ноя|дек)/i);
+      if(ruDate){const d=ruDate[1].padStart(2,'0');const m=months[ruDate[2].toLowerCase()];result.date=`2026-${m}-${d}`;}
+    }
   }
-  const dateMatch2=text.match(/(\d{4})-(\d{2})-(\d{2})/);
-  if(dateMatch2)result.date=dateMatch2[0];
 
-  // Time patterns
-  const times=text.match(/\b(\d{1,2}):(\d{2})\b/g);
-  if(times?.length>=1)result.timeDep=times[0];
-  if(times?.length>=2)result.timeArr=times[1];
+  // Times: HH:MM pattern (skip dates like 19:10-21:00 as one string)
+  const allTimes=[];
+  const timeRe=/\b([01]?\d|2[0-3]):([0-5]\d)\b/g;
+  let tm;while((tm=timeRe.exec(text))!==null)allTimes.push(tm[0]);
+  if(allTimes.length>=1)result.timeDep=allTimes[0];
+  if(allTimes.length>=2)result.timeArr=allTimes[1];
 
-  // From/To
-  const fromTo=text.match(/(?:з|від|from|откуда|відправлення)[:\s]+([А-ЯЄІЇёA-Z][а-яєіїёa-z\s\-]+)/i);
-  if(fromTo)result.from=fromTo[1].trim().split(/[\n\r]/)[0].trim();
-  const toMatch=text.match(/(?:до|to|куда|прибуття|прибытие)[:\s]+([А-ЯЄІЇёA-Z][а-яєіїёa-z\s\-]+)/i);
-  if(toMatch)result.to=toMatch[1].trim().split(/[\n\r]/)[0].trim();
+  // From/To: look for "City1 - City2" or "City1 → City2" pattern
+  const routeMatch=text.match(/([А-ЯЄІЇA-Z][а-яєіїa-z\s]+?)\s*[-–→]\s*([А-ЯЄІЇA-Z][а-яєіїa-z\s]+)/);
+  if(routeMatch){
+    result.from=routeMatch[1].trim().split(/\s+/).slice(0,3).join(' ');
+    result.to=routeMatch[2].trim().split(/\s+/).slice(0,3).join(' ');
+  }
+  // Override with explicit from/to keywords
+  const fromKw=text.match(/(?:з|від|from|откуда|відправлення|departure)[:\s]+([А-ЯЄІЇA-Z][а-яєіїёa-z\s\-]{2,})/i);
+  if(fromKw)result.from=fromKw[1].trim().split(/[\n\r,]/)[0].trim().slice(0,30);
+  const toKw=text.match(/(?:до|to|куда|прибуття|прибытие|arrival)[:\s]+([А-ЯЄІЇA-Z][а-яєіїёa-z\s\-]{2,})/i);
+  if(toKw)result.to=toKw[1].trim().split(/[\n\r,]/)[0].trim().slice(0,30);
 
   // Price
   const priceMatch=text.match(/(\d[\d\s]*[,.]?\d*)\s*(грн|uah|₴|€|eur|\$|usd)/i);
-  if(priceMatch)result.price=priceMatch[1].replace(/\s/g,'');
+  if(priceMatch)result.price=priceMatch[1].replace(/[\s]/g,'');
 
-  // Carrier
-  const carrierMatch=text.match(/(?:перевізник|перевозчик|carrier|авіакомпанія|airline)[:\s]+([^\n\r,]+)/i);
-  if(carrierMatch)result.carrier=carrierMatch[1].trim();
+  // Carrier: airline names
+  const carrierKw=text.match(/(?:перевізник|перевозчик|carrier|авіакомпанія|airline|оператор)[:\s]+([^\n\r,]{2,40})/i);
+  if(carrierKw)result.carrier=carrierKw[1].trim();
+  else {
+    // Try to find known airline names
+    const airlines=['Lufthansa','Ryanair','Wizz Air','WizzAir','Ukraine International','UIA','Aegean','El Al','FlyOne','HiSky','SkyUp','Flixbus','FlixBus','Ecolines','PKP','УЗ'];
+    for(const a of airlines){if(text.includes(a)){result.carrier=a;break;}}
+  }
 
   parseResult=result;
   document.getElementById('parse-result').innerHTML=`
@@ -779,24 +816,35 @@ async function showPublicTrip(token){
   currentTrip=trip;currentSegs=segs||[];
   const total=currentSegs.reduce((a,s)=>a+toUAH(+s.price_amount||0,s.price_currency||'USD'),0);
   app.innerHTML=`
-    <div class="public-banner">👁 Публичный просмотр маршрута · <a href="${location.origin}${location.pathname}" style="color:var(--accent2)">Создать свой</a></div>
+    <div class="public-banner">👁 Публичный просмотр маршрута &middot; <a href="${location.origin}${location.pathname}" style="color:var(--accent2)">Создать свой планировщик</a></div>
     <div class="header"><h1>✈ ${trip.name}</h1><span class="header-total">${fmt(total)}</span></div>
-    <div style="padding:14px 16px">
-      <div class="stitle">Маршрут</div>
-      <div style="display:flex;flex-direction:column;gap:8px;">
+    <div style="padding:14px 16px;max-width:900px;margin:0 auto">
+      <div class="stitle" style="margin-bottom:10px">Маршрут</div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:24px">
         ${currentSegs.map(s=>`
         <div class="seg">
           <div class="seg-hdr" style="cursor:default">
             <div class="sicon icon-${s.type}">${IC[s.type]||'📍'}</div>
             <div class="sinfo">
               <div class="sroute"><span class="tpill tp-${s.type}">${TL[s.type]}</span>${s.from_city||'?'}<span class="arr">→</span>${s.to_city||'?'}</div>
-              <div class="smeta"><span>📅 ${fmtD(s.date_from)}</span><span>⏰ ${s.time_dep&&s.time_dep!=='—'?s.time_dep+'→'+(s.time_arr||'?'):'уточнить'}</span>${s.carrier?`<span>${s.carrier}</span>`:''}</div>
+              <div class="smeta">
+                <span>📅 ${fmtD(s.date_from)}</span>
+                <span>⏰ ${s.time_dep&&s.time_dep!=='—'?s.time_dep+'->'+(s.time_arr||'?'):'уточнить'}</span>
+                ${s.carrier?`<span>${s.carrier}</span>`:''}
+                ${s.dep_address?`<span>📍 ${s.dep_address}</span>`:''}
+              </div>
             </div>
             <div class="sprice">${fmt(toUAH(+s.price_amount||0,s.price_currency||'USD'))}</div>
           </div>
         </div>`).join('')}
       </div>
+      <div class="stitle" style="margin-bottom:10px">Карта маршрута</div>
+      <div id="trip-map" style="height:380px;border-radius:10px;border:1px solid var(--border);"></div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:8px;display:flex;gap:14px">
+        <span>🟢 Начало</span><span>🔵 Промежуточные</span><span>🔴 Конец</span>
+      </div>
     </div>`;
+  setTimeout(renderMap,300);
 }
 
 async function restoreTrip(id,name,segIdx,tab){
@@ -972,8 +1020,8 @@ function renderTrip(){
         <div class="paste-view">
           <div class="paste-box">
             <h3>📋 Импорт из письма</h3>
-            <p>Скопируйте текст письма-подтверждения (билет на поезд, самолёт, автобус) и вставьте сюда. Приложение попробует распознать данные автоматически.</p>
-            <textarea class="paste-textarea" id="paste-input" placeholder="Вставьте текст письма сюда..."></textarea>
+            <p>Скопируйте текст письма-подтверждения (билет на поезд, самолёт, автобус) и вставьте сюда. Приложение попробует распознать данные автоматически. Текст сохраняется автоматически.</p>
+            <textarea class="paste-textarea" id="paste-input" placeholder="Вставьте текст письма сюда..." oninput="try{localStorage.setItem('paste_draft_'+currentTrip?.id,this.value)}catch(e){}">${(()=>{try{return localStorage.getItem('paste_draft_'+currentTrip?.id)||'';}catch(e){return '';}})()}</textarea>
             <button class="parse-btn" onclick="parsePaste()">🔍 Распознать данные</button>
             <div id="parse-result"></div>
           </div>
