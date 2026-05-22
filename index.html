@@ -548,7 +548,11 @@ function copyShare(){
 
 // ── MAP ──
 function renderMap(){
-  const el=document.getElementById('map-view-content');if(!el)return;
+  // Works for both trip detail tab and public share page
+  const el=document.getElementById('map-view-content');
+  // If no map-view-content but trip-map exists (public page), proceed directly
+  const mapDiv=document.getElementById('trip-map');
+  if(!mapDiv)return;
   const points=currentSegs.map((s,i)=>{const d=getSeg(i);return{from:d.from_city,to:d.to_city,type:d.type};});
   const coords=[];
   points.forEach(p=>{
@@ -561,22 +565,19 @@ function renderMap(){
 
   if(!unique.length){el.innerHTML='<div style="color:var(--muted);font-family:var(--mono);font-size:11px;padding:20px">Нет городов с известными координатами. Добавьте сегменты с городами из списка.</div>';return;}
 
-  setTimeout(()=>{
-    if(mapInstance){mapInstance.remove();mapInstance=null;}
-    const map=L.map('trip-map',{zoomControl:true});
-    mapInstance=map;
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap'}).addTo(map);
-    const latlngs=unique.map(c=>[c.lat,c.lng]);
-    // Draw route line
-    if(latlngs.length>1)L.polyline(latlngs,{color:'#7c6ff0',weight:2,dashArray:'5,5',opacity:0.8}).addTo(map);
-    // Add markers
-    unique.forEach((c,i)=>{
-      const color=i===0?'#3dd68c':i===unique.length-1?'#f05060':'#7c6ff0';
-      const icon=L.divIcon({html:`<div style="background:${color};width:10px;height:10px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.5)"></div>`,iconSize:[10,10],iconAnchor:[5,5],className:''});
-      L.marker([c.lat,c.lng],{icon}).addTo(map).bindPopup(`<b>${c.name}</b>`);
-    });
-    map.fitBounds(latlngs,{padding:[30,30]});
-  },100);
+  // Render map directly (no setTimeout wrapper needed, Leaflet already loaded)
+  if(mapInstance){try{mapInstance.remove();}catch(e){}mapInstance=null;}
+  const map=L.map('trip-map',{zoomControl:true});
+  mapInstance=map;
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap'}).addTo(map);
+  const latlngs=unique.map(c=>[c.lat,c.lng]);
+  if(latlngs.length>1)L.polyline(latlngs,{color:'#7c6ff0',weight:2,dashArray:'5,5',opacity:0.8}).addTo(map);
+  unique.forEach((c,i)=>{
+    const color=i===0?'#3dd68c':i===unique.length-1?'#f05060':'#7c6ff0';
+    const icon=L.divIcon({html:`<div style="background:${color};width:10px;height:10px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.5)"></div>`,iconSize:[10,10],iconAnchor:[5,5],className:''});
+    L.marker([c.lat,c.lng],{icon}).addTo(map).bindPopup(`<b>${c.name}</b>`);
+  });
+  map.fitBounds(latlngs,{padding:[30,30]});
 }
 
 // ── WEATHER ──
@@ -706,8 +707,11 @@ function parsePaste(){
   try{localStorage.setItem('paste_draft_'+currentTrip?.id,text);}catch(e){}
   const result={type:'flight',from:'',to:'',date:'',timeDep:'',timeArr:'',carrier:'',price:''};
 
-  // 1. TYPE
-  if(/поїзд|поезд|\bтrain\b|залізниця|\bpkp\b|вагон|купе|плацкарт/i.test(text))result.type='train';
+  // 1. TYPE — check flight number first (strongest signal)
+  const hasFlightNum=/\b[A-Z]{2}\s*\d{3,4}\b/.test(text);
+  const hasAirport=/\b(WAW|FRA|KBP|TLV|RMO|IST|ATH|FCO|CDG|LHR|MAD|BCN|BER|VIE|PRG|BUD|LWO|ODS|HRK|AMS|DXB|MUC|DUS|LTN|STN|CIA|BGY|WMI|KRK|GDN|POZ|WRO|LCJ|SXF)\b/.test(text);
+  if(hasFlightNum||hasAirport)result.type='flight';
+  else if(/поїзд|поезд|\bтrain\b|залізниця|\bpkp\b|вагон|купе|плацкарт/i.test(text))result.type='train';
   else if(/\bавтобус\b|\bbus\b|flixbus|ecolines/i.test(text))result.type='bus';
   else result.type='flight';
 
@@ -855,12 +859,23 @@ async function showPublicTrip(token){
         <span>🟢 Начало</span><span>🔵 Промежуточные</span><span>🔴 Конец</span>
       </div>
     </div>`;
-  // Wait for Leaflet to be ready
+  // Load Leaflet dynamically if not yet available
   function tryRenderMap(attempts){
-    if(window.L&&window.L.map){renderMap();}
-    else if(attempts>0){setTimeout(()=>tryRenderMap(attempts-1),200);}
+    if(window.L&&window.L.map){
+      renderMap();
+    } else if(attempts>0){
+      setTimeout(()=>tryRenderMap(attempts-1),300);
+    } else {
+      // Force load Leaflet
+      if(!document.querySelector('script[src*="leaflet"]')){
+        const s=document.createElement('script');
+        s.src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+        s.onload=()=>setTimeout(renderMap,100);
+        document.head.appendChild(s);
+      }
+    }
   }
-  setTimeout(()=>tryRenderMap(10),300);
+  setTimeout(()=>tryRenderMap(15),500);
 }
 
 async function restoreTrip(id,name,segIdx,tab){
