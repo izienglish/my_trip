@@ -703,63 +703,74 @@ function addCustomItem(cat){
 function parsePaste(){
   const text=document.getElementById('paste-input').value;
   if(!text.trim()){alert('Вставьте текст письма');return;}
-  // Autosave text to localStorage
-  try{localStorage.setItem('paste_draft_'+currentTrip?.id, text);}catch(e){}
+  try{localStorage.setItem('paste_draft_'+currentTrip?.id,text);}catch(e){}
   const result={type:'flight',from:'',to:'',date:'',timeDep:'',timeArr:'',carrier:'',price:''};
-  const lines=text.split(/\n/).map(l=>l.trim()).filter(Boolean);
 
-  // Type detection - flight first (most common)
-  if(/рейс|flight|авіа|самолет|авіакомпанія|airline|boarding|посадк/i.test(text))result.type='flight';
-  else if(/поїзд|поезд|train|залізниця|pkp|uz\.|вагон|купе|плацкарт/i.test(text))result.type='train';
-  else if(/автобус|bus|flixbus|ecolines/i.test(text))result.type='bus';
+  // 1. TYPE
+  if(/поїзд|поезд|\bтrain\b|залізниця|\bpkp\b|вагон|купе|плацкарт/i.test(text))result.type='train';
+  else if(/\bавтобус\b|\bbus\b|flixbus|ecolines/i.test(text))result.type='bus';
   else result.type='flight';
 
-  // Date: try ISO first (YYYY-MM-DD)
-  const isoDate=text.match(/\b(202[0-9])-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])\b/);
-  if(isoDate){result.date=isoDate[0];}
+  // 2. DATE — multiple formats
+  const MONTHS={'янв':'01','jan':'01','лют':'02','фев':'02','feb':'02','бер':'03','мар':'03','mar':'03','кві':'04','апр':'04','apr':'04','тра':'05','май':'05','мая':'05','may':'05','чер':'06','июн':'06','июня':'06','jun':'06','чрв':'06','лип':'07','июл':'07','июля':'07','jul':'07','сер':'08','авг':'08','aug':'08','вер':'09','сен':'09','sep':'09','жов':'10','окт':'10','oct':'10','лис':'11','ноя':'11','nov':'11','гру':'12','дек':'12','dec':'12'};
+  // ISO
+  const isoD=text.match(/\b(202\d)-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])\b/);
+  if(isoD){result.date=isoD[0];}
   else {
-    // DD.MM.YYYY or DD/MM/YYYY
-    const dmyMatch=text.match(/\b(0?[1-9]|[12]\d|3[01])[.\/](0?[1-9]|1[0-2])[.\/](202\d)\b/);
-    if(dmyMatch){const[,d,m,y]=dmyMatch;result.date=`${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;}
+    // DD.MM.YYYY
+    const dmy=text.match(/\b(0?[1-9]|[12]\d|3[01])\.(0?[1-9]|1[0-2])\.(202\d)\b/);
+    if(dmy){result.date=`${dmy[3]}-${dmy[2].padStart(2,'0')}-${dmy[1].padStart(2,'0')}`;}
     else {
-      // "21 июн" or "21 июня"
-      const months={янв:'01',фев:'02',мар:'03',апр:'04',май:'05',мая:'05',июн:'06',июня:'06',июл:'07',июля:'07',авг:'08',сен:'09',окт:'10',ноя:'11',дек:'12'};
-      const ruDate=text.match(/\b(\d{1,2})\s+(янв|фев|мар|апр|май|мая|июн|июня|июл|июля|авг|сен|окт|ноя|дек)/i);
-      if(ruDate){const d=ruDate[1].padStart(2,'0');const m=months[ruDate[2].toLowerCase()];result.date=`2026-${m}-${d}`;}
+      // "вс, 21 июн." or "21 июня" or "21 чер"
+      const ruD=text.match(/(?:пн|вт|ср|чт|пт|сб|вс|пн\.|вт\.|ср\.|чт\.|пт\.|сб\.|вс\.)?[,\s]*(\d{1,2})\s+(янв|лют|фев|бер|мар|кві|апр|тра|май|мая|чер|июн|июня|чрв|лип|июл|июля|сер|авг|вер|сен|жов|окт|лис|ноя|гру|дек|jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\.?(?:\s+(202\d))?/i);
+      if(ruD){
+        const d=ruD[1].padStart(2,'0');
+        const mk=ruD[2].toLowerCase().slice(0,3);
+        const m=MONTHS[mk]||'01';
+        const y=ruD[3]||'2026';
+        result.date=`${y}-${m}-${d}`;
+      }
     }
   }
 
-  // Times: HH:MM pattern (skip dates like 19:10-21:00 as one string)
-  const allTimes=[];
+  // 3. TIMES — remove phone numbers first
+  const noPhones=text.replace(/\+?[\d][\d\s\-\(\)]{8,}/g,' ');
   const timeRe=/\b([01]?\d|2[0-3]):([0-5]\d)\b/g;
-  let tm;while((tm=timeRe.exec(text))!==null)allTimes.push(tm[0]);
-  if(allTimes.length>=1)result.timeDep=allTimes[0];
-  if(allTimes.length>=2)result.timeArr=allTimes[1];
+  const allTimes=[];let tm;
+  while((tm=timeRe.exec(noPhones))!==null)allTimes.push(tm[0]);
+  const uniqTimes=[...new Set(allTimes)];
+  if(uniqTimes.length>=1)result.timeDep=uniqTimes[0];
+  if(uniqTimes.length>=2)result.timeArr=uniqTimes[1];
 
-  // From/To: look for "City1 - City2" or "City1 → City2" pattern
-  const routeMatch=text.match(/([А-ЯЄІЇA-Z][а-яєіїa-z\s]+?)\s*[-–→]\s*([А-ЯЄІЇA-Z][а-яєіїa-z\s]+)/);
-  if(routeMatch){
-    result.from=routeMatch[1].trim().split(/\s+/).slice(0,3).join(' ');
-    result.to=routeMatch[2].trim().split(/\s+/).slice(0,3).join(' ');
+  // 4. FROM/TO
+  // Pattern: "Варшава – Франкфурт" or "Варшава → Франкфурт"
+  // Use lines to avoid multiline pollution
+  const badWords=/затримк|скасуванн|хвороб|повернен|реєстрац|підтримк|support|cancel|delay|refund|захист|гарант|швидк/i;
+  for(const line of text.split(/\n/)){
+    const m=line.match(/^([А-ЯЄІЇA-ZÀ-Ö][а-яєіїёa-zà-ö\s]{1,20})\s*[–—→\-]\s*([А-ЯЄІЇA-ZÀ-Ö][а-яєіїёa-zà-ö\s]{1,20})$/);
+    if(m&&!badWords.test(m[1])&&!badWords.test(m[2])){
+      result.from=m[1].trim();result.to=m[2].trim();break;
+    }
   }
-  // Override with explicit from/to keywords
-  const fromKw=text.match(/(?:з|від|from|откуда|відправлення|departure)[:\s]+([А-ЯЄІЇA-Z][а-яєіїёa-z\s\-]{2,})/i);
-  if(fromKw)result.from=fromKw[1].trim().split(/[\n\r,]/)[0].trim().slice(0,30);
-  const toKw=text.match(/(?:до|to|куда|прибуття|прибытие|arrival)[:\s]+([А-ЯЄІЇA-Z][а-яєіїёa-z\s\-]{2,})/i);
-  if(toKw)result.to=toKw[1].trim().split(/[\n\r,]/)[0].trim().slice(0,30);
-
-  // Price
-  const priceMatch=text.match(/(\d[\d\s]*[,.]?\d*)\s*(грн|uah|₴|€|eur|\$|usd)/i);
-  if(priceMatch)result.price=priceMatch[1].replace(/[\s]/g,'');
-
-  // Carrier: airline names
-  const carrierKw=text.match(/(?:перевізник|перевозчик|carrier|авіакомпанія|airline|оператор)[:\s]+([^\n\r,]{2,40})/i);
-  if(carrierKw)result.carrier=carrierKw[1].trim();
-  else {
-    // Try to find known airline names
-    const airlines=['Lufthansa','Ryanair','Wizz Air','WizzAir','Ukraine International','UIA','Aegean','El Al','FlyOne','HiSky','SkyUp','Flixbus','FlixBus','Ecolines','PKP','УЗ'];
-    for(const a of airlines){if(text.includes(a)){result.carrier=a;break;}}
+  // Airport codes fallback
+  const AP={'WAW':'Варшава','KRK':'Краков','FRA':'Франкфурт','MUC':'Мюнхен','BER':'Берлин','VIE':'Вена','PRG':'Прага','BUD':'Будапешт','KBP':'Киев','IEV':'Киев','ODS':'Одесса','HRK':'Харьков','LWO':'Львов','TLV':'Тель-Авив','RMO':'Кишинёв','KIV':'Кишинёв','IST':'Стамбул','SAW':'Стамбул','ATH':'Афины','FCO':'Рим','CDG':'Париж','LHR':'Лондон','MAD':'Мадрид','BCN':'Барселона','AMS':'Амстердам','DXB':'Дубай','BKK':'Бангкок'};
+  if(!result.from||!result.to){
+    const codes=[...text.matchAll(/\b([A-Z]{3})\b/g)].map(m=>m[1]).filter(c=>AP[c]);
+    if(codes.length>=1&&!result.from)result.from=AP[codes[0]];
+    if(codes.length>=2&&!result.to)result.to=AP[codes[1]];
   }
+
+  // 5. CARRIER
+  const airlines=['Lufthansa','Ryanair','Wizz Air','WizzAir','Ukraine International','UIA','Aegean','El Al','FlyOne','HiSky','SkyUp','FlixBus','Flixbus','Ecolines','PKP','Укрзалізниця','Мау'];
+  for(const a of airlines){if(text.includes(a)){result.carrier=a;break;}}
+  if(!result.carrier){
+    const fn=text.match(/\b([A-Z]{2})\s*(\d{3,4})\b/);
+    if(fn)result.carrier=fn[0];
+  }
+
+  // 6. PRICE
+  const pm=text.match(/(\d[\d\s]*[,.]?\d*)\s*(грн|uah|₴|€|eur|\$|usd)/i);
+  if(pm)result.price=pm[1].replace(/\s/g,'');
 
   parseResult=result;
   document.getElementById('parse-result').innerHTML=`
@@ -844,7 +855,12 @@ async function showPublicTrip(token){
         <span>🟢 Начало</span><span>🔵 Промежуточные</span><span>🔴 Конец</span>
       </div>
     </div>`;
-  setTimeout(renderMap,300);
+  // Wait for Leaflet to be ready
+  function tryRenderMap(attempts){
+    if(window.L&&window.L.map){renderMap();}
+    else if(attempts>0){setTimeout(()=>tryRenderMap(attempts-1),200);}
+  }
+  setTimeout(()=>tryRenderMap(10),300);
 }
 
 async function restoreTrip(id,name,segIdx,tab){
