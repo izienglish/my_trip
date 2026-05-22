@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Мои Поездки</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
 :root{
@@ -17,6 +19,7 @@
 html{font-size:15px;}
 body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;-webkit-text-size-adjust:100%;}
 
+/* AUTH */
 .auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px;}
 .auth-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px 24px;width:100%;max-width:360px;}
 .auth-box h1{font-family:var(--display);font-size:22px;font-weight:800;color:var(--accent);margin-bottom:4px;}
@@ -31,7 +34,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .btn-primary{width:100%;padding:12px;border:none;border-radius:8px;font-family:var(--mono);font-size:13px;cursor:pointer;background:var(--accent2);color:#fff;}
 .auth-err{font-size:11px;font-family:var(--mono);margin-top:10px;text-align:center;min-height:16px;color:var(--danger);}
 
-.header{padding:11px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;position:sticky;top:0;background:var(--bg);z-index:100;}
+/* HEADER */
+.header{padding:11px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;position:sticky;top:0;background:var(--bg);z-index:200;}
 .header h1{font-family:var(--display);font-size:16px;font-weight:800;color:var(--accent);flex:1;}
 .rate-badge{font-family:var(--mono);font-size:10px;color:var(--muted);white-space:nowrap;}
 .rate-badge b{color:var(--ok);}
@@ -39,35 +43,108 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .back-btn{background:none;border:none;color:var(--accent2);font-family:var(--mono);font-size:12px;cursor:pointer;padding:4px 6px;white-space:nowrap;}
 .header-total{font-family:var(--mono);font-size:12px;color:var(--ok);white-space:nowrap;}
 
+/* HOME */
 .home{padding:16px;}
 .home-title{font-family:var(--display);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:12px;}
 .trips-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:10px;margin-bottom:12px;}
-
 .trip-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;cursor:pointer;transition:.2s;position:relative;}
 .trip-card:hover{border-color:var(--accent2);}
-.trip-card-name{display:flex;align-items:center;gap:6px;margin-bottom:6px;padding-right:60px;}
+.trip-card-name{display:flex;align-items:center;gap:6px;margin-bottom:6px;padding-right:80px;}
 .trip-card-name h3{font-family:var(--display);font-size:15px;font-weight:700;flex:1;}
 .trip-rename-input{font-family:var(--display);font-size:15px;font-weight:700;background:var(--surface2);border:1px solid var(--accent2);border-radius:6px;color:var(--text);padding:3px 7px;outline:none;flex:1;display:none;}
 .trip-rename-input.active{display:block;}
 .trip-card-name h3.hidden{display:none;}
 .trip-meta{font-family:var(--mono);font-size:10px;color:var(--muted);display:flex;flex-direction:column;gap:3px;}
 .trip-price{font-family:var(--mono);font-size:15px;font-weight:500;color:var(--ok);margin-top:10px;}
-.trip-actions{position:absolute;top:10px;right:10px;display:flex;gap:4px;}
-.trip-action-btn{background:none;border:none;color:var(--muted);font-size:14px;cursor:pointer;padding:4px;border-radius:4px;transition:.2s;line-height:1;}
+.trip-actions{position:absolute;top:10px;right:10px;display:flex;gap:3px;}
+.trip-action-btn{background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;padding:4px;border-radius:4px;transition:.2s;line-height:1;}
 .trip-action-btn:hover{color:var(--accent2);background:var(--surface2);}
 .trip-action-btn.del:hover{color:var(--danger);}
-
 .add-trip-box{background:var(--surface2);border:2px dashed var(--border);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:9px;}
 .add-trip-box input{background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--sans);font-size:14px;padding:10px 12px;outline:none;width:100%;}
 .add-trip-box input:focus{border-color:var(--accent2);}
 .btn-add{background:var(--accent2);color:#fff;border:none;border-radius:8px;padding:11px;font-family:var(--mono);font-size:12px;cursor:pointer;width:100%;}
 
-.trip-detail{display:grid;grid-template-columns:1fr 270px;min-height:calc(100vh - 53px);}
+/* TRIP TABS */
+.trip-wrap{display:flex;flex-direction:column;height:calc(100vh - 53px);}
+.trip-tabs{display:flex;gap:2px;padding:8px 16px 0;background:var(--bg);border-bottom:1px solid var(--border);flex-shrink:0;}
+.trip-tab{padding:8px 14px;border:none;background:none;color:var(--muted);font-family:var(--mono);font-size:11px;cursor:pointer;border-bottom:2px solid transparent;transition:.2s;}
+.trip-tab.active{color:var(--accent2);border-bottom-color:var(--accent2);}
+.trip-content{flex:1;overflow:auto;}
+
+/* TRIP DETAIL */
+.trip-detail{display:grid;grid-template-columns:1fr 270px;min-height:100%;}
 @media(max-width:680px){.trip-detail{grid-template-columns:1fr;}.sidebar{border-left:none;border-top:1px solid var(--border);}}
 .segments{padding:14px 16px;border-right:1px solid var(--border);}
 .seg-list{display:flex;flex-direction:column;gap:8px;}
 .stitle{font-family:var(--display);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:8px;}
 
+/* MAP */
+.map-view{padding:14px 16px;}
+#trip-map{height:420px;border-radius:10px;border:1px solid var(--border);z-index:1;}
+.map-legend{display:flex;gap:12px;margin-top:10px;font-family:var(--mono);font-size:10px;color:var(--muted);flex-wrap:wrap;}
+.map-legend span{display:flex;align-items:center;gap:4px;}
+
+/* WEATHER */
+.weather-view{padding:14px 16px;}
+.weather-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;}
+.weather-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;}
+.weather-card h4{font-family:var(--display);font-size:12px;font-weight:700;margin-bottom:6px;}
+.weather-card .wdate{font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:8px;}
+.weather-info{display:flex;align-items:center;gap:10px;}
+.weather-temp{font-family:var(--display);font-size:22px;font-weight:800;color:var(--accent);}
+.weather-desc{font-family:var(--mono);font-size:10px;color:var(--muted);}
+.weather-details{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:6px;display:flex;gap:10px;flex-wrap:wrap;}
+.weather-loading{color:var(--muted);font-family:var(--mono);font-size:11px;padding:20px;}
+
+/* PACKING LIST */
+.pack-view{padding:14px 16px;}
+.pack-presets{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+.preset-btn{padding:6px 12px;border:1px solid var(--border);background:var(--surface);color:var(--muted);border-radius:6px;font-family:var(--mono);font-size:11px;cursor:pointer;transition:.2s;}
+.preset-btn:hover{border-color:var(--accent2);color:var(--accent2);}
+.preset-btn.active{border-color:var(--accent2);color:var(--accent2);background:rgba(124,111,240,.1);}
+.pack-cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;}
+.pack-cat{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;}
+.pack-cat h4{font-family:var(--display);font-size:11px;font-weight:700;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);}
+.pack-item{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:13px;cursor:pointer;}
+.pack-item input[type=checkbox]{width:14px;height:14px;accent-color:var(--accent2);cursor:pointer;flex-shrink:0;}
+.pack-item.checked span{text-decoration:line-through;color:var(--muted);}
+.pack-add{display:flex;gap:6px;margin-top:8px;}
+.pack-add input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:var(--mono);font-size:11px;padding:5px 8px;outline:none;}
+.pack-add button{background:var(--accent2);color:#fff;border:none;border-radius:5px;padding:5px 10px;font-family:var(--mono);font-size:11px;cursor:pointer;}
+.pack-progress{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.pack-bar{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+.pack-bar-fill{height:100%;background:var(--ok);border-radius:3px;transition:.3s;}
+.pack-stat{font-family:var(--mono);font-size:11px;color:var(--muted);}
+
+/* PASTE PARSER */
+.paste-view{padding:14px 16px;}
+.paste-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;}
+.paste-box h3{font-family:var(--display);font-size:13px;font-weight:700;margin-bottom:6px;}
+.paste-box p{font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.6;}
+.paste-textarea{width:100%;height:140px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:11px;padding:10px;outline:none;resize:vertical;line-height:1.5;}
+.paste-textarea:focus{border-color:var(--accent2);}
+.parse-btn{background:var(--accent2);color:#fff;border:none;border-radius:6px;padding:9px 18px;font-family:var(--mono);font-size:12px;cursor:pointer;margin-top:8px;}
+.parse-result{margin-top:12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;}
+.parse-field{display:flex;gap:8px;margin-bottom:6px;font-size:12px;font-family:var(--mono);}
+.parse-field label{color:var(--muted);min-width:90px;font-size:10px;text-transform:uppercase;}
+.parse-field span{color:var(--text);}
+.apply-btn{background:var(--ok);color:#000;border:none;border-radius:6px;padding:8px 16px;font-family:var(--mono);font-size:11px;cursor:pointer;margin-top:8px;font-weight:600;}
+
+/* SHARE */
+.share-section{padding:10px 11px;}
+.share-url{display:flex;gap:6px;margin-top:8px;}
+.share-url input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:var(--mono);font-size:10px;padding:6px 8px;outline:none;}
+.copy-btn{background:var(--accent2);color:#fff;border:none;border-radius:5px;padding:6px 10px;font-family:var(--mono);font-size:10px;cursor:pointer;white-space:nowrap;}
+.share-toggle{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;}
+.toggle{position:relative;width:36px;height:20px;cursor:pointer;}
+.toggle input{opacity:0;width:0;height:0;}
+.toggle-slider{position:absolute;inset:0;background:var(--border);border-radius:20px;transition:.2s;}
+.toggle input:checked~.toggle-slider{background:var(--ok);}
+.toggle-slider:before{content:'';position:absolute;width:14px;height:14px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;}
+.toggle input:checked~.toggle-slider:before{transform:translateX(16px);}
+
+/* SEGMENTS */
 .seg{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;transition:.2s;}
 .seg.draft{border-color:var(--accent);}
 .seg-hdr{display:flex;align-items:center;gap:8px;padding:10px 12px;cursor:pointer;user-select:none;-webkit-user-select:none;}
@@ -89,7 +166,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .tp-train{background:rgba(124,111,240,.2);color:#a09af0;}
 .tp-bus{background:rgba(61,214,140,.15);color:#5dd6a0;}
 .tp-flight{background:rgba(240,192,64,.2);color:var(--accent);}
-
 .seg-edit{display:none;border-top:1px solid var(--border);padding:12px;background:var(--surface2);flex-direction:column;gap:9px;}
 .seg-edit.open{display:flex;}
 .frow{display:flex;gap:7px;flex-wrap:wrap;}
@@ -97,7 +173,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .efield label{font-size:9px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
 .efield input{background:var(--surface);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:var(--mono);font-size:13px;padding:8px;outline:none;width:100%;}
 .efield input:focus{border-color:var(--accent2);}
-
 .price-block{display:flex;flex-direction:column;gap:5px;}
 .price-block label{font-size:9px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
 .price-inner{display:flex;gap:6px;align-items:center;}
@@ -107,7 +182,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .cur-btn{padding:7px 10px;border:1px solid var(--border);background:var(--surface);color:var(--muted);border-radius:5px;font-family:var(--mono);font-size:12px;cursor:pointer;transition:.2s;}
 .cur-btn.active{border-color:var(--accent2);color:var(--accent2);background:rgba(124,111,240,.1);}
 .price-hint{font-size:10px;color:var(--ok);font-family:var(--mono);padding:5px 8px;background:rgba(61,214,140,.06);border-radius:5px;border:1px solid rgba(61,214,140,.15);}
-
 .tickets-section{display:flex;flex-direction:column;gap:6px;}
 .tickets-label{font-size:9px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
 .ticket-list{display:flex;flex-direction:column;gap:5px;}
@@ -119,31 +193,27 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .upload-btn{display:flex;align-items:center;gap:6px;padding:8px 12px;border:1px dashed var(--border);border-radius:6px;background:none;color:var(--muted);font-family:var(--mono);font-size:11px;cursor:pointer;width:100%;transition:.2s;}
 .upload-btn:hover{border-color:var(--accent2);color:var(--accent2);}
 .upload-progress{font-size:10px;color:var(--ok);font-family:var(--mono);}
-
 .search-btns{display:flex;flex-direction:column;gap:5px;}
 .search-title{font-size:9px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;}
 .search-btn{display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:7px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:var(--mono);font-size:11px;cursor:pointer;text-decoration:none;width:100%;transition:.2s;}
 .search-btn:hover{border-color:var(--accent2);color:var(--accent2);}
 .sb-label{flex:1;text-align:left;}
 .sb-arrow{color:var(--muted);}
-
 .row-btns{display:flex;gap:7px;justify-content:space-between;}
 .sbtn{background:var(--accent2);color:#fff;border:none;border-radius:5px;padding:8px 14px;font-family:var(--mono);font-size:11px;cursor:pointer;}
 .delbtn{background:rgba(240,80,96,.12);color:var(--danger);border:1px solid rgba(240,80,96,.3);border-radius:5px;padding:8px 14px;font-family:var(--mono);font-size:11px;cursor:pointer;}
-
 .add-seg-box{background:var(--surface2);border:1px dashed var(--border);border-radius:10px;padding:12px;margin-top:8px;}
 .seg-type-row{display:flex;gap:5px;margin-bottom:9px;}
 .type-btn{flex:1;padding:8px 4px;border:1px solid var(--border);background:var(--surface);color:var(--muted);border-radius:6px;font-family:var(--mono);font-size:10px;cursor:pointer;text-align:center;transition:.2s;}
 .type-btn.active{border-color:var(--accent2);color:var(--accent2);background:rgba(124,111,240,.1);}
-
 .cal-btn{display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;background:rgba(61,214,140,.08);border:1px solid rgba(61,214,140,.25);border-radius:8px;color:var(--ok);font-family:var(--mono);font-size:12px;cursor:pointer;transition:.2s;}
 .cal-btn:hover{background:rgba(61,214,140,.14);}
-
 .alerts{padding:8px 16px 4px;}
 .alert{display:flex;align-items:flex-start;gap:6px;padding:7px 10px;border-radius:7px;margin-bottom:5px;font-size:11px;font-family:var(--mono);line-height:1.5;}
 .alert.info{background:rgba(124,111,240,.08);border:1px solid rgba(124,111,240,.25);color:#a09af0;}
 .alert.ok{background:rgba(61,214,140,.08);border:1px solid rgba(61,214,140,.2);color:var(--ok);}
 
+/* SIDEBAR */
 .sidebar{padding:14px;display:flex;flex-direction:column;gap:11px;overflow-y:auto;}
 .sc{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
 .sc h3{padding:8px 11px;font-family:var(--display);font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);}
@@ -169,15 +239,22 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .rate-row{display:flex;justify-content:space-between;}
 .rate-row .rv{color:var(--ok);}
 .rate-upd{color:var(--muted);font-size:9px;margin-top:4px;}
-
 .loading{display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:var(--mono);color:var(--muted);}
 .spinner{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--accent2);border-radius:50%;animation:spin .7s linear infinite;margin-right:10px;}
 @keyframes spin{to{transform:rotate(360deg);}}
+
+/* PUBLIC VIEW */
+.public-banner{background:rgba(124,111,240,.1);border-bottom:1px solid rgba(124,111,240,.25);padding:8px 16px;font-family:var(--mono);font-size:11px;color:#a09af0;text-align:center;}
+
+/* LEAFLET OVERRIDES */
+.leaflet-container{background:#1a1a24;}
+.leaflet-tile{filter:invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.9);}
 </style>
 </head>
 <body>
 <div id="app"></div>
 <input type="file" id="file-input" accept="image/*,.pdf" style="display:none" onchange="handleFileUpload(event)">
+
 <script>
 const SUPA_URL='https://fbcdmhvjfnjioecqlnpf.supabase.co';
 const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZiY2RtaHZqZm5qaW9lY3FsbnBmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NDYzNTYsImV4cCI6MjA5NDUyMjM1Nn0.XnvAFJSVjP2vC0rL4guedpievJqm6Jp3sIxiSLwueRQ';
@@ -187,9 +264,81 @@ let RATES={USD:44,EUR:51,UAH:1};
 let ratesUpdated='загрузка...';
 let currentUser=null,currentTrip=null,currentSegs=[],newSegType='flight';
 let drafts={},openSegIdx=null,uploadingSegIdx=null;
+let activeTab='segments';
+let packItems={},activePreset='city';
+let parseResult=null;
+let mapInstance=null;
 const app=document.getElementById('app');
 
-function saveNav(){try{sessionStorage.setItem('nav',JSON.stringify({tripId:currentTrip?.id,tripName:currentTrip?.name,openSegIdx}));}catch(e){}}
+// ── CITY COORDS for map/weather ──
+const CITY_COORDS={
+  'киев':[50.45,30.52],'київ':[50.45,30.52],'kyiv':[50.45,30.52],'kiev':[50.45,30.52],
+  'варшава':[52.23,21.01],'warsaw':[52.23,21.01],'warszawa':[52.23,21.01],
+  'хелм':[51.14,23.47],'chelm':[51.14,23.47],
+  'франкфурт':[50.11,8.68],'frankfurt':[50.11,8.68],
+  'тель-авив':[32.08,34.78],'tel aviv':[32.08,34.78],'tel-aviv':[32.08,34.78],
+  'кишинев':[47.01,28.85],'кишинів':[47.01,28.85],'chisinau':[47.01,28.85],
+  'стамбул':[41.01,28.95],'istanbul':[41.01,28.95],
+  'берлин':[52.52,13.40],'berlin':[52.52,13.40],
+  'вена':[48.21,16.37],'vienna':[48.21,16.37],'wien':[48.21,16.37],
+  'прага':[50.08,14.44],'prague':[50.08,14.44],
+  'будапешт':[47.50,19.04],'budapest':[47.50,19.04],
+  'краков':[50.06,19.94],'krakow':[50.06,19.94],
+  'львов':[49.84,24.02],'львів':[49.84,24.02],'lviv':[49.84,24.02],
+  'одесса':[46.48,30.72],'одеса':[46.48,30.72],'odesa':[46.48,30.72],
+  'харьков':[49.99,36.23],'харків':[49.99,36.23],'kharkiv':[49.99,36.23],
+  'минск':[53.90,27.57],'мінськ':[53.90,27.57],'minsk':[53.90,27.57],
+  'рига':[56.95,24.11],'riga':[56.95,24.11],
+  'вильнюс':[54.69,25.28],'vilnius':[54.69,25.28],
+  'таллин':[59.44,24.75],'tallinn':[59.44,24.75],
+  'афины':[37.98,23.73],'athens':[37.98,23.73],
+  'рим':[41.90,12.50],'rome':[41.90,12.50],'roma':[41.90,12.50],
+  'париж':[48.86,2.35],'paris':[48.86,2.35],
+  'лондон':[51.51,-0.13],'london':[51.51,-0.13],
+  'мадрид':[40.42,-3.70],'madrid':[40.42,-3.70],
+  'барселона':[41.39,2.16],'barcelona':[41.39,2.16],
+  'амстердам':[52.37,4.89],'amsterdam':[52.37,4.89],
+  'дубай':[25.20,55.27],'dubai':[25.20,55.27],
+  'бангкок':[13.75,100.50],'bangkok':[13.75,100.50],
+};
+
+function getCityCoords(name){
+  if(!name)return null;
+  return CITY_COORDS[name.toLowerCase().trim()]||null;
+}
+
+// ── PACKING PRESETS ──
+const PACK_PRESETS={
+  city:{
+    'Документы':['Паспорт','Виза/разрешение','Страховка','Билеты (распечатать)','Карта банка'],
+    'Одежда':['Футболки','Джинсы/брюки','Нижнее бельё','Носки','Куртка/ветровка','Удобная обувь'],
+    'Гаджеты':['Телефон + зарядка','Power bank','Наушники','Переходник для розеток','Фотоаппарат'],
+    'Гигиена':['Зубная щётка','Паста','Дезодорант','Шампунь','Крем для лица'],
+    'Аптечка':['Обезболивающее','Антигистамин','Пластыри','Лекарства (свои)'],
+  },
+  beach:{
+    'Документы':['Паспорт','Виза/разрешение','Страховка','Билеты'],
+    'Пляж':['Купальник/плавки','Полотенце пляжное','Солнцезащитный крем SPF 50','Очки солнцезащитные','Шлёпанцы','Шляпа/кепка'],
+    'Одежда':['Лёгкие футболки','Шорты','Лёгкое платье/рубашка','Сандалии'],
+    'Гаджеты':['Телефон + зарядка','Power bank','Водонепроницаемый чехол','Переходник'],
+    'Гигиена':['Зубная щётка','Паста','Дезодорант','After-sun лосьон','Средство от насекомых'],
+  },
+  business:{
+    'Документы':['Паспорт','Виза','Страховка','Билеты','Визитки','Контракты/документы'],
+    'Одежда':['Костюм','Рубашки','Галстук','Туфли','Запасная пара носков','Запасная рубашка'],
+    'Гаджеты':['Ноутбук + зарядка','Мышь','Наушники для звонков','Power bank','Переходник для розеток','HDMI адаптер'],
+    'Разное':['Ручки','Блокнот','Таблетки от головной боли','Кофе/чай в дорогу'],
+  },
+  hike:{
+    'Документы':['Паспорт','Страховка','Разрешения (если нужны)'],
+    'Одежда':['Трекинговые ботинки','Термобельё','Флиска','Дождевик','Треккинговые носки','Шапка/перчатки'],
+    'Снаряжение':['Рюкзак','Спальник','Коврик','Палатка (если нужна)','Трекинговые палки','Фонарик'],
+    'Питание':['Орехи/сухофрукты','Энергетические батончики','Газовая горелка','Котелок','Фильтр для воды'],
+    'Аптечка':['Пластыри','Бинт','Антисептик','Обезболивающее','Солнцезащитный крем','Средство от клещей'],
+  },
+};
+
+function saveNav(){try{sessionStorage.setItem('nav',JSON.stringify({tripId:currentTrip?.id,tripName:currentTrip?.name,openSegIdx,activeTab}));}catch(e){}}
 function loadNav(){try{const d=sessionStorage.getItem('nav');return d?JSON.parse(d):null;}catch(e){return null;}}
 function clearNav(){try{sessionStorage.removeItem('nav');}catch(e){}}
 
@@ -217,6 +366,9 @@ function clearDraft(id){delete drafts[id];try{localStorage.setItem('d_'+currentT
 function getSeg(i){const s=currentSegs[i];return drafts[s.id]?{...s,...drafts[s.id]}:s;}
 function hasDraft(i){return!!drafts[currentSegs[i]?.id];}
 
+function loadPackItems(tid){try{const d=localStorage.getItem('pack_'+tid);packItems=d?JSON.parse(d):{};}catch(e){packItems={};}}
+function savePackItems(tid){try{localStorage.setItem('pack_'+tid,JSON.stringify(packItems));}catch(e){}}
+
 function getLinks(s){
   const f=s.from_city||'',t=s.to_city||'',d=s.date_from||'';
   if(s.type==='flight')return[
@@ -236,288 +388,429 @@ function getLinks(s){
   ];
 }
 
-// ── ICS CALENDAR EXPORT ──
+// ── ICS ──
 function buildICS(){
   const segs=currentSegs.map((s,i)=>getSeg(i)).filter(s=>s.date_from);
   if(!segs.length)return null;
-
-  // Только ASCII — убираем эмодзи и спецсимволы из служебных полей
   function toAsciiSummary(s){
-    const typeMap={train:'Train',bus:'Bus',flight:'Flight'};
+    const m={train:'Train',bus:'Bus',flight:'Flight'};
     const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    let dateStr='';
-    if(s.date_from){const[,m,d]=s.date_from.split('-');dateStr=` (${+d} ${months[+m-1]})`;}
-    return`${typeMap[s.type]||s.type}: ${s.from_city||'?'} - ${s.to_city||'?'}${dateStr}`;
+    let ds='';if(s.date_from){const[,mo,d]=s.date_from.split('-');ds=` (${+d} ${months[+mo-1]})`;}
+    return`${m[s.type]||s.type}: ${s.from_city||'?'} - ${s.to_city||'?'}${ds}`;
   }
-
-  // Экранирование текста для ICS
-  function esc(str){
-    if(!str)return'';
-    return str
-      .replace(/https?:\/\/\S+/g,'') // убрать URL
-      .replace(/\\/g,'\\\\')
-      .replace(/;/g,'\\;')
-      .replace(/,/g,'\\,')
-      .replace(/\n/g,'\\n')
-      .trim();
-  }
-
-  // Folding строк по RFC 5545 (макс 75 октетов)
-  function fold(line){
-    const enc=new TextEncoder();
-    if(enc.encode(line).length<=75)return line;
-    const chars=[...line];
-    const out=[];
-    let cur='';let curBytes=0;let first=true;
-    for(const ch of chars){
-      const chBytes=enc.encode(ch).length;
-      const limit=first?75:74;
-      if(curBytes+chBytes>limit){
-        out.push(cur);
-        cur=(first?'':' ')+ch;
-        curBytes=(first?0:1)+chBytes;
-        first=false;
-      } else {
-        cur+=ch;curBytes+=chBytes;
-      }
-    }
-    if(cur)out.push(cur);
-    return out.join('\r\n ');
-  }
-
+  function esc(str){if(!str)return'';return str.replace(/https?:\/\/\S+/g,'').replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n').trim();}
+  function fold(line){const enc=new TextEncoder();if(enc.encode(line).length<=75)return line;const chars=[...line];const out=[];let cur='';let cb=0;let first=true;for(const ch of chars){const cl=enc.encode(ch).length;if(cb+cl>(first?75:74)){out.push(cur);cur=(first?'':' ')+ch;cb=(first?0:1)+cl;first=false;}else{cur+=ch;cb+=cl;}}if(cur)out.push(cur);return out.join('\r\n ');}
   function dtOnly(d){return d.replace(/-/g,'');}
-  function dtTime(date,time){
-    if(!time||time==='—'||time==='')return null;
-    return date.replace(/-/g,'')+`T${time.replace(':','')}00`;
-  }
-  function nextDay(d){
-    const dt=new Date(d);dt.setDate(dt.getDate()+1);
-    return dt.toISOString().slice(0,10).replace(/-/g,'');
-  }
-
+  function dtTime(date,time){if(!time||time==='—'||time==='')return null;return date.replace(/-/g,'')+`T${time.replace(':','')}00`;}
+  function nextDay(d){const dt=new Date(d);dt.setDate(dt.getDate()+1);return dt.toISOString().slice(0,10).replace(/-/g,'');}
   const now=new Date().toISOString().replace(/[-:.]/g,'').slice(0,15)+'Z';
-
-  const lines=[
-    'BEGIN:VCALENDAR',
-    'VERSION:2.0',
-    'PRODID:-//MyTrip//EN',
-    'CALSCALE:GREGORIAN',
-    'METHOD:PUBLISH',
-  ];
-
+  const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//MyTrip//EN','CALSCALE:GREGORIAN','METHOD:PUBLISH'];
   segs.forEach((s,i)=>{
     const hasD=s.time_dep&&s.time_dep!=='—'&&s.time_dep!=='';
     const hasA=s.time_arr&&s.time_arr!=='—'&&s.time_arr!=='';
     let dtstart,dtend,allDay=false;
-
     if(hasD){
       dtstart=dtTime(s.date_from,s.time_dep);
-      if(hasA){
-        // Если прибытие раньше отправления — следующий день
-        const arrDate=s.time_arr<s.time_dep?nextDay(s.date_from):s.date_from;
-        dtend=dtTime(arrDate,s.time_arr);
-      } else {
-        // +2 часа
-        const[h,m]=(s.time_dep).split(':').map(Number);
-        const eh=String((h+2)%24).padStart(2,'0');
-        const em=String(m).padStart(2,'0');
-        dtend=dtTime(s.date_from,`${eh}:${em}`);
-      }
-    } else {
-      allDay=true;
-      dtstart=dtOnly(s.date_from);
-      dtend=nextDay(s.date_from);
-    }
-
-    const summary=toAsciiSummary(s);
-    const descParts=[
-      s.carrier&&`Carrier: ${s.carrier}`,
-      s.duration&&`Duration: ${s.duration}`,
-      s.dep_address&&`From: ${s.dep_address}`,
-      s.arr_address&&`To: ${s.arr_address}`,
-      s.price_amount&&`Price: ${s.price_amount} ${s.price_currency||'USD'}`,
-    ].filter(Boolean);
-
+      if(hasA){const ad=s.time_arr<s.time_dep?nextDay(s.date_from):s.date_from;dtend=dtTime(ad,s.time_arr);}
+      else{const[h,m]=(s.time_dep).split(':').map(Number);const eh=String((h+2)%24).padStart(2,'0');const em=String(m).padStart(2,'0');dtend=dtTime(s.date_from,`${eh}:${em}`);}
+    }else{allDay=true;dtstart=dtOnly(s.date_from);dtend=nextDay(s.date_from);}
+    const desc=[s.carrier&&`Carrier: ${s.carrier}`,s.duration&&`Duration: ${s.duration}`,s.dep_address&&`From: ${s.dep_address}`,s.arr_address&&`To: ${s.arr_address}`,s.price_amount&&`Price: ${s.price_amount} ${s.price_currency||'USD'}`].filter(Boolean);
     lines.push('BEGIN:VEVENT');
     lines.push(`UID:seg${i}-${currentTrip.id.replace(/-/g,'').slice(0,12)}@mytrip`);
     lines.push(`DTSTAMP:${now}`);
     lines.push(allDay?`DTSTART;VALUE=DATE:${dtstart}`:`DTSTART:${dtstart}`);
     lines.push(allDay?`DTEND;VALUE=DATE:${dtend}`:`DTEND:${dtend}`);
-    lines.push(`SUMMARY:${esc(summary)}`);
-    if(descParts.length)lines.push(`DESCRIPTION:${esc(descParts.join(' | '))}`);
+    lines.push(`SUMMARY:${esc(toAsciiSummary(s))}`);
+    if(desc.length)lines.push(`DESCRIPTION:${esc(desc.join(' | '))}`);
     if(s.dep_address)lines.push(`LOCATION:${esc(s.dep_address)}`);
     lines.push('END:VEVENT');
   });
-
   lines.push('END:VCALENDAR');
   return lines.map(fold).join('\r\n');
 }
 
 function exportToCalendar(){
-  const content=buildICS();
-  if(!content){alert('Нет сегментов с датами!');return;}
+  const content=buildICS();if(!content){alert('Нет сегментов с датами!');return;}
   const blob=new Blob([content],{type:'text/calendar'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
-  a.href=url;
-  a.download=`${(currentTrip.name||'trip').replace(/[^a-zA-Z0-9_-]/g,'_')}.ics`;
-  document.body.appendChild(a);a.click();
-  document.body.removeChild(a);URL.revokeObjectURL(url);
+  a.href=url;a.download=`${(currentTrip.name||'trip').replace(/[^a-zA-Z0-9_-]/g,'_')}.ics`;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
 }
 
-// Google Calendar links for each segment
 function openGoogleCalendar(){
   const segs=currentSegs.map((s,i)=>getSeg(i)).filter(s=>s.date_from);
   if(!segs.length){alert('Нет сегментов с датами!');return;}
-
   segs.forEach((s,i)=>{
     setTimeout(()=>{
       const hasD=s.time_dep&&s.time_dep!=='—'&&s.time_dep!=='';
       const hasA=s.time_arr&&s.time_arr!=='—'&&s.time_arr!=='';
-      const typeNames={train:'Поезд',bus:'Автобус',flight:'Рейс'};
-      const title=`${typeNames[s.type]||s.type}: ${s.from_city||'?'} → ${s.to_city||'?'}`;
-
+      const names={train:'Поезд',bus:'Автобус',flight:'Рейс'};
+      const title=`${names[s.type]||s.type}: ${s.from_city||'?'} → ${s.to_city||'?'}`;
       let dates;
       if(hasD){
-        const dStr=s.date_from.replace(/-/g,'');
-        const tDep=s.time_dep.replace(':','')+'00';
+        const dStr=s.date_from.replace(/-/g,'');const tDep=s.time_dep.replace(':','')+'00';
         let arrDate=s.date_from;
-        if(hasA&&s.time_arr<s.time_dep){
-          const dt=new Date(s.date_from);dt.setDate(dt.getDate()+1);
-          arrDate=dt.toISOString().slice(0,10);
-        }
-        const tArr=hasA?(s.time_arr.replace(':','')+'00'):
-          (()=>{const[h,m]=s.time_dep.split(':').map(Number);return String((h+2)%24).padStart(2,'0')+String(m).padStart(2,'0')+'00';})();
+        if(hasA&&s.time_arr<s.time_dep){const dt=new Date(s.date_from);dt.setDate(dt.getDate()+1);arrDate=dt.toISOString().slice(0,10);}
+        const tArr=hasA?(s.time_arr.replace(':','')+'00'):(()=>{const[h,m]=s.time_dep.split(':').map(Number);return String((h+2)%24).padStart(2,'0')+String(m).padStart(2,'0')+'00';})();
         dates=`${dStr}T${tDep}/${arrDate.replace(/-/g,'')}T${tArr}`;
-      } else {
-        const d=s.date_from.replace(/-/g,'');
-        dates=`${d}/${d}`;
-      }
-
-      const details=[
-        s.carrier&&`Перевозчик: ${s.carrier}`,
-        s.duration&&`Длительность: ${s.duration}`,
-        s.price_amount&&`Стоимость: ${s.price_amount} ${s.price_currency||'USD'}`,
-      ].filter(Boolean).join('\n');
-
-      const url=`https://calendar.google.com/calendar/render?action=TEMPLATE`+
-        `&text=${encodeURIComponent(title)}`+
-        `&dates=${encodeURIComponent(dates)}`+
-        `&details=${encodeURIComponent(details)}`+
-        `&location=${encodeURIComponent(s.dep_address||'')}`;
+      }else{const d=s.date_from.replace(/-/g,'');dates=`${d}/${d}`;}
+      const details=[s.carrier&&`Перевозчик: ${s.carrier}`,s.duration&&`Длительность: ${s.duration}`,s.price_amount&&`Стоимость: ${s.price_amount} ${s.price_currency||'USD'}`].filter(Boolean).join('\n');
+      const url=`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${encodeURIComponent(dates)}&details=${encodeURIComponent(details)}&location=${encodeURIComponent(s.dep_address||'')}`;
       window.open(url,'_blank');
-    },i*500);
+    },i*600);
   });
 }
 
 // ── FILE UPLOAD ──
 function triggerUpload(segIdx){uploadingSegIdx=segIdx;document.getElementById('file-input').click();}
-
 async function handleFileUpload(event){
-  const file=event.target.files[0];
-  if(!file||uploadingSegIdx===null)return;
-  event.target.value='';
-  const i=uploadingSegIdx;
-  const seg=currentSegs[i];
-  const ext=file.name.split('.').pop();
-  const path=`${currentUser.id}/${seg.id}/${Date.now()}.${ext}`;
-  const pb=document.getElementById(`upload-prog-${i}`);
-  if(pb)pb.textContent='⏳ Загрузка...';
+  const file=event.target.files[0];if(!file||uploadingSegIdx===null)return;event.target.value='';
+  const i=uploadingSegIdx;const seg=currentSegs[i];
+  const ext=file.name.split('.').pop();const path=`${currentUser.id}/${seg.id}/${Date.now()}.${ext}`;
+  const pb=document.getElementById(`upload-prog-${i}`);if(pb)pb.textContent='⏳ Загрузка...';
   const {error}=await sb.storage.from('tickets').upload(path,file);
   if(error){if(pb)pb.textContent='❌ Ошибка: '+error.message;return;}
   const files=Array.isArray(seg.ticket_files)?[...seg.ticket_files]:[];
   files.push({name:file.name,path,type:file.type});
   const {error:e2}=await sb.from('segments').update({ticket_files:files}).eq('id',seg.id);
-  if(!e2){
-    currentSegs[i].ticket_files=files;
-    clearDraft(seg.id);
-    renderTrip();
-    setTimeout(()=>{const e=document.getElementById(`ed${i}`),c=document.getElementById(`ch${i}`);if(e){e.classList.add('open');if(c)c.classList.add('open');}},50);
-  }
+  if(!e2){currentSegs[i].ticket_files=files;clearDraft(seg.id);renderTrip();setTimeout(()=>{const e=document.getElementById(`ed${i}`),c=document.getElementById(`ch${i}`);if(e){e.classList.add('open');if(c)c.classList.add('open');}},50);}
 }
-
-async function openTicket(path){
-  const {data}=await sb.storage.from('tickets').createSignedUrl(path,3600);
-  if(data?.signedUrl)window.open(data.signedUrl,'_blank');
-}
-
+async function openTicket(path){const {data}=await sb.storage.from('tickets').createSignedUrl(path,3600);if(data?.signedUrl)window.open(data.signedUrl,'_blank');}
 async function deleteTicket(si,fi){
   if(!confirm('Удалить файл?'))return;
-  const seg=currentSegs[si];
-  const files=[...( Array.isArray(seg.ticket_files)?seg.ticket_files:[])];
-  await sb.storage.from('tickets').remove([files[fi].path]);
-  files.splice(fi,1);
+  const seg=currentSegs[si];const files=[...(Array.isArray(seg.ticket_files)?seg.ticket_files:[])];
+  await sb.storage.from('tickets').remove([files[fi].path]);files.splice(fi,1);
   await sb.from('segments').update({ticket_files:files}).eq('id',seg.id);
-  currentSegs[si].ticket_files=files;
-  renderTrip();
-  setTimeout(()=>{const e=document.getElementById(`ed${si}`),c=document.getElementById(`ch${si}`);if(e){e.classList.add('open');if(c)c.classList.add('open');}},50);
+  currentSegs[si].ticket_files=files;renderTrip();setTimeout(()=>{const e=document.getElementById(`ed${si}`),c=document.getElementById(`ch${si}`);if(e){e.classList.add('open');if(c)c.classList.add('open');}},50);
 }
 
 // ── RENAME TRIP ──
-function startRename(id,event){
-  event.stopPropagation();
-  const inp=document.getElementById(`rename-${id}`);
-  const h3=document.getElementById(`tripname-${id}`);
-  if(!inp||!h3)return;
-  inp.classList.add('active');
-  h3.classList.add('hidden');
-  inp.focus();
-  inp.select();
-}
-
-async function saveRename(id,event){
-  event.stopPropagation();
-  const inp=document.getElementById(`rename-${id}`);
-  const h3=document.getElementById(`tripname-${id}`);
-  if(!inp||!h3)return;
-  const newName=inp.value.trim();
-  if(!newName){inp.classList.remove('active');h3.classList.remove('hidden');return;}
-  await sb.from('trips').update({name:newName}).eq('id',id);
-  h3.textContent=newName;
-  inp.classList.remove('active');
-  h3.classList.remove('hidden');
-  if(currentTrip?.id===id)currentTrip.name=newName;
-}
+function startRename(id,event){event.stopPropagation();const inp=document.getElementById(`rename-${id}`);const h3=document.getElementById(`tripname-${id}`);if(!inp||!h3)return;inp.classList.add('active');h3.classList.add('hidden');inp.focus();inp.select();}
+async function saveRename(id,event){event.stopPropagation();const inp=document.getElementById(`rename-${id}`);const h3=document.getElementById(`tripname-${id}`);if(!inp||!h3)return;const n=inp.value.trim();if(!n){inp.classList.remove('active');h3.classList.remove('hidden');return;}await sb.from('trips').update({name:n}).eq('id',id);h3.textContent=n;inp.classList.remove('active');h3.classList.remove('hidden');if(currentTrip?.id===id)currentTrip.name=n;}
 
 // ── DUPLICATE TRIP ──
 async function duplicateTrip(id,name,event){
-  event.stopPropagation();
-  const newName=prompt('Название копии:',name+' (копия)');
-  if(!newName)return;
-  const {data:newTrip}=await sb.from('trips').insert({name:newName,user_id:currentUser.id}).select().single();
-  if(!newTrip)return;
+  event.stopPropagation();const newName=prompt('Название копии:',name+' (копия)');if(!newName)return;
+  const {data:newTrip}=await sb.from('trips').insert({name:newName,user_id:currentUser.id}).select().single();if(!newTrip)return;
   const {data:segs}=await sb.from('segments').select('*').eq('trip_id',id).order('position');
-  if(segs?.length){
-    const copies=segs.map(s=>({
-      trip_id:newTrip.id,user_id:currentUser.id,
-      type:s.type,from_city:s.from_city,to_city:s.to_city,
-      date_from:s.date_from,time_dep:s.time_dep,time_arr:s.time_arr,
-      price_amount:s.price_amount,price_currency:s.price_currency,
-      carrier:s.carrier,duration:s.duration,notes:s.notes,
-      dep_address:s.dep_address,arr_address:s.arr_address,
-      position:s.position,luggage_ok:s.luggage_ok,ticket_files:[]
-    }));
-    await sb.from('segments').insert(copies);
-  }
+  if(segs?.length){const copies=segs.map(s=>({trip_id:newTrip.id,user_id:currentUser.id,type:s.type,from_city:s.from_city,to_city:s.to_city,date_from:s.date_from,time_dep:s.time_dep,time_arr:s.time_arr,price_amount:s.price_amount,price_currency:s.price_currency,carrier:s.carrier,duration:s.duration,notes:s.notes,dep_address:s.dep_address,arr_address:s.arr_address,position:s.position,luggage_ok:s.luggage_ok,ticket_files:[]}));await sb.from('segments').insert(copies);}
   showHome();
 }
 
+// ── PUBLIC SHARE ──
+async function toggleShare(tripId,checked){
+  let token=currentTrip.share_token;
+  if(checked&&!token){token=Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2);currentTrip.share_token=token;}
+  await sb.from('trips').update({is_public:checked,share_token:token||null}).eq('id',tripId);
+  currentTrip.is_public=checked;
+  renderShareSection();
+}
+
+function renderShareSection(){
+  const el=document.getElementById('share-section');if(!el)return;
+  const isPublic=currentTrip?.is_public;
+  const token=currentTrip?.share_token;
+  const shareUrl=token?`${location.origin}${location.pathname}?share=${token}`:'';
+  el.innerHTML=`
+    <div class="share-toggle">
+      <label class="toggle"><input type="checkbox" ${isPublic?'checked':''} onchange="toggleShare('${currentTrip.id}',this.checked)"><span class="toggle-slider"></span></label>
+      <span>${isPublic?'Ссылка активна':'Шеринг выключен'}</span>
+    </div>
+    ${isPublic&&shareUrl?`
+    <div class="share-url">
+      <input type="text" value="${shareUrl}" readonly id="share-url-inp">
+      <button class="copy-btn" onclick="copyShare()">Копировать</button>
+    </div>
+    <div style="font-size:9px;color:var(--muted);font-family:var(--mono);margin-top:4px">Любой с этой ссылкой может просмотреть маршрут</div>
+    `:''}`;
+}
+
+function copyShare(){
+  const inp=document.getElementById('share-url-inp');if(!inp)return;
+  navigator.clipboard.writeText(inp.value).then(()=>{const btn=document.querySelector('.copy-btn');if(btn){btn.textContent='Скопировано!';setTimeout(()=>btn.textContent='Копировать',2000);}});
+}
+
+// ── MAP ──
+function renderMap(){
+  const el=document.getElementById('map-view-content');if(!el)return;
+  const points=currentSegs.map((s,i)=>{const d=getSeg(i);return{from:d.from_city,to:d.to_city,type:d.type};});
+  const coords=[];
+  points.forEach(p=>{
+    const fc=getCityCoords(p.from);const tc=getCityCoords(p.to);
+    if(fc)coords.push({name:p.from,lat:fc[0],lng:fc[1],type:p.type});
+    if(tc)coords.push({name:p.to,lat:tc[0],lng:tc[1],type:p.type});
+  });
+  // Deduplicate
+  const seen=new Set();const unique=coords.filter(c=>{const k=`${c.lat},${c.lng}`;if(seen.has(k))return false;seen.add(k);return true;});
+
+  if(!unique.length){el.innerHTML='<div style="color:var(--muted);font-family:var(--mono);font-size:11px;padding:20px">Нет городов с известными координатами. Добавьте сегменты с городами из списка.</div>';return;}
+
+  setTimeout(()=>{
+    if(mapInstance){mapInstance.remove();mapInstance=null;}
+    const map=L.map('trip-map',{zoomControl:true});
+    mapInstance=map;
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap'}).addTo(map);
+    const latlngs=unique.map(c=>[c.lat,c.lng]);
+    // Draw route line
+    if(latlngs.length>1)L.polyline(latlngs,{color:'#7c6ff0',weight:2,dashArray:'5,5',opacity:0.8}).addTo(map);
+    // Add markers
+    unique.forEach((c,i)=>{
+      const color=i===0?'#3dd68c':i===unique.length-1?'#f05060':'#7c6ff0';
+      const icon=L.divIcon({html:`<div style="background:${color};width:10px;height:10px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.5)"></div>`,iconSize:[10,10],iconAnchor:[5,5],className:''});
+      L.marker([c.lat,c.lng],{icon}).addTo(map).bindPopup(`<b>${c.name}</b>`);
+    });
+    map.fitBounds(latlngs,{padding:[30,30]});
+  },100);
+}
+
+// ── WEATHER ──
+const WMO={0:'Ясно',1:'Преимущественно ясно',2:'Переменная облачность',3:'Пасмурно',45:'Туман',48:'Изморозь',51:'Лёгкий дождь',53:'Умеренный дождь',55:'Сильный дождь',61:'Небольшой дождь',63:'Умеренный дождь',65:'Сильный дождь',71:'Лёгкий снег',73:'Умеренный снег',75:'Сильный снег',80:'Ливень',81:'Умеренный ливень',82:'Сильный ливень',95:'Гроза',96:'Гроза с градом',99:'Сильная гроза'};
+const WMO_ICON={0:'☀️',1:'🌤',2:'⛅',3:'☁️',45:'🌫',48:'🌫',51:'🌦',53:'🌦',55:'🌧',61:'🌦',63:'🌧',65:'🌧',71:'🌨',73:'🌨',75:'❄️',80:'🌧',81:'🌧',82:'⛈',95:'⛈',96:'⛈',99:'⛈'};
+
+async function renderWeather(){
+  const el=document.getElementById('weather-view-content');if(!el)return;
+  el.innerHTML='<div class="weather-loading">⏳ Загрузка прогноза погоды...</div>';
+  const segData=currentSegs.map((s,i)=>getSeg(i)).filter(s=>s.date_from&&getCityCoords(s.to_city));
+  if(!segData.length){el.innerHTML='<div class="weather-loading">Нет городов с известными координатами для прогноза.</div>';return;}
+
+  const cards=await Promise.all(segData.map(async s=>{
+    const coords=getCityCoords(s.to_city);
+    const [lat,lon]=coords;
+    const date=s.date_from;
+    // Check if date is within 16 days
+    const diff=(new Date(date)-new Date())/(1000*60*60*24);
+    if(diff>16||diff<-1)return`<div class="weather-card"><h4>${s.to_city||'?'}</h4><div class="wdate">${fmtD(date)}</div><div class="weather-desc">Прогноз доступен за 16 дней до даты</div></div>`;
+    try{
+      const url=`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min,weathercode,precipitation_sum,windspeed_10m_max&start_date=${date}&end_date=${date}&timezone=auto`;
+      const r=await fetch(url);const d=await r.json();
+      if(!d.daily||!d.daily.time?.length)throw new Error('no data');
+      const code=d.daily.weathercode[0]||0;
+      const tmax=Math.round(d.daily.temperature_2m_max[0]);
+      const tmin=Math.round(d.daily.temperature_2m_min[0]);
+      const prec=d.daily.precipitation_sum[0];
+      const wind=Math.round(d.daily.windspeed_10m_max[0]);
+      const icon=WMO_ICON[code]||'🌡';
+      const desc=WMO[code]||'—';
+      return`<div class="weather-card">
+        <h4>${s.to_city}</h4>
+        <div class="wdate">${fmtD(date)}</div>
+        <div class="weather-info">
+          <span style="font-size:28px">${icon}</span>
+          <div>
+            <div class="weather-temp">${tmax}°</div>
+            <div class="weather-desc">${desc}</div>
+          </div>
+        </div>
+        <div class="weather-details">
+          <span>🌡 ${tmin}°–${tmax}°</span>
+          <span>💧 ${prec}мм</span>
+          <span>💨 ${wind}км/ч</span>
+        </div>
+      </div>`;
+    }catch(e){return`<div class="weather-card"><h4>${s.to_city||'?'}</h4><div class="wdate">${fmtD(date)}</div><div class="weather-desc">Ошибка загрузки прогноза</div></div>`;}
+  }));
+  el.innerHTML=`<div class="weather-grid">${cards.join('')}</div>`;
+}
+
+// ── PACKING LIST ──
+function renderPackList(){
+  const el=document.getElementById('pack-view-content');if(!el)return;
+  if(!packItems[activePreset])packItems[activePreset]={};
+  const preset=PACK_PRESETS[activePreset]||PACK_PRESETS.city;
+  let total=0,checked=0;
+  Object.entries(preset).forEach(([cat,items])=>{
+    items.forEach(item=>{total++;if(packItems[activePreset]?.[cat]?.[item])checked++;});
+    // Custom items
+    const custom=packItems[activePreset]?.[cat]?.['__custom']||[];
+    custom.forEach(()=>{total++;if(packItems[activePreset]?.[cat]?.['__customChecked']?.[custom.indexOf])checked++;});
+  });
+
+  const progress=total>0?Math.round(checked/total*100):0;
+
+  const cats=Object.entries(preset).map(([cat,items])=>{
+    const custom=packItems[activePreset]?.[cat]?.['__custom']||[];
+    const allItems=[...items,...custom];
+    const itemsHTML=allItems.map(item=>{
+      const isChecked=!!(packItems[activePreset]?.[cat]?.[item]);
+      return`<label class="pack-item ${isChecked?'checked':''}">
+        <input type="checkbox" ${isChecked?'checked':''} onchange="togglePackItem('${cat}','${item.replace(/'/g,"\\'")}',this.checked)">
+        <span>${item}</span>
+      </label>`;
+    }).join('');
+    return`<div class="pack-cat">
+      <h4>${cat}</h4>
+      ${itemsHTML}
+      <div class="pack-add">
+        <input type="text" placeholder="Добавить..." id="custom-${cat.replace(/\s/g,'_')}">
+        <button onclick="addCustomItem('${cat}')">+</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  el.innerHTML=`
+    <div class="pack-presets">
+      <button class="preset-btn ${activePreset==='city'?'active':''}" onclick="setPreset('city')">🏙 Город</button>
+      <button class="preset-btn ${activePreset==='beach'?'active':''}" onclick="setPreset('beach')">🏖 Пляж</button>
+      <button class="preset-btn ${activePreset==='business'?'active':''}" onclick="setPreset('business')">💼 Бизнес</button>
+      <button class="preset-btn ${activePreset==='hike'?'active':''}" onclick="setPreset('hike')">🏔 Поход</button>
+    </div>
+    <div class="pack-progress">
+      <div class="pack-bar"><div class="pack-bar-fill" style="width:${progress}%"></div></div>
+      <span class="pack-stat">${checked}/${total} собрано</span>
+    </div>
+    <div class="pack-cats">${cats}</div>`;
+}
+
+function setPreset(p){activePreset=p;renderPackList();}
+
+function togglePackItem(cat,item,val){
+  if(!packItems[activePreset])packItems[activePreset]={};
+  if(!packItems[activePreset][cat])packItems[activePreset][cat]={};
+  packItems[activePreset][cat][item]=val;
+  savePackItems(currentTrip.id);
+  renderPackList();
+}
+
+function addCustomItem(cat){
+  const inp=document.getElementById(`custom-${cat.replace(/\s/g,'_')}`);
+  if(!inp||!inp.value.trim())return;
+  const item=inp.value.trim();
+  if(!packItems[activePreset])packItems[activePreset]={};
+  if(!packItems[activePreset][cat])packItems[activePreset][cat]={};
+  if(!packItems[activePreset][cat]['__custom'])packItems[activePreset][cat]['__custom']=[];
+  packItems[activePreset][cat]['__custom'].push(item);
+  savePackItems(currentTrip.id);
+  renderPackList();
+}
+
+// ── PASTE PARSER ──
+function parsePaste(){
+  const text=document.getElementById('paste-input').value;
+  if(!text.trim()){alert('Вставьте текст письма');return;}
+  const result={type:'flight',from:'',to:'',date:'',timeDep:'',timeArr:'',carrier:'',price:''};
+
+  // Type detection
+  if(/поїзд|поезд|train|залізниця|залізнич|pkp|uz\./i.test(text))result.type='train';
+  else if(/автобус|bus|flixbus|ecolines/i.test(text))result.type='bus';
+  else result.type='flight';
+
+  // Date patterns
+  const dateMatch=text.match(/(\d{2})[.\-\/](\d{2})[.\-\/](\d{2,4})/);
+  if(dateMatch){
+    const[,d,m,y]=dateMatch;
+    const yr=y.length===2?'20'+y:y;
+    result.date=`${yr}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
+  }
+  const dateMatch2=text.match(/(\d{4})-(\d{2})-(\d{2})/);
+  if(dateMatch2)result.date=dateMatch2[0];
+
+  // Time patterns
+  const times=text.match(/\b(\d{1,2}):(\d{2})\b/g);
+  if(times?.length>=1)result.timeDep=times[0];
+  if(times?.length>=2)result.timeArr=times[1];
+
+  // From/To
+  const fromTo=text.match(/(?:з|від|from|откуда|відправлення)[:\s]+([А-ЯЄІЇёA-Z][а-яєіїёa-z\s\-]+)/i);
+  if(fromTo)result.from=fromTo[1].trim().split(/[\n\r]/)[0].trim();
+  const toMatch=text.match(/(?:до|to|куда|прибуття|прибытие)[:\s]+([А-ЯЄІЇёA-Z][а-яєіїёa-z\s\-]+)/i);
+  if(toMatch)result.to=toMatch[1].trim().split(/[\n\r]/)[0].trim();
+
+  // Price
+  const priceMatch=text.match(/(\d[\d\s]*[,.]?\d*)\s*(грн|uah|₴|€|eur|\$|usd)/i);
+  if(priceMatch)result.price=priceMatch[1].replace(/\s/g,'');
+
+  // Carrier
+  const carrierMatch=text.match(/(?:перевізник|перевозчик|carrier|авіакомпанія|airline)[:\s]+([^\n\r,]+)/i);
+  if(carrierMatch)result.carrier=carrierMatch[1].trim();
+
+  parseResult=result;
+  document.getElementById('parse-result').innerHTML=`
+    <div class="parse-field"><label>Тип</label><span>${TL[result.type]||result.type}</span></div>
+    <div class="parse-field"><label>Откуда</label><span>${result.from||'—'}</span></div>
+    <div class="parse-field"><label>Куда</label><span>${result.to||'—'}</span></div>
+    <div class="parse-field"><label>Дата</label><span>${result.date||'—'}</span></div>
+    <div class="parse-field"><label>Выезд</label><span>${result.timeDep||'—'}</span></div>
+    <div class="parse-field"><label>Прибытие</label><span>${result.timeArr||'—'}</span></div>
+    <div class="parse-field"><label>Перевозчик</label><span>${result.carrier||'—'}</span></div>
+    <div class="parse-field"><label>Цена</label><span>${result.price||'—'}</span></div>
+    <button class="apply-btn" onclick="applyParse()">✓ Создать сегмент из этих данных</button>`;
+}
+
+async function applyParse(){
+  if(!parseResult)return;
+  const{type,from,to,date,timeDep,timeArr,carrier,price}=parseResult;
+  const {data,error}=await sb.from('segments').insert({
+    trip_id:currentTrip.id,user_id:currentUser.id,
+    type,from_city:from,to_city:to,date_from:date,
+    time_dep:timeDep||null,time_arr:timeArr||null,
+    carrier,price_amount:+price||0,price_currency:'UAH',
+    position:currentSegs.length,luggage_ok:true,ticket_files:[]
+  }).select().single();
+  if(!error){
+    currentSegs.push(data);
+    alert('Сегмент создан! Перейдите на вкладку "Маршрут" для проверки.');
+    document.getElementById('paste-input').value='';
+    document.getElementById('parse-result').innerHTML='';
+    parseResult=null;
+  }
+}
+
+// ── INIT ──
 async function init(){
   showLoading();fetchRates();
+  // Check public share
+  const params=new URLSearchParams(location.search);
+  const shareToken=params.get('share');
+  if(shareToken){await showPublicTrip(shareToken);return;}
   const {data:{session}}=await sb.auth.getSession();
-  if(session){currentUser=session.user;const nav=loadNav();if(nav?.tripId)await restoreTrip(nav.tripId,nav.tripName,nav.openSegIdx);else showHome();}
+  if(session){currentUser=session.user;const nav=loadNav();if(nav?.tripId)await restoreTrip(nav.tripId,nav.tripName,nav.openSegIdx,nav.activeTab);else showHome();}
   else showAuth();
   sb.auth.onAuthStateChange((_,s)=>{
-    if(s){currentUser=s.user;const nav=loadNav();if(nav?.tripId)restoreTrip(nav.tripId,nav.tripName,nav.openSegIdx);else showHome();}
+    if(s){currentUser=s.user;const nav=loadNav();if(nav?.tripId)restoreTrip(nav.tripId,nav.tripName,nav.openSegIdx,nav.activeTab);else showHome();}
     else{currentUser=null;clearNav();showAuth();}
   });
 }
 
-async function restoreTrip(id,name,segIdx){
-  currentTrip={id,name};loadDrafts(id);
+async function showPublicTrip(token){
+  const {data:trip}=await sb.from('trips').select('*').eq('share_token',token).eq('is_public',true).single();
+  if(!trip){app.innerHTML='<div class="loading">Маршрут не найден или доступ закрыт.</div>';return;}
+  const {data:segs}=await sb.from('segments').select('*').eq('trip_id',trip.id).order('position');
+  currentTrip=trip;currentSegs=segs||[];
+  const total=currentSegs.reduce((a,s)=>a+toUAH(+s.price_amount||0,s.price_currency||'USD'),0);
+  app.innerHTML=`
+    <div class="public-banner">👁 Публичный просмотр маршрута · <a href="${location.origin}${location.pathname}" style="color:var(--accent2)">Создать свой</a></div>
+    <div class="header"><h1>✈ ${trip.name}</h1><span class="header-total">${fmt(total)}</span></div>
+    <div style="padding:14px 16px">
+      <div class="stitle">Маршрут</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        ${currentSegs.map(s=>`
+        <div class="seg">
+          <div class="seg-hdr" style="cursor:default">
+            <div class="sicon icon-${s.type}">${IC[s.type]||'📍'}</div>
+            <div class="sinfo">
+              <div class="sroute"><span class="tpill tp-${s.type}">${TL[s.type]}</span>${s.from_city||'?'}<span class="arr">→</span>${s.to_city||'?'}</div>
+              <div class="smeta"><span>📅 ${fmtD(s.date_from)}</span><span>⏰ ${s.time_dep&&s.time_dep!=='—'?s.time_dep+'→'+(s.time_arr||'?'):'уточнить'}</span>${s.carrier?`<span>${s.carrier}</span>`:''}</div>
+            </div>
+            <div class="sprice">${fmt(toUAH(+s.price_amount||0,s.price_currency||'USD'))}</div>
+          </div>
+        </div>`).join('')}
+      </div>
+    </div>`;
+}
+
+async function restoreTrip(id,name,segIdx,tab){
+  currentTrip={id,name};loadDrafts(id);loadPackItems(id);
+  activeTab=tab||'segments';
+  const {data:trip}=await sb.from('trips').select('share_token,is_public').eq('id',id).single();
+  if(trip){currentTrip.share_token=trip.share_token;currentTrip.is_public=trip.is_public;}
   const {data}=await sb.from('segments').select('*').eq('trip_id',id).order('position');
-  currentSegs=data||[];openSegIdx=segIdx;renderTrip();
+  currentSegs=data||[];openSegIdx=segIdx;
+  renderTrip();
   if(segIdx!=null)setTimeout(()=>{const e=document.getElementById(`ed${segIdx}`),c=document.getElementById(`ch${segIdx}`);if(e){e.classList.add('open');if(c)c.classList.add('open');}},100);
+  if(activeTab==='map')setTimeout(renderMap,200);
+  if(activeTab==='weather')setTimeout(renderWeather,200);
+  if(activeTab==='packing')setTimeout(renderPackList,100);
 }
 
 function showLoading(){app.innerHTML=`<div class="loading"><div class="spinner"></div>Загрузка...</div>`;}
@@ -537,12 +830,7 @@ function showAuth(tab='login'){
   </div></div>`;
 }
 async function doLogin(){const {error}=await sb.auth.signInWithPassword({email:document.getElementById('em').value,password:document.getElementById('pw').value});if(error)document.getElementById('aerr').textContent=error.message;}
-async function doReg(){
-  const {error}=await sb.auth.signUp({email:document.getElementById('em').value,password:document.getElementById('pw').value,options:{emailRedirectTo:'https://izienglish.github.io/my_trip/'}});
-  const el=document.getElementById('aerr');
-  if(error){el.style.color='var(--danger)';el.textContent=error.message;}
-  else{el.style.color='var(--ok)';el.textContent='Проверьте почту!';}
-}
+async function doReg(){const {error}=await sb.auth.signUp({email:document.getElementById('em').value,password:document.getElementById('pw').value,options:{emailRedirectTo:'https://izienglish.github.io/my_trip/'}});const el=document.getElementById('aerr');if(error){el.style.color='var(--danger)';el.textContent=error.message;}else{el.style.color='var(--ok)';el.textContent='Проверьте почту!';}}
 async function doLogout(){clearNav();await sb.auth.signOut();}
 
 async function showHome(){
@@ -554,19 +842,16 @@ async function showHome(){
     const total=segs.reduce((a,s)=>a+toUAH(+s.price_amount||+s.price_usd||0,s.price_currency||'USD'),0);
     const dates=segs.length?`${fmtD(segs[0].date_from)} – ${fmtD(segs[segs.length-1].date_from)}`:'—';
     const route=segs.length?`${segs[0].from_city||'?'} → ${segs[segs.length-1].to_city||'?'}`:'—';
-    const safeId=t.id.replace(/-/g,'');
-    const safeName=t.name.replace(/'/g,"\\'").replace(/"/g,'&quot;');
-    return`<div class="trip-card" onclick="openTrip('${t.id}','${safeName}')">
+    const sn=t.name.replace(/'/g,"\\'").replace(/"/g,'&quot;');
+    return`<div class="trip-card" onclick="openTrip('${t.id}','${sn}')">
       <div class="trip-actions">
         <button class="trip-action-btn" title="Переименовать" onclick="startRename('${t.id}',event)">✏️</button>
-        <button class="trip-action-btn" title="Дублировать" onclick="duplicateTrip('${t.id}','${safeName}',event)">⧉</button>
+        <button class="trip-action-btn" title="Дублировать" onclick="duplicateTrip('${t.id}','${sn}',event)">⧉</button>
         <button class="trip-action-btn del" title="Удалить" onclick="event.stopPropagation();delTrip('${t.id}')">✕</button>
       </div>
       <div class="trip-card-name">
         <h3 id="tripname-${t.id}">${t.name}</h3>
-        <input class="trip-rename-input" id="rename-${t.id}" value="${safeName}"
-          onblur="saveRename('${t.id}',event)"
-          onkeydown="if(event.key==='Enter')saveRename('${t.id}',event)">
+        <input class="trip-rename-input" id="rename-${t.id}" value="${sn}" onblur="saveRename('${t.id}',event)" onkeydown="if(event.key==='Enter')saveRename('${t.id}',event)">
       </div>
       <div class="trip-meta"><span>📍 ${route}</span><span>📅 ${dates}</span><span>🧩 ${segs.length} сегм.</span></div>
       <div class="trip-price">${total>0?fmt(total):'—'}</div>
@@ -580,13 +865,7 @@ async function showHome(){
   </div>
   <div class="home">
     <div class="home-title">Мои отпуска</div>
-    <div class="trips-grid">
-      ${cards}
-      <div class="add-trip-box">
-        <input type="text" id="ntn" placeholder="Название (напр. Израиль 2026)">
-        <button class="btn-add" onclick="addTrip()">+ Добавить поездку</button>
-      </div>
-    </div>
+    <div class="trips-grid">${cards}<div class="add-trip-box"><input type="text" id="ntn" placeholder="Название (напр. Израиль 2026)"><button class="btn-add" onclick="addTrip()">+ Добавить поездку</button></div></div>
   </div>`;
 }
 
@@ -594,9 +873,21 @@ async function addTrip(){const name=document.getElementById('ntn').value.trim();
 async function delTrip(id){if(!confirm('Удалить поездку со всеми сегментами?'))return;await sb.from('trips').delete().eq('id',id);showHome();}
 
 async function openTrip(id,name){
-  currentTrip={id,name};openSegIdx=null;loadDrafts(id);showLoading();
+  currentTrip={id,name};openSegIdx=null;activeTab='segments';
+  loadDrafts(id);loadPackItems(id);showLoading();
+  const {data:trip}=await sb.from('trips').select('share_token,is_public').eq('id',id).single();
+  if(trip){currentTrip.share_token=trip.share_token;currentTrip.is_public=trip.is_public;}
   const {data}=await sb.from('segments').select('*').eq('trip_id',id).order('position');
   currentSegs=data||[];saveNav();renderTrip();
+}
+
+function switchTab(tab){
+  activeTab=tab;saveNav();
+  document.querySelectorAll('.trip-tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.style.display=p.dataset.panel===tab?'block':'none');
+  if(tab==='map')setTimeout(renderMap,100);
+  if(tab==='weather')setTimeout(renderWeather,100);
+  if(tab==='packing')setTimeout(renderPackList,50);
 }
 
 function renderTrip(){
@@ -608,106 +899,120 @@ function renderTrip(){
     <span class="header-total" id="trip-total">${fmt(total)}</span>
     <button class="logout-btn" onclick="doLogout()">Выйти</button>
   </div>
-  <div id="alerts-box" class="alerts"></div>
-  <div class="trip-detail">
-    <div class="segments">
-      <div class="stitle">Сегменты маршрута</div>
-      <div class="seg-list" id="seg-list"></div>
-      <div class="add-seg-box" style="margin-top:10px">
-        <div class="stitle">+ Новый сегмент</div>
-        <div class="seg-type-row" id="type-row">
-          <button class="type-btn ${newSegType==='train'?'active':''}" onclick="setType('train',this)">🚂 Поезд</button>
-          <button class="type-btn ${newSegType==='bus'?'active':''}" onclick="setType('bus',this)">🚌 Автобус</button>
-          <button class="type-btn ${newSegType==='flight'?'active':''}" onclick="setType('flight',this)">✈️ Рейс</button>
-        </div>
-        <div class="frow" style="margin-bottom:8px">
-          <div class="efield"><label>Откуда</label><input id="ns-from" placeholder="Киев"></div>
-          <div class="efield"><label>Куда</label><input id="ns-to" placeholder="Варшава"></div>
-          <div class="efield"><label>Дата</label><input type="date" id="ns-date"></div>
-        </div>
-        <button class="btn-add" onclick="addSeg()">+ Добавить</button>
-      </div>
+  <div class="trip-wrap">
+    <div class="trip-tabs">
+      <button class="trip-tab ${activeTab==='segments'?'active':''}" data-tab="segments" onclick="switchTab('segments')">🗺 Маршрут</button>
+      <button class="trip-tab ${activeTab==='map'?'active':''}" data-tab="map" onclick="switchTab('map')">📍 Карта</button>
+      <button class="trip-tab ${activeTab==='weather'?'active':''}" data-tab="weather" onclick="switchTab('weather')">🌤 Погода</button>
+      <button class="trip-tab ${activeTab==='packing'?'active':''}" data-tab="packing" onclick="switchTab('packing')">🧳 Чеклист</button>
+      <button class="trip-tab ${activeTab==='import'?'active':''}" data-tab="import" onclick="switchTab('import')">📋 Импорт</button>
     </div>
-    <div class="sidebar">
-      <div class="sc"><h3>📅 Хронология</h3><div class="tl" id="tl"></div></div>
-      <div class="sc"><h3>💰 Бюджет</h3><div class="bgt" id="bgt"></div><div class="btotal"><span>ИТОГО</span><span class="am" id="btotal-val">—</span></div></div>
-      <div class="sc">
-        <h3>📆 Добавить в календарь</h3>
-        <div style="padding:10px 11px;display:flex;flex-direction:column;gap:7px;">
-          <div style="font-size:10px;color:var(--muted);font-family:var(--mono);line-height:1.5">
-            Все сегменты маршрута раскинутся по датам.
+    <div class="trip-content">
+      <!-- SEGMENTS TAB -->
+      <div class="tab-panel" data-panel="segments" style="display:${activeTab==='segments'?'block':'none'}">
+        <div id="alerts-box" class="alerts"></div>
+        <div class="trip-detail">
+          <div class="segments">
+            <div class="stitle">Сегменты маршрута</div>
+            <div class="seg-list" id="seg-list"></div>
+            <div class="add-seg-box" style="margin-top:10px">
+              <div class="stitle">+ Новый сегмент</div>
+              <div class="seg-type-row" id="type-row">
+                <button class="type-btn ${newSegType==='train'?'active':''}" onclick="setType('train',this)">🚂 Поезд</button>
+                <button class="type-btn ${newSegType==='bus'?'active':''}" onclick="setType('bus',this)">🚌 Автобус</button>
+                <button class="type-btn ${newSegType==='flight'?'active':''}" onclick="setType('flight',this)">✈️ Рейс</button>
+              </div>
+              <div class="frow" style="margin-bottom:8px">
+                <div class="efield"><label>Откуда</label><input id="ns-from" placeholder="Киев"></div>
+                <div class="efield"><label>Куда</label><input id="ns-to" placeholder="Варшава"></div>
+                <div class="efield"><label>Дата</label><input type="date" id="ns-date"></div>
+              </div>
+              <button class="btn-add" onclick="addSeg()">+ Добавить</button>
+            </div>
           </div>
-          <button class="cal-btn" style="background:rgba(66,133,244,.1);border-color:rgba(66,133,244,.3);color:#6ab0f5;" onclick="openGoogleCalendar()">
-            <span>📅</span> Добавить в Google Calendar
-          </button>
-          <button class="cal-btn" onclick="exportToCalendar()">
-            <span>⬇️</span> Скачать .ics (Mac / Outlook)
-          </button>
-          <div style="font-size:9px;color:var(--muted);font-family:var(--mono);line-height:1.5">
-            📱 iPhone: скачайте .ics → отправьте себе на email → откройте вложение в приложении Почта
+          <div class="sidebar">
+            <div class="sc"><h3>📅 Хронология</h3><div class="tl" id="tl"></div></div>
+            <div class="sc"><h3>💰 Бюджет</h3><div class="bgt" id="bgt"></div><div class="btotal"><span>ИТОГО</span><span class="am" id="btotal-val">—</span></div></div>
+            <div class="sc">
+              <h3>📆 Добавить в календарь</h3>
+              <div style="padding:10px 11px;display:flex;flex-direction:column;gap:7px;">
+                <button class="cal-btn" style="background:rgba(66,133,244,.1);border-color:rgba(66,133,244,.3);color:#6ab0f5;" onclick="openGoogleCalendar()"><span>📅</span> Google Calendar</button>
+                <button class="cal-btn" onclick="exportToCalendar()"><span>⬇️</span> Скачать .ics</button>
+                <div style="font-size:9px;color:var(--muted);font-family:var(--mono);line-height:1.5">📱 iPhone: скачайте .ics → отправьте себе на email → откройте вложение в Почте</div>
+              </div>
+            </div>
+            <div class="sc">
+              <h3>🔗 Поделиться маршрутом</h3>
+              <div class="share-section" id="share-section"></div>
+            </div>
+            <div class="sc"><h3>💱 Курс валют</h3><div class="rates-card" id="rates-card"></div></div>
           </div>
         </div>
       </div>
-      <div class="sc"><h3>💱 Курс валют</h3><div class="rates-card" id="rates-card"></div></div>
+      <!-- MAP TAB -->
+      <div class="tab-panel" data-panel="map" style="display:${activeTab==='map'?'block':'none'}">
+        <div class="map-view">
+          <div id="trip-map" style="height:420px;border-radius:10px;border:1px solid var(--border);"></div>
+          <div class="map-legend" style="margin-top:10px;font-family:var(--mono);font-size:10px;color:var(--muted)">
+            <span>🟢 Начало</span><span>🔵 Промежуточные</span><span>🔴 Конец</span>
+          </div>
+          <div id="map-view-content"></div>
+        </div>
+      </div>
+      <!-- WEATHER TAB -->
+      <div class="tab-panel" data-panel="weather" style="display:${activeTab==='weather'?'block':'none'}">
+        <div class="weather-view"><div id="weather-view-content"></div></div>
+      </div>
+      <!-- PACKING TAB -->
+      <div class="tab-panel" data-panel="packing" style="display:${activeTab==='packing'?'block':'none'}">
+        <div class="pack-view"><div id="pack-view-content"></div></div>
+      </div>
+      <!-- IMPORT TAB -->
+      <div class="tab-panel" data-panel="import" style="display:${activeTab==='import'?'block':'none'}">
+        <div class="paste-view">
+          <div class="paste-box">
+            <h3>📋 Импорт из письма</h3>
+            <p>Скопируйте текст письма-подтверждения (билет на поезд, самолёт, автобус) и вставьте сюда. Приложение попробует распознать данные автоматически.</p>
+            <textarea class="paste-textarea" id="paste-input" placeholder="Вставьте текст письма сюда..."></textarea>
+            <button class="parse-btn" onclick="parsePaste()">🔍 Распознать данные</button>
+            <div id="parse-result"></div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>`;
-  renderSegList();renderAlerts();renderTL();renderBgt();renderRatesCard();
+
+  renderSegList();renderAlerts();renderTL();renderBgt();renderRatesCard();renderShareSection();
+  if(activeTab==='map')setTimeout(renderMap,100);
+  if(activeTab==='weather')setTimeout(renderWeather,100);
+  if(activeTab==='packing')setTimeout(renderPackList,50);
 }
 
-function renderRatesCard(){
-  const el=document.getElementById('rates-card');if(!el)return;
-  el.innerHTML=`<div class="rate-row"><span>1 USD</span><span class="rv">= ${RATES.USD} ₴</span></div>
-    <div class="rate-row"><span>1 EUR</span><span class="rv">= ${RATES.EUR} ₴</span></div>
-    <div class="rate-row"><span>1 UAH</span><span class="rv">= 1 ₴</span></div>
-    <div class="rate-upd">🔄 ${ratesUpdated}</div>`;
-}
+function renderRatesCard(){const el=document.getElementById('rates-card');if(!el)return;el.innerHTML=`<div class="rate-row"><span>1 USD</span><span class="rv">= ${RATES.USD} ₴</span></div><div class="rate-row"><span>1 EUR</span><span class="rv">= ${RATES.EUR} ₴</span></div><div class="rate-row"><span>1 UAH</span><span class="rv">= 1 ₴</span></div><div class="rate-upd">🔄 ${ratesUpdated}</div>`;}
 
 function renderSegList(){
+  if(!document.getElementById('seg-list'))return;
   document.getElementById('seg-list').innerHTML=currentSegs.map((seg,i)=>{
-    const s=getSeg(i);
-    const isDraft=hasDraft(i);
+    const s=getSeg(i);const isDraft=hasDraft(i);
     const uah=toUAH(+s.price_amount||+s.price_usd||0,s.price_currency||'USD');
     const cur=s.price_currency||'USD';
     const files=Array.isArray(s.ticket_files)?s.ticket_files:[];
     const phint=cur==='UAH'?`${s.price_amount||0} ₴`:cur==='USD'?`${s.price_amount||0} × ${RATES.USD} = ${fmt(uah)}`:`${s.price_amount||0} × ${RATES.EUR} = ${fmt(uah)}`;
     const lhtml=getLinks(s).map(l=>`<a class="search-btn" href="${l.url}" target="_blank" rel="noopener"><span>${l.icon}</span><span class="sb-label">${l.label}</span><span class="sb-arrow">↗</span></a>`).join('');
+    const hasNextDay=s.time_arr&&s.time_arr!=='—'&&s.time_dep&&s.time_dep!=='—'&&s.time_arr<s.time_dep&&s.date_from;
+    const nextDayDate=hasNextDay?(()=>{const dt=new Date(s.date_from);dt.setDate(dt.getDate()+1);return fmtD(dt.toISOString().slice(0,10));})():'';
     const ticketsHTML=`<div class="tickets-section">
       <div class="tickets-label">🎫 Билеты и документы</div>
-      <div class="ticket-list">${files.map((f,fi)=>`
-        <div class="ticket-item">
-          <span>${f.type?.includes('pdf')?'📄':'🖼'}</span>
-          <span class="ticket-name" title="${f.name}">${f.name}</span>
-          <button class="ticket-open" onclick="openTicket('${f.path}')">Открыть</button>
-          <button class="ticket-del" onclick="deleteTicket(${i},${fi})">✕</button>
-        </div>`).join('')}</div>
+      <div class="ticket-list">${files.map((f,fi)=>`<div class="ticket-item"><span>${f.type?.includes('pdf')?'📄':'🖼'}</span><span class="ticket-name" title="${f.name}">${f.name}</span><button class="ticket-open" onclick="openTicket('${f.path}')">Открыть</button><button class="ticket-del" onclick="deleteTicket(${i},${fi})">✕</button></div>`).join('')}</div>
       <button class="upload-btn" onclick="triggerUpload(${i})">📎 Добавить фото или PDF билета</button>
       <div class="upload-progress" id="upload-prog-${i}"></div>
     </div>`;
-
     return`<div class="seg ${isDraft?'draft':''}">
     <div class="seg-hdr" onclick="togSeg(${i})">
       <div class="sicon icon-${s.type}">${IC[s.type]||'📍'}</div>
       <div class="sinfo">
-        <div class="sroute">
-          <span class="tpill tp-${s.type}">${TL[s.type]||s.type}</span>
-          ${s.from_city||'?'}<span class="arr">→</span>${s.to_city||'?'}
-          ${isDraft?'<span class="draftbadge">● черновик</span>':''}
-          ${files.length?`<span class="filebadge">🎫 ${files.length}</span>`:''}
-        </div>
-        <div class="smeta">
-          <span>📅 ${fmtD(s.date_from)}</span>
-          <span>⏰ ${(()=>{
-            if(!s.time_dep||s.time_dep==='—')return'уточнить';
-            let arr=s.time_arr&&s.time_arr!=='—'?s.time_arr:'?';
-            let suffix='';
-            if(s.time_arr&&s.time_arr!=='—'&&s.time_arr<s.time_dep&&s.date_from){
-              const dt=new Date(s.date_from);dt.setDate(dt.getDate()+1);
-              suffix=` <span style="color:var(--accent);font-size:8px">${fmtD(dt.toISOString().slice(0,10))}</span>`;
-            }
-            return s.time_dep+'→'+arr+suffix;
-          })()}</span>
-          <span>⏱ ${s.duration||'—'}</span>
-        </div>
+        <div class="sroute"><span class="tpill tp-${s.type}">${TL[s.type]||s.type}</span>${s.from_city||'?'}<span class="arr">→</span>${s.to_city||'?'}${isDraft?'<span class="draftbadge">● черновик</span>':''}${files.length?`<span class="filebadge">🎫 ${files.length}</span>`:''}</div>
+        <div class="smeta"><span>📅 ${fmtD(s.date_from)}</span><span>⏰ ${(()=>{if(!s.time_dep||s.time_dep==='—')return'уточнить';let arr=s.time_arr&&s.time_arr!=='—'?s.time_arr:'?';let sfx=hasNextDay?` <span style="color:var(--accent);font-size:8px">${nextDayDate}</span>`:'';return s.time_dep+'→'+arr+sfx;})()}</span><span>⏱ ${s.duration||'—'}</span></div>
       </div>
       <div class="sprice">${fmt(uah)}<div class="orig">${s.price_amount||s.price_usd||0}${CS[cur]||'$'}</div></div>
       <span class="chev" id="ch${i}">▼</span>
@@ -720,45 +1025,15 @@ function renderSegList(){
       <div class="frow">
         <div class="efield"><label>Дата</label><input type="date" value="${s.date_from||''}" onchange="ds(${i},'date_from',this.value)"></div>
         <div class="efield"><label>Выезд</label><input type="time" value="${s.time_dep&&s.time_dep!=='—'?s.time_dep:''}" onchange="ds(${i},'time_dep',this.value||'—')"></div>
-        <div class="efield">
-          <label>Прибытие ${(()=>{
-            if(s.time_arr&&s.time_arr!=='—'&&s.time_dep&&s.time_dep!=='—'&&s.time_arr<s.time_dep&&s.date_from){
-              const dt=new Date(s.date_from);dt.setDate(dt.getDate()+1);
-              const arrDate=dt.toISOString().slice(0,10);
-              return`<span style="color:var(--accent);font-size:9px;background:rgba(240,192,64,.15);padding:1px 5px;border-radius:3px;border:1px solid rgba(240,192,64,.3)">${fmtD(arrDate)}</span>`;
-            }
-            return'';
-          })()}</label>
-          <input type="time" value="${s.time_arr&&s.time_arr!=='—'?s.time_arr:''}" onchange="ds(${i},'time_arr',this.value||'—')">
-        </div>
+        <div class="efield"><label>Прибытие ${hasNextDay?`<span style="color:var(--accent);font-size:9px;background:rgba(240,192,64,.15);padding:1px 5px;border-radius:3px;border:1px solid rgba(240,192,64,.3)">${nextDayDate}</span>`:''}</label><input type="time" value="${s.time_arr&&s.time_arr!=='—'?s.time_arr:''}" onchange="ds(${i},'time_arr',this.value||'—')"></div>
       </div>
-      <div class="price-block">
-        <label>Стоимость</label>
-        <div class="price-inner">
-          <input type="number" value="${s.price_amount||s.price_usd||0}" min="0" onchange="ds(${i},'price_amount',+this.value)">
-          <div class="cur-row">
-            <button class="cur-btn ${cur==='UAH'?'active':''}" onclick="setCur(${i},'UAH')">₴</button>
-            <button class="cur-btn ${cur==='USD'?'active':''}" onclick="setCur(${i},'USD')">$</button>
-            <button class="cur-btn ${cur==='EUR'?'active':''}" onclick="setCur(${i},'EUR')">€</button>
-          </div>
-        </div>
-        <div class="price-hint" id="ph${i}">${phint}</div>
-      </div>
-      <div class="frow">
-        <div class="efield" style="flex:2"><label>Перевозчик</label><input value="${s.carrier||''}" placeholder="Lufthansa, FlixBus..." onchange="ds(${i},'carrier',this.value)"></div>
-        <div class="efield"><label>Длит.</label><input value="${s.duration||''}" placeholder="~4 ч" onchange="ds(${i},'duration',this.value)"></div>
-      </div>
-      <div class="frow">
-        <div class="efield"><label>Адрес отправл.</label><input value="${s.dep_address||''}" placeholder="FRA, Терминал 1" onchange="ds(${i},'dep_address',this.value)"></div>
-        <div class="efield"><label>Адрес прибыт.</label><input value="${s.arr_address||''}" placeholder="TLV, Терминал 3" onchange="ds(${i},'arr_address',this.value)"></div>
-      </div>
+      <div class="price-block"><label>Стоимость</label><div class="price-inner"><input type="number" value="${s.price_amount||s.price_usd||0}" min="0" onchange="ds(${i},'price_amount',+this.value)"><div class="cur-row"><button class="cur-btn ${cur==='UAH'?'active':''}" onclick="setCur(${i},'UAH')">₴</button><button class="cur-btn ${cur==='USD'?'active':''}" onclick="setCur(${i},'USD')">$</button><button class="cur-btn ${cur==='EUR'?'active':''}" onclick="setCur(${i},'EUR')">€</button></div></div><div class="price-hint" id="ph${i}">${phint}</div></div>
+      <div class="frow"><div class="efield" style="flex:2"><label>Перевозчик</label><input value="${s.carrier||''}" placeholder="Lufthansa, FlixBus..." onchange="ds(${i},'carrier',this.value)"></div><div class="efield"><label>Длит.</label><input value="${s.duration||''}" placeholder="~4 ч" onchange="ds(${i},'duration',this.value)"></div></div>
+      <div class="frow"><div class="efield"><label>Адрес отправл.</label><input value="${s.dep_address||''}" placeholder="FRA, Терминал 1" onchange="ds(${i},'dep_address',this.value)"></div><div class="efield"><label>Адрес прибыт.</label><input value="${s.arr_address||''}" placeholder="TLV, Терминал 3" onchange="ds(${i},'arr_address',this.value)"></div></div>
       <div class="efield"><label>Заметка</label><input value="${s.notes||''}" placeholder="доп. информация" onchange="ds(${i},'notes',this.value)"></div>
       ${ticketsHTML}
       <div class="search-btns"><div class="search-title">🔎 Найти билеты</div>${lhtml}</div>
-      <div class="row-btns">
-        <button class="delbtn" onclick="delSeg(${i})">🗑 Удалить</button>
-        <button class="sbtn" onclick="saveSeg(${i})">💾 Сохранить</button>
-      </div>
+      <div class="row-btns"><button class="delbtn" onclick="delSeg(${i})">🗑 Удалить</button><button class="sbtn" onclick="saveSeg(${i})">💾 Сохранить</button></div>
     </div>
   </div>`;
   }).join('');
@@ -775,96 +1050,54 @@ function togSeg(i){
 
 function setCur(i,cur){
   ds(i,'price_currency',cur);
-  document.querySelectorAll(`#ed${i} .cur-btn`).forEach(b=>{
-    b.classList.toggle('active',(cur==='UAH'&&b.textContent==='₴')||(cur==='USD'&&b.textContent==='$')||(cur==='EUR'&&b.textContent==='€'));
-  });
+  document.querySelectorAll(`#ed${i} .cur-btn`).forEach(b=>{b.classList.toggle('active',(cur==='UAH'&&b.textContent==='₴')||(cur==='USD'&&b.textContent==='$')||(cur==='EUR'&&b.textContent==='€'));});
 }
 
 function ds(i,k,v){
-  const seg=currentSegs[i];
-  const upd={...(drafts[seg.id]||{}),[k]:v};
-  saveDraft(seg.id,upd);
-  const s=getSeg(i);
-  const uah=toUAH(+s.price_amount||+s.price_usd||0,s.price_currency||'USD');
-  const cur=s.price_currency||'USD';
-  const ph=document.getElementById(`ph${i}`);
-  if(ph)ph.textContent=cur==='UAH'?`${s.price_amount||0} ₴`:cur==='USD'?`${s.price_amount||0} × ${RATES.USD} = ${fmt(uah)}`:`${s.price_amount||0} × ${RATES.EUR} = ${fmt(uah)}`;
-  const pe=document.querySelector(`#seg-list > div:nth-child(${i+1}) .sprice`);
-  if(pe)pe.innerHTML=`${fmt(uah)}<div class="orig">${s.price_amount||0}${CS[cur]||'$'}</div>`;
-  const re=document.querySelector(`#seg-list > div:nth-child(${i+1}) .sroute`);
-  if(re){const pill=re.querySelector('.tpill')?.outerHTML||'';re.innerHTML=`${pill}${s.from_city||'?'}<span class="arr">→</span>${s.to_city||'?'}<span class="draftbadge">● черновик</span>`;}
+  const seg=currentSegs[i];const upd={...(drafts[seg.id]||{}),[k]:v};saveDraft(seg.id,upd);
+  const s=getSeg(i);const uah=toUAH(+s.price_amount||+s.price_usd||0,s.price_currency||'USD');const cur=s.price_currency||'USD';
+  const ph=document.getElementById(`ph${i}`);if(ph)ph.textContent=cur==='UAH'?`${s.price_amount||0} ₴`:cur==='USD'?`${s.price_amount||0} × ${RATES.USD} = ${fmt(uah)}`:`${s.price_amount||0} × ${RATES.EUR} = ${fmt(uah)}`;
+  const pe=document.querySelector(`#seg-list > div:nth-child(${i+1}) .sprice`);if(pe)pe.innerHTML=`${fmt(uah)}<div class="orig">${s.price_amount||0}${CS[cur]||'$'}</div>`;
+  const re=document.querySelector(`#seg-list > div:nth-child(${i+1}) .sroute`);if(re){const pill=re.querySelector('.tpill')?.outerHTML||'';re.innerHTML=`${pill}${s.from_city||'?'}<span class="arr">→</span>${s.to_city||'?'}<span class="draftbadge">● черновик</span>`;}
   renderBgt();renderTL();renderAlerts();
 }
 
 function setType(t,btn){newSegType=t;document.querySelectorAll('#type-row .type-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
 
 async function addSeg(){
-  const from=document.getElementById('ns-from').value.trim();
-  const to=document.getElementById('ns-to').value.trim();
-  const date=document.getElementById('ns-date').value;
+  const from=document.getElementById('ns-from').value.trim();const to=document.getElementById('ns-to').value.trim();const date=document.getElementById('ns-date').value;
   if(!from||!to)return alert('Укажите откуда и куда');
-  const {data,error}=await sb.from('segments').insert({
-    trip_id:currentTrip.id,user_id:currentUser.id,
-    type:newSegType,from_city:from,to_city:to,
-    date_from:date,price_amount:0,price_currency:'USD',
-    position:currentSegs.length,luggage_ok:true,ticket_files:[]
-  }).select().single();
+  const {data,error}=await sb.from('segments').insert({trip_id:currentTrip.id,user_id:currentUser.id,type:newSegType,from_city:from,to_city:to,date_from:date,price_amount:0,price_currency:'USD',position:currentSegs.length,luggage_ok:true,ticket_files:[]}).select().single();
   if(!error){currentSegs.push(data);renderTrip();}
 }
 
 async function saveSeg(i){
   const seg=currentSegs[i];const d=getSeg(i);
-  const {error}=await sb.from('segments').update({
-    from_city:d.from_city,to_city:d.to_city,
-    date_from:d.date_from,time_dep:d.time_dep,time_arr:d.time_arr,
-    price_amount:d.price_amount,price_currency:d.price_currency,
-    carrier:d.carrier,duration:d.duration,
-    notes:d.notes,dep_address:d.dep_address,arr_address:d.arr_address,
-  }).eq('id',seg.id);
+  const {error}=await sb.from('segments').update({from_city:d.from_city,to_city:d.to_city,date_from:d.date_from,time_dep:d.time_dep,time_arr:d.time_arr,price_amount:d.price_amount,price_currency:d.price_currency,carrier:d.carrier,duration:d.duration,notes:d.notes,dep_address:d.dep_address,arr_address:d.arr_address}).eq('id',seg.id);
   if(!error){Object.assign(currentSegs[i],d);clearDraft(seg.id);openSegIdx=null;saveNav();renderTrip();}
 }
 
 async function delSeg(i){
-  if(!confirm('Удалить сегмент?'))return;
-  clearDraft(currentSegs[i].id);
-  await sb.from('segments').delete().eq('id',currentSegs[i].id);
-  currentSegs.splice(i,1);openSegIdx=null;saveNav();renderTrip();
+  if(!confirm('Удалить сегмент?'))return;clearDraft(currentSegs[i].id);
+  await sb.from('segments').delete().eq('id',currentSegs[i].id);currentSegs.splice(i,1);openSegIdx=null;saveNav();renderTrip();
 }
 
 function renderAlerts(){
   const a=[];
   if(currentSegs.some((_,i)=>hasDraft(i)))a.push({t:'info',txt:'💾 Есть несохранённые изменения. Нажмите «Сохранить» когда закончите.'});
   else if(currentSegs.length>0)a.push({t:'ok',txt:'✓ Все сохранено. При переходе на другой сайт страница восстановится автоматически.'});
-  const box=document.getElementById('alerts-box');
-  if(box)box.innerHTML=a.map(x=>`<div class="alert ${x.t}">${x.txt}</div>`).join('');
+  const box=document.getElementById('alerts-box');if(box)box.innerHTML=a.map(x=>`<div class="alert ${x.t}">${x.txt}</div>`).join('');
 }
 
 function renderTL(){
   const tl=document.getElementById('tl');if(!tl)return;
   if(!currentSegs.length){tl.innerHTML='<div style="color:var(--muted);font-size:11px;padding:4px">Нет сегментов</div>';return;}
-  tl.innerHTML=currentSegs.map((seg,i)=>{
-    const s=getSeg(i);
-    return`<div class="tli">
-    <div class="tdc"><div class="td ${s.type==='flight'?'flight':''}"></div>${i<currentSegs.length-1?'<div class="tline"></div>':''}</div>
-    <div class="tco">
-      <div class="tdate">${fmtD(s.date_from)}${s.time_dep&&s.time_dep!=='—'?' · '+s.time_dep:''}</div>
-      <div class="tlbl">${IC[s.type]} ${s.from_city||'?'} → ${s.to_city||'?'}</div>
-      ${s.dep_address?`<div class="tsub">📍 ${s.dep_address}</div>`:''}
-      ${s.arr_address?`<div class="tsub">🏁 ${s.arr_address}</div>`:''}
-      ${s.carrier?`<div class="tsub">${s.carrier}</div>`:''}
-    </div>
-  </div>`;
-  }).join('');
+  tl.innerHTML=currentSegs.map((seg,i)=>{const s=getSeg(i);return`<div class="tli"><div class="tdc"><div class="td ${s.type==='flight'?'flight':''}"></div>${i<currentSegs.length-1?'<div class="tline"></div>':''}</div><div class="tco"><div class="tdate">${fmtD(s.date_from)}${s.time_dep&&s.time_dep!=='—'?' · '+s.time_dep:''}</div><div class="tlbl">${IC[s.type]} ${s.from_city||'?'} → ${s.to_city||'?'}</div>${s.dep_address?`<div class="tsub">📍 ${s.dep_address}</div>`:''}${s.arr_address?`<div class="tsub">🏁 ${s.arr_address}</div>`:''}${s.carrier?`<div class="tsub">${s.carrier}</div>`:''}</div></div>`;}).join('');
 }
 
 function renderBgt(){
-  const bgt=document.getElementById('bgt'),btv=document.getElementById('btotal-val'),th=document.getElementById('trip-total');
-  if(!bgt)return;
-  let tot=0;
-  bgt.innerHTML=currentSegs.map((seg,i)=>{
-    const s=getSeg(i);const uah=toUAH(+s.price_amount||+s.price_usd||0,s.price_currency||'USD');tot+=uah;
-    return`<div class="brow"><span class="lb">${s.from_city||'?'}→${s.to_city||'?'}</span><span class="am">${fmt(uah)}</span></div>`;
-  }).join('');
+  const bgt=document.getElementById('bgt'),btv=document.getElementById('btotal-val'),th=document.getElementById('trip-total');if(!bgt)return;
+  let tot=0;bgt.innerHTML=currentSegs.map((seg,i)=>{const s=getSeg(i);const uah=toUAH(+s.price_amount||+s.price_usd||0,s.price_currency||'USD');tot+=uah;return`<div class="brow"><span class="lb">${s.from_city||'?'}→${s.to_city||'?'}</span><span class="am">${fmt(uah)}</span></div>`;}).join('');
   const ts=fmt(tot);if(btv)btv.textContent=ts;if(th)th.textContent=ts;
 }
 
