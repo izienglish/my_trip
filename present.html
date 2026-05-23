@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Triply — Планировщик путешествий</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0e0e12;--surface:#16161c;--surface2:#1e1e28;--border:#2a2a38;
+  --accent:#f0c040;--purple:#7c6ff0;--green:#3dd68c;--orange:#f07850;
+  --text:#e8e8f0;--muted:#8888a8;
+  --display:'Space Grotesk',system-ui,sans-serif;
+  --sans:'Inter',system-ui,sans-serif;
+  --mono:'Space Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.6;}
+
+.section{padding:72px 80px;border-bottom:1px solid var(--border);}
+.section:last-child{border-bottom:none;}
+
+.label{font-family:var(--mono);font-size:10px;color:var(--purple);letter-spacing:3px;text-transform:uppercase;margin-bottom:14px;}
+.title{font-family:var(--display);font-size:34px;font-weight:800;margin-bottom:10px;line-height:1.15;}
+.subtitle{font-size:15px;color:var(--muted);max-width:560px;line-height:1.7;}
+
+/* HERO */
+.hero{padding:100px 80px 80px;text-align:center;}
+.logo-wrap{display:flex;align-items:center;justify-content:center;gap:18px;margin-bottom:36px;}
+.logo-icon{width:64px;height:64px;background:var(--surface2);border-radius:16px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);}
+.logo-name{font-family:var(--display);font-size:52px;font-weight:800;letter-spacing:-1px;}
+.logo-name em{color:var(--purple);font-style:normal;font-weight:300;}
+.logo-name b{color:var(--accent);}
+.hero-tag{font-size:20px;color:var(--muted);font-weight:300;margin-bottom:14px;font-family:var(--sans);}
+.hero-desc{font-size:15px;color:var(--muted);max-width:500px;margin:0 auto 32px;line-height:1.7;}
+.pills{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+.pill{padding:7px 18px;border-radius:20px;font-size:12px;font-family:var(--mono);border:1px solid;}
+.pill-g{background:rgba(61,214,140,.1);color:var(--green);border-color:rgba(61,214,140,.25);}
+.pill-p{background:rgba(124,111,240,.1);color:var(--purple);border-color:rgba(124,111,240,.25);}
+.pill-y{background:rgba(240,192,64,.1);color:var(--accent);border-color:rgba(240,192,64,.25);}
+
+/* ROUTES */
+.route-examples{display:flex;flex-direction:column;gap:16px;margin-top:32px;}
+.route-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px 24px;}
+.route-card-label{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.5px;margin-bottom:20px;}
+.route-vis{display:flex;align-items:center;}
+.r-city{text-align:center;min-width:100px;}
+.r-dot{width:14px;height:14px;border-radius:50%;border:3px solid var(--bg);margin:0 auto 8px;}
+.r-name{font-size:13px;font-weight:700;font-family:var(--display);}
+.r-line{flex:1;position:relative;height:3px;border-radius:2px;margin:0 -1px 22px;}
+.r-transport{position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:3px 10px;white-space:nowrap;color:var(--muted);font-family:var(--mono);}
+
+/* FEATURES */
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:32px;}
+.feat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px;}
+.feat-icon{font-size:22px;margin-bottom:12px;}
+.feat-title{font-size:14px;font-weight:700;margin-bottom:6px;font-family:var(--display);}
+.feat-desc{font-size:12px;color:var(--muted);line-height:1.6;}
+
+/* STEPS */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:32px;}
+.step{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:28px;}
+.step-num{font-family:var(--display);font-size:42px;font-weight:800;color:var(--purple);margin-bottom:12px;line-height:1;}
+.step-title{font-size:15px;font-weight:700;margin-bottom:6px;font-family:var(--display);}
+.step-desc{font-size:13px;color:var(--muted);line-height:1.6;}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:32px;}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;text-align:center;}
+.stat-num{font-family:var(--display);font-size:40px;font-weight:800;margin-bottom:6px;line-height:1;}
+.stat-label{font-size:11px;color:var(--muted);font-family:var(--mono);}
+
+/* COMPARE */
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:32px;}
+.compare-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:26px;}
+.compare-card.featured{border-color:var(--purple);}
+.compare-title{font-size:17px;font-weight:700;margin-bottom:18px;display:flex;align-items:center;gap:10px;font-family:var(--display);}
+.badge{font-size:10px;background:rgba(124,111,240,.15);color:var(--purple);border-radius:4px;padding:3px 9px;font-family:var(--mono);}
+.check-row{display:flex;align-items:center;gap:10px;margin-bottom:11px;font-size:13px;}
+.check{width:20px;height:20px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;font-family:var(--mono);}
+.yes{background:rgba(61,214,140,.12);color:var(--green);}
+.no{background:rgba(255,255,255,.04);color:var(--muted);}
+
+/* CTA */
+.cta{text-align:center;padding:100px 80px;}
+.cta-title{font-family:var(--display);font-size:44px;font-weight:800;margin-bottom:14px;letter-spacing:-0.5px;}
+.cta-sub{font-size:16px;color:var(--muted);margin-bottom:36px;}
+.cta-btn{display:inline-block;background:var(--purple);color:#fff;border-radius:12px;padding:15px 44px;font-size:15px;font-family:var(--mono);text-decoration:none;letter-spacing:.5px;}
+.cta-note{font-size:12px;color:var(--muted);margin-top:16px;font-family:var(--mono);}
+
+.print-hint{text-align:center;padding:18px;font-family:var(--mono);font-size:11px;color:var(--muted);border-top:1px solid var(--border);}
+.print-hint span{color:var(--purple);}
+@media print{
+  .print-hint{display:none;}
+  body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .section{page-break-inside:avoid;}
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="logo-wrap">
+    <div class="logo-icon">
+      <svg width="40" height="40" viewBox="0 0 40 40">
+        <path d="M7 32 C11 20, 20 16, 25 21 C28 25, 30 18, 34 12" fill="none" stroke="#7c6ff0" stroke-width="3.5" stroke-linecap="round"/>
+        <circle cx="7" cy="32" r="6" fill="#3dd68c"/><circle cx="7" cy="32" r="3" fill="#0e0e12"/>
+        <circle cx="25" cy="21" r="6" fill="#7c6ff0"/><circle cx="25" cy="21" r="3" fill="#0e0e12"/>
+        <circle cx="34" cy="12" r="6" fill="#f0c040"/><circle cx="34" cy="12" r="2.5" fill="#0e0e12"/>
+      </svg>
+    </div>
+    <div class="logo-name">Tri<em>ply</em><b>.</b></div>
+  </div>
+  <div class="hero-tag">Планируй поездки — быстро, красиво, всё в одном месте</div>
+  <div class="hero-desc">Маршруты, бюджет, билеты, погода, карта и календарь — один инструмент для всего путешествия.</div>
+  <div class="pills">
+    <span class="pill pill-g">Бесплатно</span>
+    <span class="pill pill-p">Работает в браузере</span>
+    <span class="pill pill-y">Синхронизация везде</span>
+  </div>
+</div>
+
+<!-- ROUTES -->
+<div class="section">
+  <div class="label">маршруты</div>
+  <div class="title">Любое путешествие — в пару кликов</div>
+  <div class="subtitle">Смешивай виды транспорта. Triply соберёт всё по порядку с датами и временем.</div>
+  <div class="route-examples">
+    <div class="route-card">
+      <div class="route-card-label">🌍 Европейский трип · ✈️ рейс + 🚌 автобус + 🚂 поезд</div>
+      <div class="route-vis">
+        <div class="r-city"><div class="r-dot" style="background:#3dd68c"></div><div class="r-name">Амстердам</div></div>
+        <div class="r-line" style="background:linear-gradient(90deg,#3dd68c,#7c6ff0)"><span class="r-transport">✈️ рейс</span></div>
+        <div class="r-city"><div class="r-dot" style="background:#7c6ff0"></div><div class="r-name">Берлин</div></div>
+        <div class="r-line" style="background:#7c6ff0"><span class="r-transport">🚌 автобус</span></div>
+        <div class="r-city"><div class="r-dot" style="background:#7c6ff0"></div><div class="r-name">Прага</div></div>
+        <div class="r-line" style="background:linear-gradient(90deg,#7c6ff0,#f0c040)"><span class="r-transport">🚂 поезд</span></div>
+        <div class="r-city"><div class="r-dot" style="background:#f0c040"></div><div class="r-name">Вена</div></div>
+      </div>
+    </div>
+    <div class="route-card">
+      <div class="route-card-label">🌊 Средиземноморье · ✈️ рейс + ✈️ рейс</div>
+      <div class="route-vis">
+        <div class="r-city"><div class="r-dot" style="background:#3dd68c"></div><div class="r-name">Киев</div></div>
+        <div class="r-line" style="background:linear-gradient(90deg,#3dd68c,#7c6ff0)"><span class="r-transport">✈️ рейс</span></div>
+        <div class="r-city"><div class="r-dot" style="background:#7c6ff0"></div><div class="r-name">Барселона</div></div>
+        <div class="r-line" style="background:linear-gradient(90deg,#7c6ff0,#f0c040)"><span class="r-transport">✈️ рейс</span></div>
+        <div class="r-city"><div class="r-dot" style="background:#f0c040"></div><div class="r-name">Рим</div></div>
+      </div>
+    </div>
+    <div class="route-card">
+      <div class="route-card-label">🚆 Наземный маршрут · 🚂 поезд + 🚌 автобус + 🚂 поезд</div>
+      <div class="route-vis">
+        <div class="r-city"><div class="r-dot" style="background:#3dd68c"></div><div class="r-name">Варшава</div></div>
+        <div class="r-line" style="background:linear-gradient(90deg,#3dd68c,#7c6ff0)"><span class="r-transport">🚂 поезд</span></div>
+        <div class="r-city"><div class="r-dot" style="background:#7c6ff0"></div><div class="r-name">Будапешт</div></div>
+        <div class="r-line" style="background:linear-gradient(90deg,#7c6ff0,#f07850)"><span class="r-transport">🚌 автобус</span></div>
+        <div class="r-city"><div class="r-dot" style="background:#f07850"></div><div class="r-name">Загреб</div></div>
+        <div class="r-line" style="background:linear-gradient(90deg,#f07850,#f0c040)"><span class="r-transport">🚂 поезд</span></div>
+        <div class="r-city"><div class="r-dot" style="background:#f0c040"></div><div class="r-name">Любляна</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<div class="section">
+  <div class="label">функции</div>
+  <div class="title">Всё что нужно для поездки</div>
+  <div class="feat-grid">
+    <div class="feat-card"><div class="feat-icon">🗺</div><div class="feat-title">Карта маршрута</div><div class="feat-desc">Все точки путешествия на интерактивной карте с линией маршрута.</div></div>
+    <div class="feat-card"><div class="feat-icon">💰</div><div class="feat-title">Бюджет в реальном времени</div><div class="feat-desc">₴, $ и € с живым курсом. Итог пересчитывается автоматически.</div></div>
+    <div class="feat-card"><div class="feat-icon">🌤</div><div class="feat-title">Прогноз погоды</div><div class="feat-desc">Погода на даты каждого сегмента прямо в приложении.</div></div>
+    <div class="feat-card"><div class="feat-icon">📆</div><div class="feat-title">Экспорт в календарь</div><div class="feat-desc">Все события в Google Calendar или .ics одной кнопкой.</div></div>
+    <div class="feat-card"><div class="feat-icon">🎫</div><div class="feat-title">Хранение билетов</div><div class="feat-desc">Загрузи PDF или фото — доступны с любого устройства.</div></div>
+    <div class="feat-card"><div class="feat-icon">📋</div><div class="feat-title">Импорт из письма</div><div class="feat-desc">Вставь текст письма — приложение само распознает маршрут.</div></div>
+    <div class="feat-card"><div class="feat-icon">🔗</div><div class="feat-title">Публичная ссылка</div><div class="feat-desc">Поделись маршрутом с друзьями — откроется с картой.</div></div>
+    <div class="feat-card"><div class="feat-icon">🧳</div><div class="feat-title">Чеклист вещей</div><div class="feat-desc">Пресеты для города, пляжа, похода, бизнеса. С прогресс-баром.</div></div>
+    <div class="feat-card"><div class="feat-icon">☁️</div><div class="feat-title">Синхронизация</div><div class="feat-desc">Добавил на телефоне — видишь на ноуте. Всегда в облаке.</div></div>
+  </div>
+</div>
+
+<!-- STEPS -->
+<div class="section">
+  <div class="label">как это работает</div>
+  <div class="title">Три шага до готового маршрута</div>
+  <div class="steps">
+    <div class="step"><div class="step-num">1</div><div class="step-title">Создай поездку</div><div class="step-desc">Назови её и добавь сегменты — поезд, автобус или рейс.</div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-title">Заполни детали</div><div class="step-desc">Даты, время, цены, билеты, адреса — всё в одном месте.</div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-title">Езди спокойно</div><div class="step-desc">Маршрут в кармане, погода и карта всегда под рукой.</div></div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="section">
+  <div class="label">в цифрах</div>
+  <div class="title">Быстро и без лишнего</div>
+  <div class="stats">
+    <div class="stat"><div class="stat-num" style="color:var(--green)">100%</div><div class="stat-label">бесплатно</div></div>
+    <div class="stat"><div class="stat-num" style="color:var(--purple)">3</div><div class="stat-label">вида транспорта</div></div>
+    <div class="stat"><div class="stat-num" style="color:var(--accent)">∞</div><div class="stat-label">поездок и устройств</div></div>
+    <div class="stat"><div class="stat-num" style="color:var(--green)">0</div><div class="stat-label">установок не нужно</div></div>
+  </div>
+</div>
+
+<!-- COMPARE -->
+<div class="section">
+  <div class="label">сравнение</div>
+  <div class="title">Triply vs другие</div>
+  <div class="compare-grid">
+    <div class="compare-card featured">
+      <div class="compare-title">Triply <span class="badge">наш выбор</span></div>
+      <div class="check-row"><span class="check yes">✓</span>Гривна + живой курс валют</div>
+      <div class="check-row"><span class="check yes">✓</span>УЗ, FlixBus, PKP</div>
+      <div class="check-row"><span class="check yes">✓</span>Хранение билетов в облаке</div>
+      <div class="check-row"><span class="check yes">✓</span>Карта + прогноз погоды</div>
+      <div class="check-row"><span class="check yes">✓</span>Полностью бесплатно</div>
+      <div class="check-row"><span class="check yes">✓</span>Без установки, работает в браузере</div>
+    </div>
+    <div class="compare-card">
+      <div class="compare-title" style="color:var(--muted)">TripIt / Wanderlog</div>
+      <div class="check-row"><span class="check no">–</span>Нет гривны, нет СНГ-валют</div>
+      <div class="check-row"><span class="check no">–</span>Нет УЗ / FlixBus / PKP</div>
+      <div class="check-row"><span class="check yes">✓</span>Хранение билетов есть</div>
+      <div class="check-row"><span class="check yes">✓</span>Карта есть</div>
+      <div class="check-row"><span class="check no">–</span>Платные фичи от $40/год</div>
+      <div class="check-row"><span class="check no">–</span>Нужна установка приложения</div>
+    </div>
+  </div>
+</div>
+
+<!-- CTA -->
+<div class="cta">
+  <div class="label" style="text-align:center">попробуй</div>
+  <div class="cta-title">Открой прямо сейчас</div>
+  <div class="cta-sub">Никакой установки. Просто открой в браузере и начни планировать.</div>
+  <a class="cta-btn" href="https://izienglish.github.io/my_trip/">izienglish.github.io/my_trip</a>
+  <div class="cta-note">Бесплатно · iPhone, Android, Mac, Windows</div>
+</div>
+
+<div class="print-hint">Чтобы сохранить как PDF — нажми <span>Ctrl+P</span> (Cmd+P на Mac) → Сохранить как PDF</div>
+
+</body>
+</html>
