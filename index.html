@@ -3,12 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'><rect width='36' height='36' rx='8' fill='%230e0e12'/><path d='M6 28 C10 18, 18 14, 22 19 C25 23, 27 16, 30 11' fill='none' stroke='%237c6ff0' stroke-width='3' stroke-linecap='round'/><circle cx='6' cy='28' r='5' fill='%233dd68c'/><circle cx='6' cy='28' r='2.5' fill='%230e0e12'/><circle cx='22' cy='19' r='5' fill='%237c6ff0'/><circle cx='22' cy='19' r='2.5' fill='%230e0e12'/><circle cx='30' cy='11' r='5' fill='%23f0c040'/><circle cx='30' cy='11' r='2' fill='%230e0e12'/></svg>">
 <title>Triply — Планировщик путешествий</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;800&family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
 :root{
   --bg:#0e0e12;--surface:#16161c;--surface2:#1e1e28;--border:#2a2a38;
   --accent:#f0c040;--accent2:#7c6ff0;--ok:#3dd68c;--warn:#f07850;--danger:#f05060;
@@ -977,7 +978,12 @@ async function showHome(){
   }).join('');
   app.innerHTML=`
   <div class="header">
-    <h1>✈ Мои Поездки</h1>
+<div style="display:flex;align-items:center;gap:12px;flex:1">
+      <div style="width:36px;height:36px;background:#16161c;border-radius:10px;border:1px solid #2a2a38;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <svg width="24" height="24" viewBox="0 0 36 36"><path d="M6 28 C10 18, 18 14, 22 19 C25 23, 27 16, 30 11" fill="none" stroke="#7c6ff0" stroke-width="3.5" stroke-linecap="round"/><circle cx="6" cy="28" r="5" fill="#3dd68c"/><circle cx="6" cy="28" r="2.5" fill="#16161c"/><circle cx="22" cy="19" r="5" fill="#7c6ff0"/><circle cx="22" cy="19" r="2.5" fill="#16161c"/><circle cx="30" cy="11" r="5" fill="#f0c040"/><circle cx="30" cy="11" r="2" fill="#16161c"/></svg>
+      </div>
+      <span style="font-size:19px;line-height:1;font-family:'Inter',system-ui,sans-serif"><b style="font-weight:800;color:#e8e8f0;letter-spacing:-0.3px">Tri</b><span style="font-weight:300;color:#7c6ff0;letter-spacing:-0.3px">ply</span><span style="color:#f0c040;font-weight:800">.</span></span>
+    </div>
     <span class="rate-badge" id="rate-badge-val"><b>$${RATES.USD}₴</b> · <b>€${RATES.EUR}₴</b></span>
     <button class="logout-btn" onclick="doLogout()">Выйти</button>
   </div>
