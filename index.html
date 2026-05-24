@@ -819,8 +819,32 @@ async function init(){
   if(session){currentUser=session.user;const nav=loadNav();if(nav?.tripId)await restoreTrip(nav.tripId,nav.tripName,nav.openSegIdx,nav.activeTab);else showHome();}
   else showAuth();
   sb.auth.onAuthStateChange((_,s)=>{
-    if(s){currentUser=s.user;const nav=loadNav();if(nav?.tripId)restoreTrip(nav.tripId,nav.tripName,nav.openSegIdx,nav.activeTab);else showHome();}
-    else{currentUser=null;clearNav();showAuth();}
+    if(s){
+      // If user changed — clear ALL navigation state from previous session
+      const prevUserId=localStorage.getItem('current_user_id');
+      if(prevUserId && prevUserId!==s.user.id){
+        // Different user — clear everything
+        clearNav();
+        try{
+          // Clear all drafts and pack items from other users
+          Object.keys(localStorage).forEach(k=>{
+            if(k.startsWith('d_')||k.startsWith('pack_')||k.startsWith('paste_draft_')){
+              localStorage.removeItem(k);
+            }
+          });
+        }catch(e){}
+      }
+      localStorage.setItem('current_user_id',s.user.id);
+      currentUser=s.user;
+      const nav=loadNav();
+      // Extra safety: verify the trip belongs to this user before restoring
+      if(nav?.tripId){
+        restoreTrip(nav.tripId,nav.tripName,nav.openSegIdx,nav.activeTab);
+      }else{
+        showHome();
+      }
+    }
+    else{currentUser=null;clearNav();localStorage.removeItem('current_user_id');showAuth();}
   });
 }
 
@@ -879,10 +903,15 @@ async function showPublicTrip(token){
 }
 
 async function restoreTrip(id,name,segIdx,tab){
-  currentTrip={id,name};loadDrafts(id);loadPackItems(id);
+  // Security check: verify this trip belongs to current user
+  const {data:ownerCheck}=await sb.from('trips').select('id,user_id,share_token,is_public').eq('id',id).eq('user_id',currentUser.id).single();
+  if(!ownerCheck){
+    // Trip doesn't belong to this user — clear nav and go home
+    clearNav();showHome();return;
+  }
+  currentTrip={id,name,share_token:ownerCheck.share_token,is_public:ownerCheck.is_public};
+  loadDrafts(id);loadPackItems(id);
   activeTab=tab||'segments';
-  const {data:trip}=await sb.from('trips').select('share_token,is_public').eq('id',id).single();
-  if(trip){currentTrip.share_token=trip.share_token;currentTrip.is_public=trip.is_public;}
   const {data}=await sb.from('segments').select('*').eq('trip_id',id).order('position');
   currentSegs=data||[];openSegIdx=segIdx;
   renderTrip();
@@ -914,7 +943,7 @@ async function doLogout(){clearNav();await sb.auth.signOut();}
 
 async function showHome(){
   clearNav();showLoading();
-  const {data:trips}=await sb.from('trips').select('*').order('created_at');
+  const {data:trips}=await sb.from('trips').select('*').eq('user_id',currentUser.id).order('created_at');
   const sa=trips?.length?(await sb.from('segments').select('*').in('trip_id',trips.map(t=>t.id))).data||[]:[];
   const cards=(trips||[]).map(t=>{
     const segs=sa.filter(s=>s.trip_id===t.id).sort((a,b)=>a.position-b.position);
@@ -952,10 +981,12 @@ async function addTrip(){const name=document.getElementById('ntn').value.trim();
 async function delTrip(id){if(!confirm('Удалить поездку со всеми сегментами?'))return;await sb.from('trips').delete().eq('id',id);showHome();}
 
 async function openTrip(id,name){
-  currentTrip={id,name};openSegIdx=null;activeTab='segments';
+  // Security: verify ownership before opening
+  const {data:trip}=await sb.from('trips').select('share_token,is_public,user_id').eq('id',id).eq('user_id',currentUser.id).single();
+  if(!trip){showHome();return;}
+  currentTrip={id,name,share_token:trip.share_token,is_public:trip.is_public};
+  openSegIdx=null;activeTab='segments';
   loadDrafts(id);loadPackItems(id);showLoading();
-  const {data:trip}=await sb.from('trips').select('share_token,is_public').eq('id',id).single();
-  if(trip){currentTrip.share_token=trip.share_token;currentTrip.is_public=trip.is_public;}
   const {data}=await sb.from('segments').select('*').eq('trip_id',id).order('position');
   currentSegs=data||[];saveNav();renderTrip();
 }
